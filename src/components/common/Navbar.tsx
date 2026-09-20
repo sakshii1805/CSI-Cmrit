@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
-import { Menu, X, Shield, Search } from 'lucide-react';
-import { LogoMark } from './Logo';
+import { Menu, X, Shield } from 'lucide-react';
 
 export const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -10,15 +9,20 @@ export const Navbar: React.FC = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 15);
+      setIsScrolled(window.scrollY > 20);
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileMenuOpen]);
 
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -27,182 +31,173 @@ export const Navbar: React.FC = () => {
     { name: 'Gallery', path: '/gallery' },
     { name: 'Announcements', path: '/announcements' },
     { name: 'SIH', path: '/sih' },
-    { name: 'Join Us', path: '/join' },
     { name: 'Contact', path: '/contact' },
   ];
 
   return (
-    <header
-      className={`sticky top-0 z-50 w-full transition-all duration-300 ${isScrolled
-        ? 'bg-slate-950/95 backdrop-blur-md shadow-md border-b border-slate-800 py-3'
-        : 'bg-slate-950 border-b border-slate-850 py-3.5'
-        }`}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between">
-          {/* Brand Logo (College Logo) */}
+    <>
+      {/* Floating navbar wrapper */}
+      <div className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-4 px-4 md:px-10 pointer-events-none">
+        <nav
+          className={`flex items-center justify-between w-full max-w-7xl pointer-events-auto transition-all duration-500 ease-in-out px-5 py-2.5 rounded-2xl ${isScrolled
+            ? 'bg-slate-950/80 backdrop-blur-xl shadow-lg shadow-black/30 border border-slate-800/60'
+            : 'bg-transparent'
+            }`}
+        >
+          {/* Left: Logo + college info (visible at top, collapses on scroll) */}
           <Link
             to="/"
-            className="flex items-center gap-3 group focus:outline-none relative py-1"
-            aria-label="CSI CMRIT Chapter"
+            className="flex items-center gap-3 group pointer-events-auto min-w-0"
+            aria-label="CSI CMRIT Chapter Home"
           >
-            <div className="w-11 h-11 rounded-full bg-white flex items-center justify-center p-0.5 shadow-sm border border-slate-700/60 shrink-0 overflow-hidden group-hover:scale-105 transition-transform">
-              <img
-                src="/images/college-logo.png"
-                alt="CMR Logo"
-                className="w-full h-full object-cover rounded-full"
-              />
-            </div>
+            {/* CSI CMRIT Logo */}
+            <img
+              src="/images/logos/cmrit_csi_logo.jpeg"
+              alt="CSI CMRIT Logo"
+              className="h-8 md:h-9 w-auto object-contain rounded-sm transition-all duration-500 shrink-0"
+            />
 
-            {/* CSI CMRIT text block */}
-            <div className="flex items-center gap-3 relative">
-              <div className="flex flex-col">
-                <div className="flex items-baseline gap-1.5">
-                  <span className="text-base sm:text-lg font-black text-white tracking-tight leading-none group-hover:text-blue-400 transition-colors">
-                    CSI
+            {/* Divider + Text block — fades out on scroll */}
+            <div
+              className={`flex items-center gap-2.5 transition-all duration-500 overflow-hidden ${isScrolled ? 'max-w-0 opacity-0' : 'max-w-xs opacity-100'
+                }`}
+            >
+              {/* Vertical divider */}
+              <div className="h-8 w-px bg-slate-600/70 shrink-0" />
+
+              {/* Text */}
+              <div className="flex flex-col gap-0.5 min-w-0">
+                <span className="text-[11px] sm:text-[12px] font-semibold text-white whitespace-nowrap tracking-tight leading-none">
+                  Computer Society of India
+                </span>
+                <span className="inline-flex items-center gap-1 whitespace-nowrap">
+                  <span className="text-[9px] sm:text-[10px] font-medium text-slate-400  tracking-widest leading-none">
+                    CMRIT Chapter
                   </span>
-                  <span className="text-base sm:text-lg font-black text-white tracking-tight leading-none group-hover:text-blue-400 transition-colors">
-                    CMRIT
-                  </span>
-                </div>
-                <span className="text-[10px] text-slate-400 font-medium tracking-normal mt-0.5">
-                  Chapter
                 </span>
               </div>
+            </div>
 
-              {/* Vertical divider */}
-              <div className="hidden sm:block h-7 w-[1px] bg-slate-700" />
+            {/* CMR College Logo + label — fades out on scroll */}
+            <div
+              className={`flex items-center gap-2 transition-all duration-500 overflow-hidden ${isScrolled ? 'max-w-0 opacity-0' : 'max-w-xs opacity-100'
+                }`}
+            >
+              {/* Second vertical divider */}
+              <div className="h-8 w-px bg-slate-600/70 shrink-0" />
 
-              {/* Subtitles */}
-              <div className="hidden sm:flex flex-col text-[11px] text-slate-400 leading-tight">
-                <span className="group-hover:text-slate-300 transition-colors">Computer Society of India</span>
-                <span className="text-slate-300 font-medium group-hover:text-blue-300 transition-colors">CMRIT Chapter</span>
+              {/* Logo square */}
+              <div className="w-7 h-7 rounded-sm flex items-center justify-center shrink-0">
+                <img
+                  src="/images/logos/cmr_new_logo.png"
+                  alt="CMRIT College Logo"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+
+              {/* College name + tagline */}
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[10px] sm:text-[11px] font-semibold text-slate-300 whitespace-nowrap tracking-tight leading-none">
+                  CMR Institute of Technology
+                </span>
+                <span className="text-[8px] sm:text-[9px] font-medium text-slate-400 tracking-widest leading-none whitespace-nowrap">
+                  Explore to Invent
+                </span>
               </div>
             </div>
           </Link>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden xl:flex items-center gap-1 sm:gap-1.5" aria-label="Main Navigation">
+          {/* Center-Right: Desktop nav links */}
+          <div className="hidden lg:flex items-center gap-6 xl:gap-8">
             {navLinks.map((link) => (
               <NavLink
                 key={link.path}
                 to={link.path}
+                end={link.path === '/'}
                 className={({ isActive }) =>
-                  `group relative px-3 py-2 text-xs font-medium transition-all duration-200 flex items-center justify-center ${isActive
-                    ? 'text-white font-semibold'
-                    : 'text-slate-300 hover:text-white'
+                  `text-[11px] font-semibold uppercase tracking-wider whitespace-nowrap transition-opacity duration-200 ${isActive
+                    ? 'text-white opacity-100'
+                    : 'text-slate-300 hover:opacity-60'
                   }`
                 }
               >
-                {({ isActive }) => (
-                  <>
-                    <span className="relative z-10 transition-transform duration-200 group-hover:-translate-y-0.5">
-                      {link.name}
-                    </span>
+                {link.name}
+              </NavLink>
+            ))}
+          </div>
 
-                    {/* Dynamic hover and active line */}
-                    <span
-                      className={`absolute bottom-0 left-2.5 right-2.5 h-[2.5px] rounded-full transition-all duration-300 ease-out transform ${isActive
-                          ? 'bg-blue-500 scale-x-100 shadow-[0_0_8px_rgba(59,130,246,0.8)] opacity-100'
-                          : 'bg-gradient-to-r from-blue-500 via-sky-400 to-indigo-500 scale-x-0 group-hover:scale-x-100 opacity-0 group-hover:opacity-100 shadow-[0_0_8px_rgba(56,189,248,0.7)] origin-center'
-                        }`}
-                    />
-                  </>
-                )}
+          {/* Right: CTA + Admin + Mobile toggle */}
+          <div className="flex items-center gap-3">
+            {/* Join Us CTA */}
+            <Link
+              to="/join"
+              className="hidden sm:inline-flex rounded-full text-[10px] font-bold uppercase tracking-wider transition-all whitespace-nowrap bg-white text-slate-950 px-5 py-2 hover:bg-slate-200"
+            >
+              Join Us
+            </Link>
+
+            {/* Admin (desktop) */}
+            <Link
+              to="/admin/login"
+              className="hidden lg:inline-flex items-center gap-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all whitespace-nowrap border border-slate-600 text-slate-300 px-3 py-1.5 hover:border-slate-400 hover:text-white"
+              aria-label="Admin Portal"
+            >
+
+              Login
+            </Link>
+
+            {/* Mobile hamburger */}
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden p-2 text-slate-300 hover:text-white transition-colors"
+              aria-label="Toggle navigation menu"
+            >
+              {mobileMenuOpen
+                ? <X className="w-5 h-5" />
+                : <Menu className="w-5 h-5" />
+              }
+            </button>
+          </div>
+        </nav>
+      </div>
+
+      {/* Mobile full-screen drawer */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-40 bg-slate-950/97 backdrop-blur-xl flex flex-col pt-24 px-6 pb-10 lg:hidden">
+          <nav className="flex flex-col gap-1">
+            {navLinks.map((link) => (
+              <NavLink
+                key={link.path}
+                to={link.path}
+                end={link.path === '/'}
+                className={({ isActive }) =>
+                  `text-sm font-semibold uppercase tracking-widest py-3.5 border-b border-slate-800 transition-opacity ${isActive ? 'text-white' : 'text-slate-400 hover:text-white'
+                  }`
+                }
+              >
+                {link.name}
               </NavLink>
             ))}
           </nav>
 
-          {/* Right Section: Actions + CSI Logo */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            {/* Search (Desktop) */}
+          <div className="mt-8 flex flex-col gap-3">
             <Link
-              to="/events"
-              className="group relative hidden sm:inline-flex p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-900 transition-all overflow-hidden"
-              title="Search events and announcements"
+              to="/join"
+              className="flex items-center justify-center rounded-full text-[11px] font-bold uppercase tracking-wider bg-white text-slate-950 py-3 hover:bg-slate-200 transition-all"
             >
-              <Search className="w-4 h-4 group-hover:scale-110 transition-transform" />
-              <span className="absolute bottom-0 left-1 right-1 h-[2px] bg-gradient-to-r from-blue-500 to-sky-400 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center rounded-full" />
+              Join Us
             </Link>
-
-            {/* Admin Login (Desktop) */}
             <Link
               to="/admin/login"
-              className="group relative hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 border border-slate-700 shadow-sm transition-all hover:border-blue-500 overflow-hidden"
+              className="flex items-center justify-center gap-2 rounded-full text-[11px] font-bold uppercase tracking-wider border border-slate-700 text-slate-300 py-3 hover:border-slate-500 hover:text-white transition-all"
             >
-              <Shield className="w-3.5 h-3.5 text-blue-400 group-hover:scale-110 transition-transform" />
-              <span>Admin</span>
-              <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-gradient-to-r from-blue-500 to-sky-400 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center rounded-full" />
-            </Link>
-
-            {/* CSI Chapter Logo */}
-            <a
-              href="https://csi-india.org"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-11 h-11 rounded-full bg-white hover:bg-slate-100 flex items-center justify-center p-0.5 shadow-sm border border-slate-700/60 transition-all hover:scale-105 shrink-0 overflow-hidden"
-              title="Computer Society of India (CSI)"
-              aria-label="Computer Society of India (CSI)"
-            >
-              <img
-                src="/images/logo.png"
-                alt="CSI Logo"
-                className="w-full h-full object-cover rounded-full"
-              />
-            </a>
-
-            {/* Mobile Admin Icon */}
-            <Link
-              to="/admin/login"
-              className="p-1.5 text-slate-300 hover:text-white sm:hidden"
-              aria-label="Admin"
-            >
-              <Shield className="w-4 h-4 text-blue-400" />
-            </Link>
-
-            {/* Mobile menu toggle */}
-            <button
-              type="button"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 focus:outline-none xl:hidden"
-              aria-label="Toggle navigation menu"
-            >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Drawer */}
-      {mobileMenuOpen && (
-        <div className="xl:hidden border-t border-slate-800 bg-slate-950 px-4 pt-3 pb-6 space-y-1 shadow-2xl animate-in slide-in-from-top-2">
-          {navLinks.map((link) => (
-            <NavLink
-              key={link.path}
-              to={link.path}
-              className={({ isActive }) =>
-                `group relative flex items-center justify-between px-4 py-2.5 rounded-lg text-xs font-semibold transition-colors ${isActive
-                  ? 'text-white bg-blue-600/30 border border-blue-500/40'
-                  : 'text-slate-300 hover:bg-slate-900 hover:text-white'
-                }`
-              }
-            >
-              <span>{link.name}</span>
-              <span className="absolute left-0 top-1.5 bottom-1.5 w-[3px] bg-blue-500 rounded-r-full scale-y-0 group-hover:scale-y-100 transition-transform duration-200" />
-            </NavLink>
-          ))}
-
-          <div className="pt-3 border-t border-slate-800">
-            <Link
-              to="/admin/login"
-              className="flex items-center justify-center gap-2 w-full px-4 py-2 rounded-full text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 border border-slate-700"
-            >
-              <Shield className="w-4 h-4 text-blue-400" />
-              <span>Admin Portal Login</span>
+              <Shield className="w-3.5 h-3.5" />
+              Admin Portal
             </Link>
           </div>
         </div>
       )}
-    </header>
+    </>
   );
 };
