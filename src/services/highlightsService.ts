@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabaseClient';
 import { ChapterHighlightItem } from '../types';
+import { mockGallery } from '../data/gallery';
 
 export const highlightsService = {
   /**
@@ -13,21 +14,20 @@ export const highlightsService = {
         .eq('status', 'published')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        return { data: [], error: error.message };
+      if (error || !data || data.length === 0) {
+        return { data: mockGallery };
       }
 
       const mapped = (data || []).map((h) => ({
         ...h,
-        imageUrl: h.image_url,
-        date: h.event_date || 'Chapter Activity',
-        description: h.caption || h.title,
+        imageUrl: h.image_url || h.imageUrl,
+        date: h.event_date || h.date || 'Chapter Activity',
+        description: h.caption || h.description || h.title,
       })) as ChapterHighlightItem[];
 
-      return { data: mapped };
-    } catch (err: unknown) {
-      const error = err as Error;
-      return { data: [], error: error.message };
+      return { data: mapped.length > 0 ? mapped : mockGallery };
+    } catch {
+      return { data: mockGallery };
     }
   },
 
