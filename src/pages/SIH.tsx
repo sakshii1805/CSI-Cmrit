@@ -1,28 +1,21 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Lightbulb, 
   Target, 
   Users, 
-  Award, 
   ArrowRight, 
   CheckCircle2, 
   Layers, 
   Cpu, 
   ShieldCheck, 
   Compass,
-  FileCode2
+  FileCode2,
+  ImageOff
 } from 'lucide-react';
 import { Button } from '../components/common/Button';
-import { mockGallery } from '../data/gallery';
-import { GalleryCard } from '../components/gallery/GalleryCard';
-import { LightboxModal } from '../components/gallery/LightboxModal';
-import { GalleryItem } from '../types';
 
 export const SIH: React.FC = () => {
-  const [selectedPhoto, setSelectedPhoto] = useState<GalleryItem | null>(null);
-
-  const sihPhotos = mockGallery.filter((g) => g.category === 'SIH' || g.category === 'Hackathons').slice(0, 3);
 
   const focusThemes = [
     {
@@ -71,7 +64,7 @@ export const SIH: React.FC = () => {
               From ideas to solutions.
             </p>
             <p className="text-base sm:text-lg text-slate-300 leading-relaxed font-normal pt-2">
-              Empowering CMRIT engineering students to transform academic theoretical knowledge into deployable national technological solutions for central ministries, state departments, and industry sectors.
+              Empowering CMRIT engineering students to transform academic knowledge into deployable solutions for central ministries, state departments, and industry sectors.
             </p>
 
             <div className="pt-4 flex flex-wrap gap-4">
@@ -98,7 +91,7 @@ export const SIH: React.FC = () => {
       <section className="py-16 bg-white border-b border-slate-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-            <div className="lg:col-span-6 space-y-4">
+            <div className="lg:col-span-7 space-y-4">
               <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">
                 National Overview
               </span>
@@ -127,18 +120,29 @@ export const SIH: React.FC = () => {
               </div>
             </div>
 
-            <div className="lg:col-span-6">
-              <img
-                src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1000&q=80"
-                alt="Students collaborating on prototype hardware and software"
-                className="rounded-2xl border border-slate-200 shadow-card w-full h-80 sm:h-96 object-cover"
-              />
+            <div className="lg:col-span-5">
+              <div className="rounded-2xl bg-slate-900 border border-slate-800 p-8 text-white space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center">
+                    <Lightbulb className="w-5 h-5 text-amber-400" />
+                  </div>
+                  <h3 className="text-base font-bold text-white">CSI CMRIT & SIH</h3>
+                </div>
+                <p className="text-sm text-slate-300 leading-relaxed">
+                  Our chapter actively supports CMRIT students participating in SIH — providing guidance, internal screening rounds, and mentorship from problem selection to prototype presentation.
+                </p>
+                <div className="pt-2 p-4 rounded-xl bg-slate-800/60 border border-slate-700">
+                  <p className="text-xs text-slate-400 leading-relaxed">
+                    SIH team details, results, and chapter achievements will be published here by administrators as they become available.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Section 2: CSI CMRIT & SIH */}
+      {/* Section 2: CSI CMRIT & SIH — What We Do */}
       <section className="py-16 bg-slate-50 border-b border-slate-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-12">
@@ -146,7 +150,7 @@ export const SIH: React.FC = () => {
               Chapter Mentorship
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-3">
-              CSI CMRIT & Smart India Hackathon
+              How CSI CMRIT Supports SIH
             </h2>
             <p className="text-sm sm:text-base text-slate-600 mt-2">
               Our chapter acts as an incubator for CMRIT teams from problem selection to prototype presentation.
@@ -195,10 +199,10 @@ export const SIH: React.FC = () => {
               Innovation Verticals
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
-              Key Focus Areas & Projects
+              Key Focus Areas
             </h2>
             <p className="text-sm sm:text-base text-slate-600 mt-1">
-              Sample innovation domains where our student teams explore practical engineering applications.
+              Example innovation domains where student teams typically explore practical engineering applications in SIH.
             </p>
           </div>
 
@@ -283,33 +287,30 @@ export const SIH: React.FC = () => {
         </div>
       </section>
 
-      {/* Section 5: Gallery Preview */}
+      {/* Section 5: SIH Updates — Empty State */}
       <section className="py-16 bg-white border-b border-slate-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
-            <div>
-              <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">
-                Visual Archives
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
-                SIH & Hackathon Memories
-              </h2>
-            </div>
-            <Link to="/gallery">
-              <Button variant="outline" size="sm" rightIcon={<ArrowRight className="w-4 h-4" />}>
-                View All Photos
-              </Button>
-            </Link>
+          <div className="mb-8">
+            <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">
+              Chapter Updates
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
+              SIH at CSI CMRIT
+            </h2>
+            <p className="text-sm text-slate-500 mt-1">
+              Teams, projects, and achievements from our chapter&apos;s SIH participation.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {sihPhotos.map((item) => (
-              <GalleryCard
-                key={item.id}
-                item={item}
-                onClick={() => setSelectedPhoto(item)}
-              />
-            ))}
+          {/* Empty State — No SIH updates published yet */}
+          <div className="bg-slate-50 rounded-2xl border border-slate-200 border-dashed p-16 text-center max-w-lg">
+            <div className="w-16 h-16 rounded-2xl bg-white border border-slate-200 text-slate-300 flex items-center justify-center mb-5 shadow-subtle">
+              <ImageOff className="w-8 h-8" />
+            </div>
+            <h3 className="text-base font-bold text-slate-900 mb-2">No SIH updates yet</h3>
+            <p className="text-sm text-slate-500 leading-relaxed max-w-xs mx-auto">
+              SIH teams, projects and activities will appear here when published by chapter administrators.
+            </p>
           </div>
         </div>
       </section>
@@ -326,19 +327,12 @@ export const SIH: React.FC = () => {
           <div className="pt-2">
             <Link to="/join">
               <Button variant="accent" size="lg" rightIcon={<ArrowRight className="w-4 h-4" />}>
-                Join Chapter & SIH Cell
+                Join Chapter &amp; SIH Cell
               </Button>
             </Link>
           </div>
         </div>
       </section>
-
-      {/* Lightbox */}
-      <LightboxModal
-        isOpen={!!selectedPhoto}
-        item={selectedPhoto}
-        onClose={() => setSelectedPhoto(null)}
-      />
     </div>
   );
 };

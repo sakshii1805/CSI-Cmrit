@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Search, Filter, X, Bell, AlertCircle } from 'lucide-react';
+import { Search, Filter, X, AlertCircle, BellOff } from 'lucide-react';
 import { mockAnnouncements } from '../data/announcements';
 import { AnnouncementCard } from '../components/announcements/AnnouncementCard';
 import { AnnouncementCategory } from '../types';
@@ -37,7 +37,7 @@ export const Announcements: React.FC = () => {
     <div className="flex flex-col min-h-screen bg-slate-50">
       {/* Top Banner */}
       <section className="bg-slate-950 text-white py-14 sm:py-18 border-b border-slate-800 relative overflow-hidden">
-        <div 
+        <div
           className="absolute inset-0 opacity-5 pointer-events-none"
           style={{
             backgroundImage: `radial-gradient(#38bdf8 1px, transparent 1px)`,
@@ -53,7 +53,7 @@ export const Announcements: React.FC = () => {
               Announcements
             </h1>
             <p className="text-base sm:text-lg text-slate-300 leading-relaxed font-normal">
-              Official circulars, registration deadlines, competition notices, and community opportunities from CSI CMRIT Chapter.
+              Official updates, registration notices, and community opportunities from CSI CMRIT Chapter — published by chapter administrators.
             </p>
           </div>
         </div>
@@ -85,7 +85,10 @@ export const Announcements: React.FC = () => {
             </div>
 
             <div className="text-xs text-slate-500 font-medium">
-              Showing <strong className="text-slate-800">{filteredAnnouncements.length}</strong> items
+              {mockAnnouncements.length === 0
+                ? 'No announcements published yet'
+                : <><strong className="text-slate-800">{filteredAnnouncements.length}</strong> items</>
+              }
             </div>
           </div>
 
@@ -111,14 +114,26 @@ export const Announcements: React.FC = () => {
           </div>
         </div>
 
-        {/* Announcements Grid */}
-        {filteredAnnouncements.length > 0 ? (
+        {/* Content */}
+        {mockAnnouncements.length === 0 ? (
+          /* Primary empty state: website is new, no announcements published yet */
+          <div className="bg-white rounded-2xl border border-slate-200 border-dashed p-16 text-center max-w-lg mx-auto shadow-subtle my-8">
+            <div className="w-16 h-16 rounded-2xl bg-slate-100 text-slate-300 flex items-center justify-center mx-auto mb-5">
+              <BellOff className="w-8 h-8" />
+            </div>
+            <h3 className="text-base font-bold text-slate-900 mb-2">No announcements yet</h3>
+            <p className="text-sm text-slate-500 leading-relaxed max-w-xs mx-auto">
+              Important updates from CSI CMRIT will appear here when published by chapter administrators.
+            </p>
+          </div>
+        ) : filteredAnnouncements.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredAnnouncements.map((ann) => (
               <AnnouncementCard key={ann.id} announcement={ann} />
             ))}
           </div>
         ) : (
+          /* Filter/search empty state */
           <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center max-w-lg mx-auto shadow-subtle my-8">
             <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-4">
               <AlertCircle className="w-6 h-6" />

@@ -9,7 +9,7 @@ import { Home } from './pages/Home';
 import { About } from './pages/About';
 import { Events } from './pages/Events';
 import { EventDetails } from './pages/EventDetails';
-import { Gallery } from './pages/Gallery';
+import { ChapterHighlights } from './pages/ChapterHighlights';
 import { Announcements } from './pages/Announcements';
 import { AnnouncementDetails } from './pages/AnnouncementDetails';
 import { SIH } from './pages/SIH';
@@ -79,7 +79,7 @@ export const App: React.FC = () => {
             <Route path="/about" element={<About />} />
             <Route path="/events" element={<Events />} />
             <Route path="/events/:id" element={<EventDetails />} />
-            <Route path="/gallery" element={<Gallery />} />
+            <Route path="/highlights" element={<ChapterHighlights />} />
             <Route path="/announcements" element={<Announcements />} />
             <Route path="/announcements/:id" element={<AnnouncementDetails />} />
             <Route path="/sih" element={<SIH />} />
@@ -88,7 +88,7 @@ export const App: React.FC = () => {
             <Route path="*" element={<NotFound />} />
           </Route>
 
-          {/* Admin UI Prototypes (Standalone Layout) */}
+          {/* Admin Section (Standalone Layout — no public Navbar/Footer) */}
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
         </Routes>

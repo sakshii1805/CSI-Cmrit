@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, Filter, Calendar, X, AlertCircle } from 'lucide-react';
+import { Search, Filter, Calendar, X, AlertCircle, CalendarX2 } from 'lucide-react';
 import { mockEvents } from '../data/events';
 import { EventCard } from '../components/events/EventCard';
 import { EventCategory } from '../types';
@@ -220,7 +220,19 @@ export const Events: React.FC = () => {
               <EventCard key={evt.id} event={evt} />
             ))}
           </div>
+        ) : mockEvents.length === 0 ? (
+          /* Primary empty state: No events have been published yet */
+          <div className="bg-white rounded-2xl border border-slate-200 border-dashed p-16 text-center max-w-lg mx-auto shadow-subtle my-8">
+            <div className="w-16 h-16 rounded-2xl bg-slate-100 text-slate-300 flex items-center justify-center mx-auto mb-5">
+              <CalendarX2 className="w-8 h-8" />
+            </div>
+            <h3 className="text-base font-bold text-slate-900 mb-2">No upcoming events</h3>
+            <p className="text-sm text-slate-500 leading-relaxed max-w-xs mx-auto">
+              Events and activities will appear here when they are announced by chapter administrators.
+            </p>
+          </div>
         ) : (
+          /* Filter/search empty state: Events exist but none match the current filters */
           <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center max-w-lg mx-auto shadow-subtle my-8">
             <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-4">
               <AlertCircle className="w-6 h-6" />
