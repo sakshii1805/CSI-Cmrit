@@ -20,7 +20,7 @@ export const Gallery: React.FC = () => {
 
   const filteredPhotos = useMemo(() => {
     if (selectedCategory === 'All') return mockGallery;
-    return mockGallery.filter((item) => item.category === selectedCategory);
+    return mockGallery.filter((item: GalleryItem) => item.category === selectedCategory);
   }, [selectedCategory]);
 
   const activePhoto = activePhotoIndex !== null ? filteredPhotos[activePhotoIndex] : null;
@@ -94,7 +94,7 @@ export const Gallery: React.FC = () => {
 
         {/* Responsive Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredPhotos.map((item, index) => (
+          {filteredPhotos.map((item: GalleryItem, index: number) => (
             <GalleryCard
               key={item.id}
               item={item}

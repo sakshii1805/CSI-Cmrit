@@ -11,7 +11,14 @@ export const Footer: React.FC = () => {
           {/* Col 1: Chapter Logo & Brand (~30%) */}
           <div className="lg:col-span-4 space-y-3">
             <Link to="/" className="inline-flex items-center gap-3">
-              <LogoMark size={44} />
+              {/* Official CSI CMRIT Chapter Emblem */}
+              <div className="h-10 w-11 rounded-lg bg-white border border-slate-700/60 flex items-center justify-center p-0.5 shadow-xs shrink-0 overflow-hidden">
+                <img
+                  src="/images/csi_cmrit_logo.png"
+                  alt="CSI CMRIT Official Logo"
+                  className="h-full w-full object-contain"
+                />
+              </div>
 
               <div className="flex flex-col">
                 <div className="flex items-baseline gap-1.5">

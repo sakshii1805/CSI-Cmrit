@@ -194,6 +194,69 @@ export const About: React.FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Section 5: CMRIT Campus & Chapter Hub Showcase */}
+      <section className="py-16 bg-white border-b border-slate-200/80">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl mb-10">
+            <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">
+              Institutional Environment
+            </span>
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mt-1">
+              Our Campus & Innovation Hub
+            </h2>
+            <p className="text-sm sm:text-base text-slate-600 mt-2">
+              Based at the prestigious CMR Institute of Technology, our chapter benefits from advanced computing laboratories, incubation facilities, and a sprawling green academic ecosystem.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Campus Front Photo Card */}
+            <div className="group rounded-2xl border border-slate-200 overflow-hidden bg-white shadow-subtle hover:shadow-card transition-all">
+              <div className="relative aspect-[16/10] overflow-hidden bg-slate-950">
+                <img
+                  src="/images/cmrit_campus_front.png"
+                  alt="CMR Institute of Technology Main Campus Façade"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute top-3 left-3">
+                  <span className="text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-md bg-blue-600 text-white shadow-xs">
+                    Main Campus
+                  </span>
+                </div>
+              </div>
+              <div className="p-5">
+                <h3 className="text-base font-bold text-slate-900">C.M.R. Institute of Technology Main Building</h3>
+                <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                  The grand central campus building housing collegiate computing centers, lecture theaters, and the CSI chapter operations desk.
+                </p>
+              </div>
+            </div>
+
+            {/* Campus Wing Photo Card */}
+            <div className="group rounded-2xl border border-slate-200 overflow-hidden bg-white shadow-subtle hover:shadow-card transition-all">
+              <div className="relative aspect-[16/10] overflow-hidden bg-slate-950">
+                <img
+                  src="/images/cmrit_campus_wing.png"
+                  alt="CMRIT Innovation & Laboratories Wing"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                />
+                <div className="absolute top-3 left-3">
+                  <span className="text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-md bg-emerald-600 text-white shadow-xs">
+                    Labs & Innovation
+                  </span>
+                </div>
+              </div>
+              <div className="p-5">
+                <h3 className="text-base font-bold text-slate-900">Innovation & Engineering Wings</h3>
+                <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                  Modern laboratories, maker spaces, and student collaboration hubs where 24-hour hackathons and hands-on workshops are conducted.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 };
