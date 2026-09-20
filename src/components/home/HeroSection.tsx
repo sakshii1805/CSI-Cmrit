@@ -21,7 +21,7 @@ export const HeroSection: React.FC = () => {
         <div className="max-w-xl space-y-5 text-left">
           {/* Label */}
           <p className="text-[11px] sm:text-xs font-bold text-blue-400 tracking-[0.2em] uppercase">
-            COMPUTER SOCIETY OF INDIA • CMRIT CHAPTER
+            COMPUTER SOCIETY OF INDIA - STUDENT CHAPTER
           </p>
 
           {/* Main Headline */}
