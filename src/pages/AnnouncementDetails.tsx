@@ -1,17 +1,56 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { Calendar, User, ArrowLeft, Tag, Share2, Bell, CheckCircle2 } from 'lucide-react';
-import { mockAnnouncements } from '../data/announcements';
+import { Calendar, User, ArrowLeft, Tag, Share2, Bell, Loader2 } from 'lucide-react';
 import { Badge } from '../components/common/Badge';
-import { Button } from '../components/common/Button';
 import { useToast } from '../components/common/Toast';
+import { CommentSection } from '../components/common/CommentSection';
+import { announcementsService } from '../services/announcementsService';
+import { AnnouncementItem } from '../types';
 
 export const AnnouncementDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { showToast } = useToast();
 
-  const announcement = mockAnnouncements.find((a) => a.slug === id || a.id === id);
+  const [announcement, setAnnouncement] = useState<AnnouncementItem | null>(null);
+  const [relatedAnnouncements, setRelatedAnnouncements] = useState<AnnouncementItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      if (!id) return;
+      try {
+        setLoading(true);
+        const res = await announcementsService.getAnnouncementBySlug(id);
+        setAnnouncement(res.data);
+
+        if (res.data) {
+          const allRes = await announcementsService.getPublishedAnnouncements();
+          const list = allRes.data || [];
+          setRelatedAnnouncements(list.filter((a) => a.id !== res.data?.id).slice(0, 2));
+        }
+      } catch (err) {
+        console.error('Failed to load announcement details:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, [id]);
+
+  const handleShare = () => {
+    navigator.clipboard?.writeText(window.location.href);
+    showToast('Announcement link copied to clipboard!', 'info');
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-center">
+        <Loader2 className="w-8 h-8 animate-spin text-blue-600 mb-3" />
+        <p className="text-sm text-slate-500 font-medium">Loading notice details...</p>
+      </div>
+    );
+  }
 
   // No announcement found (array is empty or invalid ID)
   if (!announcement) {
@@ -34,12 +73,11 @@ export const AnnouncementDetails: React.FC = () => {
     );
   }
 
-  const relatedAnnouncements = mockAnnouncements.filter((a) => a.id !== announcement.id).slice(0, 2);
-
-  const handleShare = () => {
-    navigator.clipboard?.writeText(window.location.href);
-    showToast('Announcement link copied to clipboard!', 'info');
-  };
+  const contentParagraphs = Array.isArray(announcement.content)
+    ? announcement.content
+    : typeof announcement.content === 'string'
+      ? (announcement.content as string).split('\n\n')
+      : [];
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 pb-20">
@@ -65,7 +103,7 @@ export const AnnouncementDetails: React.FC = () => {
       </div>
 
       {/* Main Container */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 w-full">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 w-full space-y-10">
         <article className="bg-white rounded-2xl p-6 sm:p-10 border border-slate-200 shadow-subtle space-y-6">
           {/* Header & Meta */}
           <div className="space-y-3 pb-6 border-b border-slate-100">
@@ -97,13 +135,15 @@ export const AnnouncementDetails: React.FC = () => {
           </div>
 
           {/* Summary Callout Box */}
-          <div className="p-4 sm:p-5 rounded-xl bg-blue-50/70 border border-blue-100 text-sm text-blue-900 leading-relaxed font-medium">
-            {announcement.summary}
-          </div>
+          {announcement.summary && (
+            <div className="p-4 sm:p-5 rounded-xl bg-blue-50/70 border border-blue-100 text-sm text-blue-900 leading-relaxed font-medium">
+              {announcement.summary}
+            </div>
+          )}
 
           {/* Detailed Content Paragraphs */}
           <div className="space-y-4 text-sm sm:text-base text-slate-700 leading-relaxed">
-            {announcement.content.map((paragraph, idx) => (
+            {contentParagraphs.map((paragraph, idx) => (
               <p key={idx}>{paragraph}</p>
             ))}
           </div>
@@ -125,9 +165,16 @@ export const AnnouncementDetails: React.FC = () => {
           )}
         </article>
 
+        {/* Public Visitor Comments */}
+        <CommentSection
+          targetType="announcement"
+          targetId={announcement.id}
+          targetTitle={announcement.title}
+        />
+
         {/* Related Announcements */}
         {relatedAnnouncements.length > 0 && (
-          <div className="mt-12 space-y-4">
+          <div className="space-y-4">
             <h3 className="text-lg font-bold text-slate-900">Recent Notices</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {relatedAnnouncements.map((rel) => (

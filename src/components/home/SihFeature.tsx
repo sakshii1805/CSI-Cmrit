@@ -7,7 +7,7 @@ export const SihFeature: React.FC = () => {
   return (
     <section className="py-16 sm:py-20 bg-slate-900 text-white relative overflow-hidden border-b border-slate-800">
       {/* Background accents */}
-      <div 
+      <div
         className="absolute inset-0 opacity-5 pointer-events-none"
         style={{
           backgroundImage: `radial-gradient(#38bdf8 1px, transparent 1px)`,
@@ -27,7 +27,7 @@ export const SihFeature: React.FC = () => {
                 className="w-full h-80 sm:h-96 object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
-              
+
               <div className="absolute bottom-4 left-4 right-4 p-4 rounded-xl bg-slate-900/90 backdrop-blur-md border border-slate-700/80">
                 <div className="flex items-center gap-2 text-xs font-semibold text-blue-400 uppercase tracking-wider mb-1">
                   <Lightbulb className="w-4 h-4 text-amber-400" />

@@ -1,11 +1,11 @@
 import React from 'react';
-import { 
-  Wrench, 
-  Code2, 
-  Trophy, 
-  Briefcase, 
-  Lightbulb, 
-  Users2 
+import {
+  Wrench,
+  Code2,
+  Trophy,
+  Briefcase,
+  Lightbulb,
+  Users2
 } from 'lucide-react';
 
 export const WhatWeDo: React.FC = () => {

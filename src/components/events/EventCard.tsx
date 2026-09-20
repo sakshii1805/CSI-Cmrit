@@ -9,7 +9,7 @@ interface EventCardProps {
 }
 
 export const EventCard: React.FC<EventCardProps> = ({ event }) => {
-  const isUpcoming = event.status === 'upcoming';
+  const isUpcoming = event.status !== 'draft';
 
   const categoryColorMap = {
     Workshops: 'blue',
@@ -24,7 +24,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
       {/* Image container */}
       <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100">
         <img
-          src={event.image}
+          src={event.image || event.image_url || ''}
           alt={event.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           loading="lazy"
@@ -33,7 +33,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
 
         {/* Category & Status badges */}
         <div className="absolute top-3 left-3 flex items-center gap-2 flex-wrap">
-          <Badge variant={categoryColorMap[event.category] || 'blue'}>
+          <Badge variant={(categoryColorMap as Record<string, any>)[event.category] || 'blue'}>
             {event.category}
           </Badge>
           <span
@@ -43,7 +43,7 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
                 : 'bg-slate-700/90 text-slate-200'
             }`}
           >
-            {isUpcoming ? 'Upcoming' : 'Completed'}
+            {isUpcoming ? 'Published' : 'Draft'}
           </span>
         </div>
       </div>
@@ -54,12 +54,12 @@ export const EventCard: React.FC<EventCardProps> = ({ event }) => {
         <div className="flex items-center gap-3 text-xs text-slate-500 mb-2.5">
           <div className="flex items-center gap-1">
             <Calendar className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-            <span>{event.date}</span>
+            <span>{event.date || event.event_date}</span>
           </div>
           <span>•</span>
           <div className="flex items-center gap-1 truncate">
             <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-            <span className="truncate">{event.time.split('–')[0].trim()}</span>
+            <span className="truncate">{(event.time || event.event_time || '').split('–')[0].trim()}</span>
           </div>
         </div>
 

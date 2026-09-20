@@ -1,12 +1,29 @@
-import React, { useState, useMemo } from 'react';
-import { Search, Filter, X, AlertCircle, BellOff } from 'lucide-react';
-import { mockAnnouncements } from '../data/announcements';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Search, Filter, X, AlertCircle, BellOff, Loader2 } from 'lucide-react';
 import { AnnouncementCard } from '../components/announcements/AnnouncementCard';
-import { AnnouncementCategory } from '../types';
+import { AnnouncementCategory, AnnouncementItem } from '../types';
+import { announcementsService } from '../services/announcementsService';
 
 export const Announcements: React.FC = () => {
+  const [announcements, setAnnouncements] = useState<AnnouncementItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<AnnouncementCategory>('All');
+
+  useEffect(() => {
+    async function loadAnnouncements() {
+      try {
+        setLoading(true);
+        const res = await announcementsService.getPublishedAnnouncements();
+        setAnnouncements(res.data || []);
+      } catch (err) {
+        console.error('Failed to load announcements:', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadAnnouncements();
+  }, []);
 
   const categories: AnnouncementCategory[] = [
     'All',
@@ -18,20 +35,20 @@ export const Announcements: React.FC = () => {
   ];
 
   const filteredAnnouncements = useMemo(() => {
-    return mockAnnouncements.filter((ann) => {
+    return announcements.filter((ann) => {
       if (selectedCategory !== 'All' && ann.category !== selectedCategory) {
         return false;
       }
       if (searchQuery.trim() !== '') {
         const q = searchQuery.toLowerCase();
         const matchesTitle = ann.title.toLowerCase().includes(q);
-        const matchesSummary = ann.summary.toLowerCase().includes(q);
-        const matchesTags = ann.tags.some((t) => t.toLowerCase().includes(q));
+        const matchesSummary = (ann.summary || '').toLowerCase().includes(q);
+        const matchesTags = (ann.tags || []).some((t) => t.toLowerCase().includes(q));
         return matchesTitle || matchesSummary || matchesTags;
       }
       return true;
     });
-  }, [searchQuery, selectedCategory]);
+  }, [announcements, searchQuery, selectedCategory]);
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50">
@@ -85,10 +102,13 @@ export const Announcements: React.FC = () => {
             </div>
 
             <div className="text-xs text-slate-500 font-medium">
-              {mockAnnouncements.length === 0
-                ? 'No announcements published yet'
-                : <><strong className="text-slate-800">{filteredAnnouncements.length}</strong> items</>
-              }
+              {loading ? (
+                'Loading notices...'
+              ) : announcements.length === 0 ? (
+                'No announcements published yet'
+              ) : (
+                <><strong className="text-slate-800">{filteredAnnouncements.length}</strong> items</>
+              )}
             </div>
           </div>
 
@@ -102,11 +122,10 @@ export const Announcements: React.FC = () => {
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`text-xs px-3.5 py-1.5 rounded-full font-medium whitespace-nowrap transition-all ${
-                  selectedCategory === cat
+                className={`text-xs px-3.5 py-1.5 rounded-full font-medium whitespace-nowrap transition-all ${selectedCategory === cat
                     ? 'bg-blue-600 text-white shadow-xs font-semibold'
                     : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200/60'
-                }`}
+                  }`}
               >
                 {cat}
               </button>
@@ -115,7 +134,12 @@ export const Announcements: React.FC = () => {
         </div>
 
         {/* Content */}
-        {mockAnnouncements.length === 0 ? (
+        {loading ? (
+          <div className="py-24 flex flex-col items-center justify-center text-slate-400">
+            <Loader2 className="w-8 h-8 animate-spin text-blue-600 mb-3" />
+            <p className="text-sm font-medium">Loading announcements...</p>
+          </div>
+        ) : announcements.length === 0 ? (
           /* Primary empty state: website is new, no announcements published yet */
           <div className="bg-white rounded-2xl border border-slate-200 border-dashed p-16 text-center max-w-lg mx-auto shadow-subtle my-8">
             <div className="w-16 h-16 rounded-2xl bg-slate-100 text-slate-300 flex items-center justify-center mx-auto mb-5">

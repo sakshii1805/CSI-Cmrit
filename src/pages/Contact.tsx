@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Mail, MapPin, Phone, Send, CheckCircle2, User, MessageSquare, ExternalLink } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { Modal } from '../components/common/Modal';
+import { contactService } from '../services/contactService';
 
 export const Contact: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +14,7 @@ export const Contact: React.FC = () => {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validate = () => {
     const errs: Record<string, string> = {};
@@ -31,10 +33,30 @@ export const Contact: React.FC = () => {
     return Object.keys(errs).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validate()) {
+    if (!validate()) return;
+
+    try {
+      setIsSubmitting(true);
+      const res = await contactService.submitMessage({
+        name: formData.name,
+        email: formData.email,
+        subject: formData.subject,
+        message: formData.message,
+      });
+
+      if (!res.success) {
+        setErrors({ form: res.error || 'Failed to transmit message. Please try again.' });
+        return;
+      }
+
       setIsSuccessModalOpen(true);
+    } catch (err: unknown) {
+      const error = err as Error;
+      setErrors({ form: error.message || 'An unexpected error occurred.' });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -48,7 +70,7 @@ export const Contact: React.FC = () => {
     <div className="flex flex-col min-h-screen bg-slate-50 pb-20">
       {/* Banner */}
       <section className="bg-slate-950 text-white py-14 sm:py-20 border-b border-slate-800 relative overflow-hidden">
-        <div 
+        <div
           className="absolute inset-0 opacity-5 pointer-events-none"
           style={{
             backgroundImage: `radial-gradient(#38bdf8 1px, transparent 1px)`,
@@ -164,9 +186,8 @@ export const Contact: React.FC = () => {
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         placeholder="e.g. Ananya Rao"
-                        className={`w-full pl-9 pr-3 py-2 text-sm rounded-lg border focus:outline-none focus:ring-2 ${
-                          errors.name ? 'border-rose-400 focus:ring-rose-200' : 'border-slate-200 focus:ring-blue-100 focus:border-blue-600'
-                        }`}
+                        className={`w-full pl-9 pr-3 py-2 text-sm rounded-lg border focus:outline-none focus:ring-2 ${errors.name ? 'border-rose-400 focus:ring-rose-200' : 'border-slate-200 focus:ring-blue-100 focus:border-blue-600'
+                          }`}
                       />
                     </div>
                     {errors.name && <p className="text-rose-600 text-xs mt-1">{errors.name}</p>}
@@ -184,9 +205,8 @@ export const Contact: React.FC = () => {
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         placeholder="name@example.com"
-                        className={`w-full pl-9 pr-3 py-2 text-sm rounded-lg border focus:outline-none focus:ring-2 ${
-                          errors.email ? 'border-rose-400 focus:ring-rose-200' : 'border-slate-200 focus:ring-blue-100 focus:border-blue-600'
-                        }`}
+                        className={`w-full pl-9 pr-3 py-2 text-sm rounded-lg border focus:outline-none focus:ring-2 ${errors.email ? 'border-rose-400 focus:ring-rose-200' : 'border-slate-200 focus:ring-blue-100 focus:border-blue-600'
+                          }`}
                       />
                     </div>
                     {errors.email && <p className="text-rose-600 text-xs mt-1">{errors.email}</p>}
@@ -217,9 +237,8 @@ export const Contact: React.FC = () => {
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     placeholder="Write your detailed query or message here..."
-                    className={`w-full p-3 text-sm rounded-lg border focus:outline-none focus:ring-2 ${
-                      errors.message ? 'border-rose-400 focus:ring-rose-200' : 'border-slate-200 focus:ring-blue-100 focus:border-blue-600'
-                    }`}
+                    className={`w-full p-3 text-sm rounded-lg border focus:outline-none focus:ring-2 ${errors.message ? 'border-rose-400 focus:ring-rose-200' : 'border-slate-200 focus:ring-blue-100 focus:border-blue-600'
+                      }`}
                   />
                   {errors.message && <p className="text-rose-600 text-xs mt-1">{errors.message}</p>}
                 </div>
@@ -230,11 +249,15 @@ export const Contact: React.FC = () => {
                     variant="accent"
                     size="lg"
                     className="w-full"
+                    disabled={isSubmitting}
                     leftIcon={<Send className="w-4 h-4" />}
                   >
-                    Send Message
+                    {isSubmitting ? 'Transmitting Inbound Message...' : 'Send Message'}
                   </Button>
                 </div>
+                {errors.form && (
+                  <p className="text-rose-600 text-xs text-center font-medium mt-2">{errors.form}</p>
+                )}
               </form>
             </div>
           </div>
@@ -253,19 +276,19 @@ export const Contact: React.FC = () => {
           </div>
 
           <div>
-            <h3 className="text-xl font-bold text-slate-900">Message Sent Successfully</h3>
+            <h3 className="text-xl font-bold text-slate-900">Message Received</h3>
             <p className="text-sm font-medium text-emerald-700 mt-1">
               Thank you for reaching out, {formData.name}!
             </p>
           </div>
 
-          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs text-slate-600 space-y-1 text-left">
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs text-slate-600 space-y-1 text-left font-mono">
             <p><span className="font-semibold text-slate-800">Sender:</span> {formData.email}</p>
             {formData.subject && <p><span className="font-semibold text-slate-800">Subject:</span> {formData.subject}</p>}
           </div>
 
-          <div className="p-3 bg-blue-50 border border-blue-100 rounded-xl text-xs text-blue-800">
-            💡 Notice: Frontend message demo. Backend mailer/database integration will be added later.
+          <div className="p-3 bg-blue-50 border border-blue-100 rounded-xl text-xs text-blue-800 font-mono">
+            Your message has been logged in the chapter dispatch database.
           </div>
 
           <div className="pt-2">

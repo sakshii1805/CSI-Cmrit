@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   ArrowRight, 
@@ -15,15 +15,37 @@ import {
 } from 'lucide-react';
 import { HeroSection } from '../components/home/HeroSection';
 import { HomeAboutRow } from '../components/home/HomeAboutRow';
-import { mockEvents } from '../data/events';
-import { mockAnnouncements } from '../data/announcements';
-import { chapterHighlights } from '../data/gallery';
+import { eventsService } from '../services/eventsService';
+import { announcementsService } from '../services/announcementsService';
+import { highlightsService } from '../services/highlightsService';
+import { EventItem, AnnouncementItem, ChapterHighlightItem } from '../types';
 
 export const Home: React.FC = () => {
-  // These will be populated once admins publish content via the dashboard
-  const upcomingEvents = mockEvents.filter(e => e.status === 'upcoming').slice(0, 4);
-  const latestAnnouncements = mockAnnouncements.slice(0, 4);
-  const highlightThumbnails = chapterHighlights.slice(0, 9);
+  const [events, setEvents] = useState<EventItem[]>([]);
+  const [announcements, setAnnouncements] = useState<AnnouncementItem[]>([]);
+  const [highlights, setHighlights] = useState<ChapterHighlightItem[]>([]);
+
+  useEffect(() => {
+    async function loadHomeContent() {
+      try {
+        const [evts, anns, hls] = await Promise.all([
+          eventsService.getPublishedEvents(),
+          announcementsService.getPublishedAnnouncements(),
+          highlightsService.getPublishedHighlights()
+        ]);
+        setEvents(evts.data || []);
+        setAnnouncements(anns.data || []);
+        setHighlights(hls.data || []);
+      } catch (err) {
+        console.error('Failed to load home page content:', err);
+      }
+    }
+    loadHomeContent();
+  }, []);
+
+  const upcomingEvents = events.slice(0, 4);
+  const latestAnnouncements = announcements.slice(0, 4);
+  const highlightThumbnails = highlights.slice(0, 9);
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50">
@@ -318,7 +340,7 @@ export const Home: React.FC = () => {
                   {latestAnnouncements.map((ann, idx) => (
                     <Link
                       key={idx}
-                      to={`/announcements/${ann.slug}`}
+                      to={`/announcements/${ann.slug || ann.id}`}
                       className="p-4 rounded-xl border border-slate-200/90 hover:border-blue-300 hover:bg-blue-50/20 bg-white transition-all flex items-center justify-between gap-4 group"
                     >
                       <div className="flex items-center gap-3.5 flex-1 min-w-0">

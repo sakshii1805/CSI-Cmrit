@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { 
-  CheckCircle2, 
-  User, 
-  Mail, 
-  Phone, 
-  Building, 
-  GraduationCap, 
-  HelpCircle, 
-  Sparkles, 
+import {
+  CheckCircle2,
+  User,
+  Mail,
+  Phone,
+  Building,
+  GraduationCap,
+  HelpCircle,
+  Sparkles,
   ArrowRight,
   ShieldCheck,
   Laptop,
@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { Modal } from '../components/common/Modal';
+import { joinService } from '../services/joinService';
 
 export const JoinUs: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -77,10 +78,34 @@ export const JoinUs: React.FC = () => {
     return Object.keys(errs).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validate()) {
+    if (!validate()) return;
+
+    try {
+      setIsSubmitting(true);
+      const res = await joinService.submitApplication({
+        fullName: formData.fullName,
+        email: formData.email,
+        year: formData.year,
+        branch: formData.branch,
+        phone: formData.phone,
+        reason: formData.reason,
+      });
+
+      if (!res.success) {
+        setErrors({ form: res.error || 'Failed to submit application. Please try again.' });
+        return;
+      }
+
       setIsSuccessModalOpen(true);
+    } catch (err: unknown) {
+      const error = err as Error;
+      setErrors({ form: error.message || 'An unexpected error occurred.' });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -102,7 +127,7 @@ export const JoinUs: React.FC = () => {
     <div className="flex flex-col min-h-screen bg-slate-50 pb-20">
       {/* Hero */}
       <section className="bg-slate-950 text-white py-14 sm:py-20 border-b border-slate-800 relative overflow-hidden">
-        <div 
+        <div
           className="absolute inset-0 opacity-5 pointer-events-none"
           style={{
             backgroundImage: `radial-gradient(#38bdf8 1px, transparent 1px)`,
@@ -152,9 +177,8 @@ export const JoinUs: React.FC = () => {
                       value={formData.fullName}
                       onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                       placeholder="e.g. Sravan Kumar"
-                      className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border focus:outline-none focus:ring-2 ${
-                        errors.fullName ? 'border-rose-400 focus:ring-rose-200' : 'border-slate-200 focus:ring-blue-100 focus:border-blue-600'
-                      }`}
+                      className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border focus:outline-none focus:ring-2 ${errors.fullName ? 'border-rose-400 focus:ring-rose-200' : 'border-slate-200 focus:ring-blue-100 focus:border-blue-600'
+                        }`}
                     />
                   </div>
                   {errors.fullName && <p className="text-rose-600 text-xs mt-1">{errors.fullName}</p>}
@@ -173,9 +197,8 @@ export const JoinUs: React.FC = () => {
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                         placeholder="name@student.cmritonline.ac.in"
-                        className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border focus:outline-none focus:ring-2 ${
-                          errors.email ? 'border-rose-400 focus:ring-rose-200' : 'border-slate-200 focus:ring-blue-100 focus:border-blue-600'
-                        }`}
+                        className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border focus:outline-none focus:ring-2 ${errors.email ? 'border-rose-400 focus:ring-rose-200' : 'border-slate-200 focus:ring-blue-100 focus:border-blue-600'
+                          }`}
                       />
                     </div>
                     {errors.email && <p className="text-rose-600 text-xs mt-1">{errors.email}</p>}
@@ -192,9 +215,8 @@ export const JoinUs: React.FC = () => {
                         value={formData.phone}
                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                         placeholder="+91 98765 43210"
-                        className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border focus:outline-none focus:ring-2 ${
-                          errors.phone ? 'border-rose-400 focus:ring-rose-200' : 'border-slate-200 focus:ring-blue-100 focus:border-blue-600'
-                        }`}
+                        className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border focus:outline-none focus:ring-2 ${errors.phone ? 'border-rose-400 focus:ring-rose-200' : 'border-slate-200 focus:ring-blue-100 focus:border-blue-600'
+                          }`}
                       />
                     </div>
                     {errors.phone && <p className="text-rose-600 text-xs mt-1">{errors.phone}</p>}
@@ -258,11 +280,10 @@ export const JoinUs: React.FC = () => {
                           type="button"
                           key={item}
                           onClick={() => toggleInterest(item)}
-                          className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition-all ${
-                            isSelected
+                          className={`text-xs px-3 py-1.5 rounded-lg border font-medium transition-all ${isSelected
                               ? 'bg-blue-50 text-blue-700 border-blue-300 font-semibold'
                               : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
-                          }`}
+                            }`}
                         >
                           {isSelected ? '✓ ' : '+ '}
                           {item}
@@ -282,19 +303,21 @@ export const JoinUs: React.FC = () => {
                     value={formData.reason}
                     onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
                     placeholder="Describe your technical interests, past projects, or what you hope to learn and build as part of the chapter..."
-                    className={`w-full p-3.5 text-sm rounded-xl border focus:outline-none focus:ring-2 ${
-                      errors.reason ? 'border-rose-400 focus:ring-rose-200' : 'border-slate-200 focus:ring-blue-100 focus:border-blue-600'
-                    }`}
+                    className={`w-full p-3.5 text-sm rounded-xl border focus:outline-none focus:ring-2 ${errors.reason ? 'border-rose-400 focus:ring-rose-200' : 'border-slate-200 focus:ring-blue-100 focus:border-blue-600'
+                      }`}
                   />
                   {errors.reason && <p className="text-rose-600 text-xs mt-1">{errors.reason}</p>}
                 </div>
 
                 {/* Submit button */}
                 <div className="pt-2">
-                  <Button type="submit" variant="accent" size="lg" className="w-full">
-                    Submit Application
+                  <Button type="submit" variant="accent" size="lg" className="w-full" disabled={isSubmitting}>
+                    {isSubmitting ? 'Submitting Application...' : 'Submit Application'}
                   </Button>
                 </div>
+                {errors.form && (
+                  <p className="text-rose-600 text-xs text-center font-medium mt-2">{errors.form}</p>
+                )}
               </form>
             </div>
           </div>
@@ -386,12 +409,12 @@ export const JoinUs: React.FC = () => {
           <div>
             <h3 className="text-xl font-bold text-slate-900">Application Received</h3>
             <p className="text-sm font-semibold text-emerald-700 mt-2">
-              Application received successfully. Backend integration will be added later.
+              Your membership application has been submitted successfully!
             </p>
           </div>
 
           <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
-            Thank you, <span className="font-semibold text-slate-800">{formData.fullName}</span>! Your submission has been captured in the frontend prototype. Our coordinator team will review applications during the official drive.
+            Thank you, <span className="font-semibold text-slate-800">{formData.fullName}</span>! Your application is recorded in the chapter database. The executive coordinator council will review your submission and contact you via email.
           </p>
 
           <div className="pt-2">
