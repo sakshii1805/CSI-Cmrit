@@ -218,17 +218,17 @@ export const Home: React.FC = () => {
               )}
             </div>
 
-            {/* Right: Chapter Highlights */}
+            {/* Right: Gallery */}
             <div className="lg:col-span-6 space-y-4">
               <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                 <div className="flex items-center gap-2">
                   <Camera className="w-5 h-5 text-blue-600" />
                   <h2 className="text-xl font-bold text-slate-900 tracking-tight">
-                    Chapter Highlights
+                    Gallery
                   </h2>
                 </div>
                 <Link
-                  to="/highlights"
+                  to="/gallery"
                   className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700"
                 >
                   <span>View All</span>
@@ -241,7 +241,7 @@ export const Home: React.FC = () => {
                   {highlightThumbnails.map((item) => (
                     <Link
                       key={item.id}
-                      to="/highlights"
+                      to="/gallery"
                       className="relative aspect-video rounded-xl overflow-hidden group bg-slate-900 border border-slate-200"
                     >
                       <img

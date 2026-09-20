@@ -54,7 +54,7 @@ export const ChapterHighlights: React.FC = () => {
               Visual Archives
             </span>
             <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white mt-3 mb-3">
-              Chapter Highlights
+              Gallery
             </h1>
             <p className="text-base sm:text-lg text-slate-300 leading-relaxed font-normal">
               Photos and moments from CSI CMRIT activities, events, workshops, and chapter life — published by chapter administrators.

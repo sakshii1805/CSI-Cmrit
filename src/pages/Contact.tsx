@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, MapPin, Phone, Send, CheckCircle2, User, MessageSquare, ExternalLink, Clock } from 'lucide-react';
+import { Mail, MapPin, Phone, Send, CheckCircle2, User, MessageSquare, ExternalLink } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { Modal } from '../components/common/Modal';
 
@@ -84,15 +84,9 @@ export const Contact: React.FC = () => {
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
                   Official Email
                 </span>
-                <a
-                  href="mailto:csi@cmritonline.ac.in"
-                  className="text-base font-bold text-slate-900 hover:text-blue-600 transition-colors mt-0.5 block"
-                >
-                  csi@cmritonline.ac.in
-                </a>
-                <p className="text-xs text-slate-500 mt-1">
-                  Responses typically sent within 24–48 hours during working weekdays.
-                </p>
+                <span className="text-base font-bold text-slate-400 mt-0.5 block italic">
+                  Loading...
+                </span>
               </div>
             </div>
 
@@ -111,29 +105,11 @@ export const Contact: React.FC = () => {
                 <p className="text-xs text-slate-600 mt-1 leading-relaxed">
                   Kandlakoya, Medchal Road, Hyderabad – 501401, Telangana, India.
                 </p>
-                <div className="mt-2 text-xs font-medium text-blue-600 flex items-center gap-1">
-                  <span>Tech Block • Lab 4 / Innovation Cell</span>
-                </div>
+
               </div>
             </div>
 
-            {/* Chapter Operating Hours */}
-            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-subtle flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100 shrink-0">
-                <Clock className="w-6 h-6" />
-              </div>
-              <div>
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">
-                  Activity Hours
-                </span>
-                <p className="text-sm font-bold text-slate-900 mt-0.5">
-                  Monday – Friday: 9:30 AM – 4:30 PM
-                </p>
-                <p className="text-xs text-slate-500 mt-1">
-                  Weekend bootcamps, workshops, and hackathons are scheduled according to official event announcements.
-                </p>
-              </div>
-            </div>
+
           </div>
 
           {/* Right Column: Interactive Contact Form */}

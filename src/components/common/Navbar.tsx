@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
 import { Menu, X, Shield, Search } from 'lucide-react';
+import { LogoMark } from './Logo';
 
 export const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -23,7 +24,7 @@ export const Navbar: React.FC = () => {
     { name: 'Home', path: '/' },
     { name: 'About', path: '/about' },
     { name: 'Events', path: '/events' },
-    { name: 'Highlights', path: '/highlights' },
+    { name: 'Gallery', path: '/gallery' },
     { name: 'Announcements', path: '/announcements' },
     { name: 'SIH', path: '/sih' },
     { name: 'Join Us', path: '/join' },
@@ -32,28 +33,25 @@ export const Navbar: React.FC = () => {
 
   return (
     <header
-      className={`sticky top-0 z-50 w-full transition-all duration-300 ${
-        isScrolled
+      className={`sticky top-0 z-50 w-full transition-all duration-300 ${isScrolled
           ? 'bg-slate-950/95 backdrop-blur-md shadow-md border-b border-slate-800 py-3'
           : 'bg-slate-950 border-b border-slate-850 py-3.5'
-      }`}
+        }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
-          {/* Exact Brand Logo from user screenshot */}
-          <Link 
-            to="/" 
+          {/* Brand Logo (College Logo) */}
+          <Link
+            to="/"
             className="flex items-center gap-3 group focus:outline-none"
             aria-label="CSI CMRIT Chapter"
           >
-            {/* Circular CSI Emblem */}
-            <div className="w-10 h-10 rounded-full bg-slate-900 border-2 border-blue-500/80 flex items-center justify-center p-1 shadow-sm group-hover:border-blue-400 transition-colors shrink-0">
-              <svg viewBox="0 0 40 40" className="w-full h-full" fill="none">
-                <circle cx="20" cy="20" r="17" stroke="#3b82f6" strokeWidth="2.5" strokeDasharray="3 3"/>
-                <path d="M14 20C14 16.6863 16.6863 14 20 14C22.4 14 24.4 15.4 25.3 17.5" stroke="#ffffff" strokeWidth="2.5" strokeLinecap="round"/>
-                <path d="M26 20C26 23.3137 23.3137 26 20 26C17.6 26 15.6 24.6 14.7 22.5" stroke="#38bdf8" strokeWidth="2.5" strokeLinecap="round"/>
-                <circle cx="20" cy="20" r="3.5" fill="#3b82f6"/>
-              </svg>
+            <div className="w-11 h-11 rounded-full bg-white flex items-center justify-center p-0.5 shadow-sm border border-slate-700/60 shrink-0 overflow-hidden group-hover:scale-105 transition-transform">
+              <img
+                src="/images/college-logo.png"
+                alt="CMR Logo"
+                className="w-full h-full object-cover rounded-full"
+              />
             </div>
 
             {/* CSI CMRIT text block */}
@@ -90,10 +88,9 @@ export const Navbar: React.FC = () => {
                 key={link.path}
                 to={link.path}
                 className={({ isActive }) =>
-                  `px-3 py-1.5 text-xs font-medium transition-all relative ${
-                    isActive
-                      ? 'text-white font-semibold after:content-[""] after:absolute after:bottom-0 after:left-3 after:right-3 after:h-[2px] after:bg-blue-500'
-                      : 'text-slate-300 hover:text-white'
+                  `px-3 py-1.5 text-xs font-medium transition-all relative ${isActive
+                    ? 'text-white font-semibold after:content-[""] after:absolute after:bottom-0 after:left-3 after:right-3 after:h-[2px] after:bg-blue-500'
+                    : 'text-slate-300 hover:text-white'
                   }`
                 }
               >
@@ -102,39 +99,56 @@ export const Navbar: React.FC = () => {
             ))}
           </nav>
 
-          {/* Search + Admin button */}
-          <div className="hidden sm:flex items-center gap-3">
+          {/* Right Section: Actions + CSI Logo */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Search (Desktop) */}
             <Link
               to="/events"
-              className="p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors"
+              className="hidden sm:inline-flex p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors"
               title="Search events and announcements"
             >
               <Search className="w-4 h-4" />
             </Link>
 
+            {/* Admin Login (Desktop) */}
             <Link
               to="/admin/login"
-              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 border border-slate-700 shadow-sm transition-all hover:border-slate-600"
+              className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 border border-slate-700 shadow-sm transition-all hover:border-slate-600"
             >
               <Shield className="w-3.5 h-3.5 text-blue-400" />
-              <span>Admin Login</span>
+              <span>Admin</span>
             </Link>
-          </div>
 
-          {/* Mobile menu toggle */}
-          <div className="flex items-center gap-2 xl:hidden">
+            {/* CSI Chapter Logo */}
+            <a
+              href="https://csi-india.org"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-11 h-11 rounded-full bg-white hover:bg-slate-100 flex items-center justify-center p-0.5 shadow-sm border border-slate-700/60 transition-all hover:scale-105 shrink-0 overflow-hidden"
+              title="Computer Society of India (CSI)"
+              aria-label="Computer Society of India (CSI)"
+            >
+              <img
+                src="/images/logo.png"
+                alt="CSI Logo"
+                className="w-full h-full object-cover rounded-full"
+              />
+            </a>
+
+            {/* Mobile Admin Icon */}
             <Link
               to="/admin/login"
-              className="p-1.5 text-slate-300 hover:text-white"
+              className="p-1.5 text-slate-300 hover:text-white sm:hidden"
               aria-label="Admin"
             >
               <Shield className="w-4 h-4 text-blue-400" />
             </Link>
 
+            {/* Mobile menu toggle */}
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 focus:outline-none"
+              className="p-2 rounded-lg text-slate-300 hover:text-white hover:bg-slate-800 focus:outline-none xl:hidden"
               aria-label="Toggle navigation menu"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -151,10 +165,9 @@ export const Navbar: React.FC = () => {
               key={link.path}
               to={link.path}
               className={({ isActive }) =>
-                `flex items-center justify-between px-4 py-2.5 rounded-lg text-xs font-semibold transition-colors ${
-                  isActive
-                    ? 'text-white bg-blue-600/30 border border-blue-500/40'
-                    : 'text-slate-300 hover:bg-slate-900'
+                `flex items-center justify-between px-4 py-2.5 rounded-lg text-xs font-semibold transition-colors ${isActive
+                  ? 'text-white bg-blue-600/30 border border-blue-500/40'
+                  : 'text-slate-300 hover:bg-slate-900'
                 }`
               }
             >

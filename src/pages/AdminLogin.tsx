@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Shield, Lock, Mail, ArrowLeft, AlertCircle } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { useToast } from '../components/common/Toast';
+import { LogoMark } from '../components/common/Logo';
 
 export const AdminLogin: React.FC = () => {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ export const AdminLogin: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
       {/* Subtle background tech grid */}
-      <div 
+      <div
         className="absolute inset-0 opacity-5 pointer-events-none"
         style={{
           backgroundImage: `radial-gradient(#38bdf8 1px, transparent 1px)`,
@@ -41,11 +42,9 @@ export const AdminLogin: React.FC = () => {
       </div>
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10 px-4">
-        {/* Chapter Logo Emblem */}
+        {/* Chapter Logo */}
         <div className="flex justify-center mb-4">
-          <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center text-white font-bold text-xl shadow-card border border-blue-500/40">
-            CSI
-          </div>
+          <LogoMark size={56} />
         </div>
 
         <h2 className="text-center text-2xl sm:text-3xl font-extrabold tracking-tight text-white">

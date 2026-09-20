@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Calendar, 
-  Bell, 
-  Image as ImageIcon, 
-  MessageSquare, 
-  Users, 
-  LogOut, 
-  Plus, 
-  Pencil, 
-  Trash2, 
-  Check, 
-  X, 
+import {
+  LayoutDashboard,
+  Calendar,
+  Bell,
+  Image as ImageIcon,
+  MessageSquare,
+  Users,
+  LogOut,
+  Plus,
+  Pencil,
+  Trash2,
+  Check,
+  X,
   ExternalLink,
   Menu,
   Lightbulb,
@@ -22,6 +22,7 @@ import {
 import { mockAdminStats, mockRecentApplications, mockPendingComments } from '../data/adminMock';
 import { Button } from '../components/common/Button';
 import { useToast } from '../components/common/Toast';
+import { LogoMark } from '../components/common/Logo';
 
 type AdminTab = 'dashboard' | 'events' | 'announcements' | 'highlights' | 'sih' | 'comments' | 'applications';
 
@@ -44,7 +45,7 @@ export const AdminDashboard: React.FC = () => {
     { id: 'dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
     { id: 'events', label: 'Events', icon: <Calendar className="w-4 h-4" />, count: mockAdminStats.totalEvents },
     { id: 'announcements', label: 'Announcements', icon: <Bell className="w-4 h-4" />, count: mockAdminStats.totalAnnouncements },
-    { id: 'highlights', label: 'Chapter Highlights', icon: <Camera className="w-4 h-4" />, count: mockAdminStats.galleryImages },
+    { id: 'highlights', label: 'Gallery', icon: <Camera className="w-4 h-4" />, count: mockAdminStats.galleryImages },
     { id: 'sih', label: 'SIH', icon: <Lightbulb className="w-4 h-4" /> },
     { id: 'comments', label: 'Comments', icon: <MessageSquare className="w-4 h-4" />, count: mockAdminStats.pendingComments },
     { id: 'applications', label: 'Join Applications', icon: <Users className="w-4 h-4" />, count: mockAdminStats.totalApplications },
@@ -67,9 +68,7 @@ export const AdminDashboard: React.FC = () => {
       {/* Mobile Top Header */}
       <div className="lg:hidden bg-slate-900 text-white p-4 flex items-center justify-between border-b border-slate-800">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-sm">
-            CSI
-          </div>
+          <LogoMark size={32} />
           <span className="font-bold text-sm">CSI CMRIT Admin</span>
         </div>
         <button
@@ -83,16 +82,13 @@ export const AdminDashboard: React.FC = () => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-slate-950 text-slate-300 flex flex-col border-r border-slate-800/80 transform transition-transform duration-300 lg:translate-x-0 lg:static lg:h-screen ${
-          mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`fixed inset-y-0 left-0 z-40 w-64 bg-slate-950 text-slate-300 flex flex-col border-r border-slate-800/80 transform transition-transform duration-300 lg:translate-x-0 lg:static lg:h-screen ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
       >
         {/* Sidebar Brand Header */}
         <div className="p-5 border-b border-slate-800 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center font-bold text-white text-base shadow-sm">
-              CSI
-            </div>
+            <LogoMark size={36} />
             <div>
               <h2 className="text-sm font-bold text-white tracking-tight">CSI CMRIT</h2>
               <span className="text-[10px] text-blue-400 uppercase tracking-widest font-semibold block">
@@ -123,11 +119,10 @@ export const AdminDashboard: React.FC = () => {
                   setActiveTab(link.id);
                   setMobileSidebarOpen(false);
                 }}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
-                  isActive
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all ${isActive
                     ? 'bg-blue-600 text-white shadow-xs'
                     : 'text-slate-400 hover:text-white hover:bg-slate-900'
-                }`}
+                  }`}
               >
                 <div className="flex items-center gap-2.5">
                   {link.icon}
@@ -135,9 +130,8 @@ export const AdminDashboard: React.FC = () => {
                 </div>
                 {link.count !== undefined && (
                   <span
-                    className={`text-[10px] px-1.5 py-0.5 rounded-full ${
-                      isActive ? 'bg-blue-700 text-white' : 'bg-slate-800 text-slate-400'
-                    }`}
+                    className={`text-[10px] px-1.5 py-0.5 rounded-full ${isActive ? 'bg-blue-700 text-white' : 'bg-slate-800 text-slate-400'
+                      }`}
                   >
                     {link.count}
                   </span>
@@ -174,9 +168,9 @@ export const AdminDashboard: React.FC = () => {
           <div>
             <h1 className="text-xl font-bold text-slate-900 capitalize">
               {activeTab === 'dashboard' ? 'Dashboard Overview'
-                : activeTab === 'highlights' ? 'Chapter Highlights'
-                : activeTab === 'applications' ? 'Join Applications'
-                : activeTab}
+                : activeTab === 'highlights' ? 'Gallery'
+                  : activeTab === 'applications' ? 'Join Applications'
+                    : activeTab}
             </h1>
             <p className="text-xs text-slate-500">
               CSI CMRIT Chapter Administration Console
@@ -216,7 +210,7 @@ export const AdminDashboard: React.FC = () => {
 
             <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-subtle flex flex-col justify-between">
               <div className="flex items-center justify-between text-slate-500 mb-2">
-                <span className="text-xs font-semibold uppercase tracking-wider">Highlights</span>
+                <span className="text-xs font-semibold uppercase tracking-wider">Gallery</span>
                 <Camera className="w-4 h-4 text-emerald-600" />
               </div>
               <div className="text-2xl font-extrabold text-slate-900">{mockAdminStats.galleryImages}</div>
@@ -316,12 +310,12 @@ export const AdminDashboard: React.FC = () => {
             </div>
           )}
 
-          {/* Chapter Highlights Table */}
+          {/* Gallery Table */}
           {(activeTab === 'dashboard' || activeTab === 'highlights') && (
             <div className="bg-white rounded-xl border border-slate-200 shadow-subtle overflow-hidden">
               <div className="p-5 border-b border-slate-100 flex items-center justify-between">
                 <div>
-                  <h3 className="text-base font-bold text-slate-900">Chapter Highlights</h3>
+                  <h3 className="text-base font-bold text-slate-900">Gallery</h3>
                   <p className="text-xs text-slate-500">Upload and manage photos from chapter activities</p>
                 </div>
                 <Button
@@ -346,7 +340,7 @@ export const AdminDashboard: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 text-slate-700">
-                    <EmptyTableState message="No chapter highlights uploaded yet" />
+                    <EmptyTableState message="No gallery photos uploaded yet" />
                   </tbody>
                 </table>
               </div>
@@ -501,11 +495,10 @@ export const AdminDashboard: React.FC = () => {
                           </td>
                           <td className="px-5 py-3 text-slate-500 whitespace-nowrap">{app.submittedAt}</td>
                           <td className="px-5 py-3">
-                            <span className={`px-2 py-0.5 rounded text-[11px] font-semibold ${
-                              app.status === 'Approved'
+                            <span className={`px-2 py-0.5 rounded text-[11px] font-semibold ${app.status === 'Approved'
                                 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                                 : 'bg-amber-50 text-amber-700 border border-amber-200'
-                            }`}>
+                              }`}>
                               {app.status}
                             </span>
                           </td>
