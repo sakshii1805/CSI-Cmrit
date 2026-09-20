@@ -1,11 +1,11 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  CheckCircle2, 
-  Lightbulb, 
-  Compass, 
-  Users, 
-  FileCode2, 
+import {
+  CheckCircle2,
+  Lightbulb,
+  Compass,
+  Users,
+  FileCode2,
   ArrowRight,
   Bookmark,
   Share2,
@@ -13,7 +13,8 @@ import {
 } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { sihProblemStatements } from '../data/sihProblemStatements';
-import { SIHProblemStatement } from '../types';
+import { SIHProblemStatement, SihItem } from '../types';
+import { sihService } from '../services/sihService';
 import { SihHeroHeader } from '../components/sih/SihHeroHeader';
 import { SihGuidanceBanner } from '../components/sih/SihGuidanceBanner';
 import { SihProblemStatementCard } from '../components/sih/SihProblemStatementCard';
@@ -21,6 +22,10 @@ import { SihFilterControls, SortOption } from '../components/sih/SihFilterContro
 import { SihDetailModal } from '../components/sih/SihDetailModal';
 
 export const SIH: React.FC = () => {
+  // Live chapter updates from Supabase
+  const [sihItems, setSihItems] = useState<SihItem[]>([]);
+  const [loadingUpdates, setLoadingUpdates] = useState<boolean>(true);
+
   // Filter States
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
@@ -44,6 +49,21 @@ export const SIH: React.FC = () => {
   });
 
   useEffect(() => {
+    async function loadSihUpdates() {
+      try {
+        setLoadingUpdates(true);
+        const res = await sihService.getPublishedSihItems();
+        setSihItems(res.data || []);
+      } catch (err) {
+        console.error('Failed to load SIH updates:', err);
+      } finally {
+        setLoadingUpdates(false);
+      }
+    }
+    loadSihUpdates();
+  }, []);
+
+  useEffect(() => {
     try {
       localStorage.setItem('csi_sih_shortlist', JSON.stringify(shortlistedIds));
     } catch {
@@ -52,7 +72,7 @@ export const SIH: React.FC = () => {
   }, [shortlistedIds]);
 
   const toggleShortlist = (id: string) => {
-    setShortlistedIds((prev) => 
+    setShortlistedIds((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     );
   };
@@ -179,6 +199,77 @@ export const SIH: React.FC = () => {
 
       {/* 2. Guidance & Strategy Session Banner (Reference 1 Bottom) */}
       <SihGuidanceBanner />
+
+      {/* Chapter SIH Cell Updates & Teams */}
+      <section className="py-10 bg-[#070E1E] border-b border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+              <div className="inline-flex items-center gap-1.5 text-xs font-mono text-sky-400 bg-sky-950/60 border border-sky-800/60 px-2.5 py-0.5 rounded uppercase tracking-wider mb-1">
+                <Sparkles className="w-3 h-3" />
+                <span>CMRIT Chapter Updates</span>
+              </div>
+              <h2 className="font-display text-xl sm:text-2xl font-bold text-white">
+                Chapter Teams &amp; SIH Announcements
+              </h2>
+            </div>
+            <p className="text-xs text-slate-400 max-w-sm">
+              Official notifications, team listings, and achievement milestones published by chapter administrators.
+            </p>
+          </div>
+
+          {loadingUpdates ? (
+            <div className="py-12 text-center text-slate-400 text-xs font-mono">
+              Loading chapter updates...
+            </div>
+          ) : sihItems.length === 0 ? (
+            /* Designated empty state */
+            <div className="bg-[#0B1528] rounded-2xl border border-slate-800 border-dashed p-10 text-center max-w-lg mx-auto">
+              <div className="w-12 h-12 rounded-full bg-slate-900 border border-slate-800 text-sky-400 flex items-center justify-center mx-auto mb-3">
+                <Sparkles className="w-6 h-6" />
+              </div>
+              <h3 className="text-base font-bold text-white mb-1">No SIH updates yet</h3>
+              <p className="text-xs text-slate-400 leading-relaxed max-w-sm mx-auto">
+                Chapter teams, mentor notices, and national round qualifiers will be posted here by chapter admins.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {sihItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="p-5 rounded-2xl bg-[#0B1528] border border-slate-800 flex flex-col justify-between hover:border-sky-500/40 transition-colors"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-sky-500/10 border border-sky-500/20 text-sky-300 font-semibold">
+                        {item.category}
+                      </span>
+                      {item.status && (
+                        <span className="text-[10px] uppercase font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300">
+                          {item.status}
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="text-base font-bold text-white leading-snug">
+                      {item.title}
+                    </h3>
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      {item.content}
+                    </p>
+                  </div>
+                  {(item.team_name || item.problem_code) && (
+                    <div className="pt-4 mt-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400 font-mono">
+                      {item.team_name && <span>Team: <strong className="text-slate-200">{item.team_name}</strong></span>}
+                      {item.problem_code && <span>PS: <strong className="text-sky-400">{item.problem_code}</strong></span>}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
 
       {/* 3. Problem Statements Explorer Section (Reference 2) */}
       <section id="statements-hub" className="py-12 bg-[#081226] border-t border-b border-slate-800/80">

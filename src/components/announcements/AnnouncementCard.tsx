@@ -22,7 +22,7 @@ export const AnnouncementCard: React.FC<AnnouncementCardProps> = ({ announcement
       {/* Top row: Category & Date */}
       <div className="flex items-center justify-between gap-2 mb-3">
         <div className="flex items-center gap-2">
-          <Badge variant={categoryVariantMap[announcement.category] || 'slate'}>
+          <Badge variant={(categoryVariantMap as Record<string, any>)[announcement.category] || 'slate'}>
             {announcement.category}
           </Badge>
           {announcement.isUrgent && (

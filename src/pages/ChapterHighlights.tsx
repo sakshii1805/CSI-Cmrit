@@ -1,11 +1,14 @@
-import React, { useState, useMemo } from 'react';
-import { Filter, Images, Camera } from 'lucide-react';
-import { chapterHighlights } from '../data/gallery';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Filter, Camera } from 'lucide-react';
+import { highlightsService } from '../services/highlightsService';
 import { GalleryCard } from '../components/gallery/GalleryCard';
 import { LightboxModal } from '../components/gallery/LightboxModal';
-import { ChapterHighlightCategory, GalleryItem } from '../types';
+import { CommentSection } from '../components/common/CommentSection';
+import { ChapterHighlightCategory, ChapterHighlightItem } from '../types';
 
 export const ChapterHighlights: React.FC = () => {
+  const [highlights, setHighlights] = useState<ChapterHighlightItem[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedCategory, setSelectedCategory] = useState<ChapterHighlightCategory>('All');
   const [activePhotoIndex, setActivePhotoIndex] = useState<number | null>(null);
 
@@ -18,10 +21,26 @@ export const ChapterHighlights: React.FC = () => {
     'Community'
   ];
 
+  useEffect(() => {
+    const fetchHighlights = async () => {
+      try {
+        setIsLoading(true);
+        const res = await highlightsService.getPublishedHighlights();
+        setHighlights(res.data);
+      } catch (err) {
+        console.error('Error fetching highlights:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchHighlights();
+  }, []);
+
   const filteredPhotos = useMemo(() => {
-    if (selectedCategory === 'All') return chapterHighlights;
-    return chapterHighlights.filter((item) => item.category === selectedCategory);
-  }, [selectedCategory]);
+    if (selectedCategory === 'All') return highlights;
+    return highlights.filter((item) => item.category === selectedCategory);
+  }, [highlights, selectedCategory]);
 
   const activePhoto = activePhotoIndex !== null ? filteredPhotos[activePhotoIndex] : null;
 
@@ -41,7 +60,7 @@ export const ChapterHighlights: React.FC = () => {
     <div className="flex flex-col min-h-screen bg-slate-50">
       {/* Header Banner */}
       <section className="bg-slate-950 text-white py-14 sm:py-18 border-b border-slate-800 relative overflow-hidden">
-        <div 
+        <div
           className="absolute inset-0 opacity-5 pointer-events-none"
           style={{
             backgroundImage: `radial-gradient(#38bdf8 1px, transparent 1px)`,
@@ -76,11 +95,10 @@ export const ChapterHighlights: React.FC = () => {
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`text-xs px-3.5 py-1.5 rounded-full font-medium whitespace-nowrap transition-all ${
-                  selectedCategory === cat
-                    ? 'bg-blue-600 text-white shadow-xs font-semibold'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200/60'
-                }`}
+                className={`text-xs px-3.5 py-1.5 rounded-full font-medium whitespace-nowrap transition-all ${selectedCategory === cat
+                  ? 'bg-blue-600 text-white shadow-xs font-semibold'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200/60'
+                  }`}
               >
                 {cat}
               </button>
@@ -88,15 +106,24 @@ export const ChapterHighlights: React.FC = () => {
           </div>
 
           <div className="text-xs text-slate-500 font-medium">
-            {filteredPhotos.length === 0
-              ? 'No highlights published yet'
-              : <>Showing <strong className="text-slate-800">{filteredPhotos.length}</strong> {filteredPhotos.length === 1 ? 'highlight' : 'highlights'}</>
-            }
+            {isLoading ? (
+              'Loading archives...'
+            ) : filteredPhotos.length === 0 ? (
+              'No highlights published yet'
+            ) : (
+              <>Showing <strong className="text-slate-800">{filteredPhotos.length}</strong> {filteredPhotos.length === 1 ? 'highlight' : 'highlights'}</>
+            )}
           </div>
         </div>
 
-        {/* Highlights Grid or Empty State */}
-        {filteredPhotos.length > 0 ? (
+        {/* Loading Spinner */}
+        {isLoading ? (
+          <div className="py-20 text-center flex flex-col items-center justify-center">
+            <div className="w-10 h-10 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mb-3" />
+            <p className="text-xs font-mono text-slate-500">Retrieving official visual archives...</p>
+          </div>
+        ) : filteredPhotos.length > 0 ? (
+          /* Highlights Grid */
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredPhotos.map((item, index) => (
               <GalleryCard
@@ -107,6 +134,7 @@ export const ChapterHighlights: React.FC = () => {
             ))}
           </div>
         ) : (
+          /* Empty State */
           <div className="bg-white rounded-2xl border border-slate-200 p-16 text-center max-w-lg mx-auto shadow-subtle my-8">
             <div className="w-16 h-16 rounded-2xl bg-slate-100 text-slate-300 flex items-center justify-center mx-auto mb-5">
               <Camera className="w-8 h-8" />
@@ -127,6 +155,13 @@ export const ChapterHighlights: React.FC = () => {
             )}
           </div>
         )}
+
+        {/* Public Comments Section for Chapter Highlights */}
+        <CommentSection
+          targetType="highlight"
+          targetId="general-gallery"
+          targetTitle="Chapter Gallery & Archives"
+        />
       </section>
 
       {/* Fullscreen Lightbox Modal */}

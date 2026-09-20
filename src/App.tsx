@@ -3,6 +3,8 @@ import { BrowserRouter as Router, Routes, Route, useLocation, Outlet } from 'rea
 import { Navbar } from './components/common/Navbar';
 import { Footer } from './components/common/Footer';
 import { ToastProvider } from './components/common/Toast';
+import { AuthProvider } from './context/AuthContext';
+import { ProtectedRoute } from './components/common/ProtectedRoute';
 
 // Pages
 import { Home } from './pages/Home';
@@ -70,30 +72,39 @@ const NotFound: React.FC = () => {
 export const App: React.FC = () => {
   return (
     <ToastProvider>
-      <Router>
-        <ScrollToTop />
-        <Routes>
-          {/* Public Pages Layout */}
-          <Route element={<PublicLayout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/events" element={<Events />} />
-            <Route path="/events/:id" element={<EventDetails />} />
-            <Route path="/gallery" element={<ChapterHighlights />} />
-            <Route path="/highlights" element={<ChapterHighlights />} />
-            <Route path="/announcements" element={<Announcements />} />
-            <Route path="/announcements/:id" element={<AnnouncementDetails />} />
-            <Route path="/sih" element={<SIH />} />
-            <Route path="/join" element={<JoinUs />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="*" element={<NotFound />} />
-          </Route>
+      <AuthProvider>
+        <Router>
+          <ScrollToTop />
+          <Routes>
+            {/* Public Pages Layout */}
+            <Route element={<PublicLayout />}>
+              <Route path="/" element={<Home />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/events" element={<Events />} />
+              <Route path="/events/:id" element={<EventDetails />} />
+              <Route path="/gallery" element={<ChapterHighlights />} />
+              <Route path="/highlights" element={<ChapterHighlights />} />
+              <Route path="/announcements" element={<Announcements />} />
+              <Route path="/announcements/:id" element={<AnnouncementDetails />} />
+              <Route path="/sih" element={<SIH />} />
+              <Route path="/join" element={<JoinUs />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="*" element={<NotFound />} />
+            </Route>
 
-          {/* Admin Section (Standalone Layout — no public Navbar/Footer) */}
-          <Route path="/admin/login" element={<AdminLogin />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        </Routes>
-      </Router>
+            {/* Admin Section (Standalone Layout — no public Navbar/Footer) */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route
+              path="/admin/dashboard"
+              element={
+                <ProtectedRoute>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </Router>
+      </AuthProvider>
     </ToastProvider>
   );
 };
