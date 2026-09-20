@@ -7,7 +7,7 @@ export const mockEvents: EventItem[] = [
     slug: 'avishkaar-2026',
     category: 'Hackathons',
     date: '9 – 10 October 2026',
-    isoDate: '2026-10-09T09:00:00',
+    event_date: '2026-10-09',
     time: 'Preliminary: 26 Sept 2026 | Grand Finale: 9 – 10 Oct 2026',
     venue: 'CMR Institute of Technology (UGC Autonomous), Kandlakoya, Hyderabad',
     mode: 'In-person',
@@ -39,7 +39,7 @@ export const mockEvents: EventItem[] = [
     galleryImages: [
       '/images/avishkaar_poster.jpg'
     ],
-    status: 'upcoming',
+    status: 'published',
     registrationOpen: true
   }
 ];

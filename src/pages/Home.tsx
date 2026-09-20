@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { 
-  ArrowRight, 
-  Calendar, 
-  Megaphone, 
-  Camera, 
-  Lightbulb, 
-  ChevronRight, 
-  CalendarX2, 
+import {
+  ArrowRight,
+  Calendar,
+  Megaphone,
+  Camera,
+  Lightbulb,
+  ChevronRight,
+  CalendarX2,
   BellOff,
   MapPin,
   Clock,
@@ -58,12 +58,11 @@ export const Home: React.FC = () => {
       {/* 4. Upcoming Events */}
       <section className="py-20 lg:py-24 bg-slate-50/60 border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
+
           {/* Section Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
             <div className="space-y-3">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-xs font-semibold tracking-wider uppercase">
-                <Sparkles className="w-3.5 h-3.5 text-blue-600" />
                 <span>Chapter Calendar</span>
               </div>
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.15]">
@@ -87,7 +86,7 @@ export const Home: React.FC = () => {
             /* Single Featured Event Showcase (AVISHKAAR) */
             <div className="max-w-5xl mx-auto bg-white rounded-3xl border border-slate-200/90 shadow-xl overflow-hidden hover:border-blue-300 transition-all duration-300 group">
               <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch">
-                
+
                 {/* Poster Preview (5 cols) */}
                 <div className="lg:col-span-5 relative bg-slate-950 overflow-hidden flex items-center justify-center p-4 sm:p-6">
                   <div className="relative w-full aspect-[3/4] max-w-sm rounded-2xl overflow-hidden shadow-2xl border border-white/10 group-hover:scale-[1.02] transition-transform duration-500">

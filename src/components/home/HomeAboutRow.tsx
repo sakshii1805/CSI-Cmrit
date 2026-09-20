@@ -22,7 +22,7 @@ export const HomeAboutRow: React.FC = () => {
             {/* Headline */}
             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.15]">
               Where Passionate Students Turn Ideas into{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-600">
+              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
                 Real Impact
               </span>
             </h2>
@@ -36,10 +36,12 @@ export const HomeAboutRow: React.FC = () => {
             <div className="pt-2">
               <Link
                 to="/about"
-                className="inline-flex items-center gap-2 px-7 py-3 rounded-full text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 transition-all duration-200 shadow-md shadow-blue-500/20 hover:shadow-lg hover:scale-105 active:scale-95"
+                className="group inline-flex items-center gap-3.5 px-7 py-3.5 rounded-full text-sm font-semibold text-white bg-gradient-to-r from-blue-600 via-blue-600 to-indigo-600 hover:from-blue-700 hover:via-blue-600 hover:to-indigo-700 shadow-lg shadow-blue-600/25 hover:shadow-xl hover:shadow-blue-600/35 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
               >
-                <span>Discover Our Story</span>
-                <ArrowRight className="w-4 h-4" />
+                <span className="tracking-wide">Discover Our Story</span>
+                <span className="w-6 h-6 rounded-full bg-white/20 group-hover:bg-white flex items-center justify-center transition-all duration-300">
+                  <ArrowRight className="w-3.5 h-3.5 text-white group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all duration-300" />
+                </span>
               </Link>
             </div>
 

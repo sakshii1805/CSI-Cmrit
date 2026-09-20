@@ -59,6 +59,14 @@ export interface EventItem {
   registrationOpen?: boolean;
   is_featured?: boolean;
   is_published?: boolean;
+  expectations?: string[];
+  galleryImages?: string[];
+  speaker?: {
+    name: string;
+    role?: string;
+    organization?: string;
+    avatar?: string;
+  };
 }
 
 // --- Announcements ---
