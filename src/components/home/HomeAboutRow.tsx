@@ -1,77 +1,121 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Monitor, Trophy, Users, UserCheck, Lightbulb, Network } from 'lucide-react';
+import { ArrowRight, Terminal, Trophy, Users, UserCheck, Lightbulb, GitBranch } from 'lucide-react';
 
 export const HomeAboutRow: React.FC = () => {
-  const cards = [
-    { title: 'Technical Workshops', icon: <Monitor className="w-5 h-5 text-blue-600" /> },
-    { title: 'Coding & Competitions', icon: <Trophy className="w-5 h-5 text-blue-600" /> },
-    { title: 'Hackathons', icon: <Users className="w-5 h-5 text-blue-600" /> },
-    { title: 'Industry Sessions', icon: <UserCheck className="w-5 h-5 text-blue-600" /> },
-    { title: 'Innovation', icon: <Lightbulb className="w-5 h-5 text-blue-600" /> },
-    { title: 'Community & Networking', icon: <Network className="w-5 h-5 text-blue-600" /> },
+  const pillars = [
+    {
+      title: 'Technical Bootcamps',
+      desc: 'Hands-on labs on full-stack web, cloud infrastructure, and AI engineering.',
+      icon: <Terminal className="w-4 h-4 text-blue-600" />
+    },
+    {
+      title: 'Competitive Coding',
+      desc: 'Weekly algorithm circles and contest preparation for regional rounds.',
+      icon: <Trophy className="w-4 h-4 text-amber-600" />
+    },
+    {
+      title: 'Hackathon Incubation',
+      desc: 'Dedicated mentorship from ideation to prototype for Smart India Hackathon.',
+      icon: <Lightbulb className="w-4 h-4 text-emerald-600" />
+    },
+    {
+      title: 'Industry Tech Talks',
+      desc: 'Direct sessions with working software engineers and engineering leads.',
+      icon: <UserCheck className="w-4 h-4 text-indigo-600" />
+    },
+    {
+      title: 'Open Source Building',
+      desc: 'Student squads building collaborative software solutions and tooling.',
+      icon: <GitBranch className="w-4 h-4 text-cyan-600" />
+    },
+    {
+      title: 'Peer Mentorship Network',
+      desc: 'Seniors guiding juniors through coursework, projects, and placement prep.',
+      icon: <Users className="w-4 h-4 text-purple-600" />
+    },
   ];
 
   return (
-    <section className="py-12 bg-white border-b border-slate-200">
+    <section className="py-16 bg-white border-b border-slate-200/80">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-          {/* Col 1: About CSI CMRIT (~30%) */}
-          <div className="lg:col-span-3 flex flex-col justify-between space-y-4">
-            <div>
-              <h3 className="text-xl font-bold text-slate-900 tracking-tight mb-3">
-                About CSI CMRIT
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                CSI CMRIT is a student chapter of the Computer Society of India, bringing together technology enthusiasts, learners and innovators to build skills, solve real-world problems and create meaningful opportunities.
-              </p>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+          {/* Left: About CSI CMRIT narrative (~40%) */}
+          <div className="lg:col-span-4 space-y-5">
+            <div className="space-y-2">
+              <span className="font-mono text-xs text-blue-600 font-medium tracking-tight">
+                // ABOUT THE CHAPTER
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-display font-extrabold text-slate-900 tracking-tight leading-tight">
+                Bridging academic theory with real engineering.
+              </h2>
             </div>
 
-            <div>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              CSI CMRIT is the student chapter of the Computer Society of India at CMR Institute of Technology, Hyderabad. We run a peer-driven technical community where students build real projects, compete nationally, and prepare for modern software engineering careers.
+            </p>
+
+            <div className="pt-2">
               <Link
                 to="/about"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold text-blue-600 border border-blue-600 hover:bg-blue-50 transition-colors"
+                className="inline-flex items-center gap-2 text-xs sm:text-sm font-display font-semibold text-blue-600 hover:text-blue-700 transition-colors group"
               >
-                <span>Learn More</span>
-                <ArrowRight className="w-3.5 h-3.5" />
+                <span>Read our chapter charter</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </Link>
             </div>
           </div>
 
-          {/* Col 2: What We Do 6 cards (~55%) */}
-          <div className="lg:col-span-6 flex flex-col">
-            <h3 className="text-xl font-bold text-slate-900 tracking-tight mb-3">
-              What We Do
-            </h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 flex-1">
-              {cards.map((card, idx) => (
-                <div
-                  key={idx}
-                  className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 hover:border-blue-300 hover:bg-blue-50/40 transition-all flex flex-col items-center justify-center text-center group"
-                >
-                  <div className="mb-2 p-2 rounded-lg bg-white shadow-xs border border-slate-200 group-hover:scale-105 transition-transform">
-                    {card.icon}
-                  </div>
-                  <h4 className="text-xs font-bold text-slate-800 leading-snug">
-                    {card.title}
-                  </h4>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Col 3: Dark Laptop Code photo card (~25%) */}
-          <div className="lg:col-span-3 flex flex-col">
-            <div className="relative rounded-2xl overflow-hidden shadow-card border border-slate-200 flex-1 min-h-[200px] bg-slate-950 group">
-              <img
-                src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80"
-                alt="Code editor on laptop screen"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-85"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-4">
-                <span className="text-xs font-semibold text-white tracking-wide">
-                  Learn • Collaborate • Grow
+          {/* Right: Editorial Discipline Matrix (~60%) */}
+          <div className="lg:col-span-8">
+            <div className="border border-slate-200 rounded-xl overflow-hidden bg-slate-50/50">
+              <div className="px-5 py-3.5 bg-slate-100/70 border-b border-slate-200 flex items-center justify-between">
+                <span className="font-display text-xs font-bold text-slate-800 uppercase tracking-wider">
+                  Chapter Programs &amp; Focus Areas
                 </span>
+                <span className="font-mono text-[11px] text-slate-500">
+                  06 ACTIVE TRACKS
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 bg-white">
+                {/* Column 1: Items 0, 1, 2 */}
+                <div className="divide-y divide-slate-200">
+                  {pillars.slice(0, 3).map((item, idx) => (
+                    <div key={idx} className="p-5 hover:bg-slate-50/80 transition-colors">
+                      <div className="flex items-center gap-2.5 mb-1.5">
+                        <div className="p-1.5 rounded-md bg-slate-100 text-slate-700">
+                          {item.icon}
+                        </div>
+                        <h3 className="font-display text-sm font-bold text-slate-900">
+                          {item.title}
+                        </h3>
+                      </div>
+                      <p className="text-xs text-slate-600 leading-relaxed pl-8">
+                        {item.desc}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Column 2: Items 3, 4, 5 */}
+                <div className="divide-y divide-slate-200">
+                  {pillars.slice(3, 6).map((item, idx) => (
+                    <div key={idx} className="p-5 hover:bg-slate-50/80 transition-colors">
+                      <div className="flex items-center gap-2.5 mb-1.5">
+                        <div className="p-1.5 rounded-md bg-slate-100 text-slate-700">
+                          {item.icon}
+                        </div>
+                        <h3 className="font-display text-sm font-bold text-slate-900">
+                          {item.title}
+                        </h3>
+                      </div>
+                      <p className="text-xs text-slate-600 leading-relaxed pl-8">
+                        {item.desc}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

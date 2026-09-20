@@ -84,16 +84,16 @@ export const Navbar: React.FC = () => {
           </Link>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden xl:flex items-center gap-1 sm:gap-2" aria-label="Main Navigation">
+          <nav className="hidden xl:flex items-center gap-1" aria-label="Main Navigation">
             {navLinks.map((link) => (
               <NavLink
                 key={link.path}
                 to={link.path}
                 className={({ isActive }) =>
-                  `px-3 py-1.5 text-xs font-medium transition-all relative ${
+                  `px-3 py-1.5 text-xs font-display font-medium rounded-md transition-all ${
                     isActive
-                      ? 'text-white font-semibold after:content-[""] after:absolute after:bottom-0 after:left-3 after:right-3 after:h-[2px] after:bg-blue-500'
-                      : 'text-slate-300 hover:text-white'
+                      ? 'text-white font-semibold bg-blue-600/20 text-blue-300 border border-blue-500/30'
+                      : 'text-slate-300 hover:text-white hover:bg-slate-900/60'
                   }`
                 }
               >
@@ -103,10 +103,10 @@ export const Navbar: React.FC = () => {
           </nav>
 
           {/* Search + Admin button */}
-          <div className="hidden sm:flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-2.5">
             <Link
               to="/events"
-              className="p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors"
+              className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-900/80 transition-colors"
               title="Search events and announcements"
             >
               <Search className="w-4 h-4" />
@@ -114,10 +114,10 @@ export const Navbar: React.FC = () => {
 
             <Link
               to="/admin/login"
-              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 border border-slate-700 shadow-sm transition-all hover:border-slate-600"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-display font-semibold text-slate-200 bg-slate-900 hover:bg-slate-800 hover:text-white border border-slate-750 shadow-subtle transition-all active:scale-[0.98]"
             >
               <Shield className="w-3.5 h-3.5 text-blue-400" />
-              <span>Admin Login</span>
+              <span>Admin</span>
             </Link>
           </div>
 

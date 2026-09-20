@@ -78,24 +78,17 @@ export const Events: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen bg-slate-50">
       {/* Top Header Banner */}
-      <section className="bg-slate-950 text-white py-14 sm:py-18 border-b border-slate-800 relative overflow-hidden">
-        <div 
-          className="absolute inset-0 opacity-5 pointer-events-none"
-          style={{
-            backgroundImage: `radial-gradient(#38bdf8 1px, transparent 1px)`,
-            backgroundSize: '28px 28px'
-          }}
-        />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="max-w-3xl">
-            <span className="text-xs font-bold text-blue-400 uppercase tracking-widest bg-slate-900 border border-slate-800 px-3 py-1 rounded-md">
-              Events Directory
-            </span>
-            <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white mt-3 mb-3">
-              Events
+      <section className="bg-[#081325] text-white py-14 sm:py-20 border-b border-slate-800 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl space-y-3">
+            <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-md bg-blue-950 border border-blue-800 text-blue-300 font-mono text-[11px] font-medium tracking-wide">
+              <span>EVENTS DIRECTORY</span>
+            </div>
+            <h1 className="text-3xl sm:text-5xl font-display font-extrabold tracking-tight text-white leading-tight">
+              Chapter Events &amp; Workshops
             </h1>
             <p className="text-base sm:text-lg text-slate-300 leading-relaxed font-normal">
-              Discover workshops, competitions, hackathons, technical sessions and more organized by CSI CMRIT.
+              Technical workshops, hackathons, and guest engineering sessions organized by CSI CMRIT.
             </p>
           </div>
         </div>

@@ -51,7 +51,7 @@ export const LightboxModal: React.FC<LightboxModalProps> = ({
     >
       {/* Dark backdrop */}
       <div
-        className="fixed inset-0 bg-slate-950/90 backdrop-blur-md transition-opacity"
+        className="fixed inset-0 bg-slate-950/95 backdrop-blur-md transition-opacity"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -59,10 +59,10 @@ export const LightboxModal: React.FC<LightboxModalProps> = ({
       {/* Close button */}
       <button
         onClick={onClose}
-        className="absolute top-5 right-5 z-20 p-2.5 rounded-full bg-slate-900/80 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="absolute top-5 right-5 z-20 p-2.5 rounded-lg bg-slate-900 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-700 transition-all active:scale-[0.96] focus:outline-none focus:ring-2 focus:ring-blue-500"
         aria-label="Close photo preview"
       >
-        <X className="w-6 h-6" />
+        <X className="w-5 h-5" />
       </button>
 
       {/* Navigation: Previous */}
@@ -72,10 +72,10 @@ export const LightboxModal: React.FC<LightboxModalProps> = ({
             e.stopPropagation();
             onPrev();
           }}
-          className="absolute left-4 sm:left-6 z-20 p-3 rounded-full bg-slate-900/80 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="absolute left-4 sm:left-6 z-20 p-3 rounded-lg bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-700 transition-all active:scale-[0.96] focus:outline-none focus:ring-2 focus:ring-blue-500"
           aria-label="Previous photo"
         >
-          <ChevronLeft className="w-6 h-6" />
+          <ChevronLeft className="w-5 h-5" />
         </button>
       )}
 
@@ -86,15 +86,15 @@ export const LightboxModal: React.FC<LightboxModalProps> = ({
             e.stopPropagation();
             onNext();
           }}
-          className="absolute right-4 sm:right-6 z-20 p-3 rounded-full bg-slate-900/80 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="absolute right-4 sm:right-6 z-20 p-3 rounded-lg bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-700 transition-all active:scale-[0.96] focus:outline-none focus:ring-2 focus:ring-blue-500"
           aria-label="Next photo"
         >
-          <ChevronRight className="w-6 h-6" />
+          <ChevronRight className="w-5 h-5" />
         </button>
       )}
 
       {/* Container */}
-      <div className="relative z-10 max-w-5xl w-full max-h-[90vh] flex flex-col bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 shadow-elevated">
+      <div className="relative z-10 max-w-5xl w-full max-h-[90vh] flex flex-col bg-[#081325] rounded-xl overflow-hidden border border-slate-800 shadow-elevated">
         {/* Main Image */}
         <div className="flex-1 bg-black flex items-center justify-center overflow-hidden max-h-[70vh]">
           <img
@@ -105,20 +105,20 @@ export const LightboxModal: React.FC<LightboxModalProps> = ({
         </div>
 
         {/* Footer Details */}
-        <div className="p-4 sm:p-6 bg-slate-900 border-t border-slate-800 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="space-y-1">
+        <div className="p-5 sm:p-6 bg-[#081325] border-t border-slate-800 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1.5">
             <div className="flex items-center gap-2">
-              <Badge variant="blue" className="bg-blue-950/80 text-blue-300 border-blue-800">
+              <Badge variant="blue" className="bg-blue-950/80 text-blue-300 border-blue-800 font-mono text-[10px]">
                 {item.category}
               </Badge>
-              <h3 className="text-base font-bold text-white">{item.title}</h3>
+              <h3 className="font-display text-base font-bold text-white">{item.title}</h3>
             </div>
-            <p className="text-xs sm:text-sm text-slate-400 max-w-2xl">
+            <p className="text-xs sm:text-sm text-slate-300 max-w-2xl font-normal leading-relaxed">
               {item.description}
             </p>
           </div>
 
-          <div className="flex items-center gap-4 text-xs text-slate-400 shrink-0">
+          <div className="flex items-center gap-4 font-mono text-xs text-slate-400 shrink-0">
             <div className="flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5 text-blue-400" />
               <span>{item.date}</span>
@@ -135,3 +135,4 @@ export const LightboxModal: React.FC<LightboxModalProps> = ({
     </div>
   );
 };
+

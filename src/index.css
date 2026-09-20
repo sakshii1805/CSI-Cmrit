@@ -17,6 +17,14 @@
   .text-balance {
     text-wrap: balance;
   }
+
+  .focus-ring {
+    @apply focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2;
+  }
+
+  .tap-target {
+    @apply min-h-[44px] min-w-[44px] inline-flex items-center justify-center;
+  }
 }
 
 /* Custom scrollbar */
