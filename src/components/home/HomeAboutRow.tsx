@@ -79,7 +79,7 @@ export const HomeAboutRow: React.FC = () => {
                     Innovation & Labs Wing
                   </span>
                   <p className="text-[10px] text-slate-300 font-normal mt-0.5">
-                    Bengaluru, Karnataka • NAAC A++ Hub
+                    Hyderabad, Telangana • NAAC A++ Hub
                   </p>
                 </div>
               </div>

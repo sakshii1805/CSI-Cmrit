@@ -8,7 +8,7 @@ export const mockGallery: GalleryItem[] = [
     imageUrl: '/images/cmrit_campus_front.png',
     date: '2026 Academic Year',
     description: 'The iconic central building and manicured grounds of CMR Institute of Technology, home to the CSI CMRIT Student Chapter.',
-    location: 'CMRIT Main Campus, Bengaluru'
+    location: 'CMRIT Main Campus, Hyderabad'
   },
   {
     id: 'gal-campus-02',
