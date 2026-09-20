@@ -95,7 +95,7 @@ export const HeroSection: React.FC = () => {
               to="/join"
               className="inline-flex items-center px-7 py-3 font-sans text-sm sm:text-base font-semibold rounded-full border border-white/35 text-white hover:bg-white hover:text-slate-950 transition-all duration-300 hover:scale-105 active:scale-95 backdrop-blur-md bg-white/5"
             >
-              Join CSI
+              Join Us
             </Link>
           </div>
 
