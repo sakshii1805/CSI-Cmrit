@@ -27,6 +27,32 @@ export default {
         'card': '0 4px 6px -1px rgba(15, 23, 42, 0.05), 0 2px 4px -1px rgba(15, 23, 42, 0.03)',
         'card-hover': '0 12px 24px -4px rgba(15, 23, 42, 0.08), 0 4px 8px -2px rgba(15, 23, 42, 0.04)',
         'elevated': '0 20px 30px -8px rgba(15, 23, 42, 0.12)',
+        'glow-blue': '0 0 25px -5px rgba(59, 130, 246, 0.4)',
+        'glow-cyan': '0 0 25px -5px rgba(6, 182, 212, 0.4)'
+      },
+      keyframes: {
+        float: {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-10px)' },
+        },
+        floatDelayed: {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-8px)' },
+        },
+        pulseGlow: {
+          '0%, 100%': { opacity: '0.35', transform: 'scale(1)' },
+          '50%': { opacity: '0.7', transform: 'scale(1.04)' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        }
+      },
+      animation: {
+        'float-slow': 'float 6s ease-in-out infinite',
+        'float-delayed': 'floatDelayed 7s ease-in-out 2s infinite',
+        'pulse-glow': 'pulseGlow 5s ease-in-out infinite',
+        'shimmer': 'shimmer 3s linear infinite',
       }
     },
   },

@@ -2,6 +2,24 @@ import { GalleryItem } from '../types';
 
 export const mockGallery: GalleryItem[] = [
   {
+    id: 'gal-campus-01',
+    title: 'C.M.R. Institute of Technology Main Campus Façade',
+    category: 'Community',
+    imageUrl: '/images/cmrit_campus_front.png',
+    date: '2026 Academic Year',
+    description: 'The iconic central building and manicured grounds of CMR Institute of Technology, home to the CSI CMRIT Student Chapter.',
+    location: 'CMRIT Main Campus, Bengaluru'
+  },
+  {
+    id: 'gal-campus-02',
+    title: 'CMRIT Innovation & Academic Wing',
+    category: 'Community',
+    imageUrl: '/images/cmrit_campus_wing.png',
+    date: '2026 Academic Year',
+    description: 'Perspective view of the state-of-the-art campus labs and student hub where CSI workshops and hackathons take place.',
+    location: 'Computing & Innovation Blocks'
+  },
+  {
     id: 'gal-01',
     title: 'CodeSprint 24-Hour Hackathon Collaboration Hub',
     category: 'Hackathons',

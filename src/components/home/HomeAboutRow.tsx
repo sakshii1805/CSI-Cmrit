@@ -60,18 +60,28 @@ export const HomeAboutRow: React.FC = () => {
             </div>
           </div>
 
-          {/* Col 3: Dark Laptop Code photo card (~25%) */}
+          {/* Col 3: CMRIT Campus Architecture & Community (~25%) */}
           <div className="lg:col-span-3 flex flex-col">
-            <div className="relative rounded-2xl overflow-hidden shadow-card border border-slate-200 flex-1 min-h-[200px] bg-slate-950 group">
+            <div className="relative rounded-2xl overflow-hidden shadow-card border border-slate-200 flex-1 min-h-[240px] bg-slate-950 group">
               <img
-                src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80"
-                alt="Code editor on laptop screen"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-85"
+                src="/images/cmrit_campus_wing.png"
+                alt="CMR Institute of Technology Innovation Campus Wing"
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-4">
-                <span className="text-xs font-semibold text-white tracking-wide">
-                  Learn • Collaborate • Grow
-                </span>
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent flex flex-col justify-between p-4">
+                <div className="flex justify-end">
+                  <span className="text-[10px] font-bold text-white bg-blue-600/90 backdrop-blur-md px-2.5 py-1 rounded-full shadow-xs">
+                    CMRIT Campus
+                  </span>
+                </div>
+                <div>
+                  <span className="text-xs font-bold text-white tracking-wide block">
+                    Innovation & Labs Wing
+                  </span>
+                  <p className="text-[10px] text-slate-300 font-normal mt-0.5">
+                    Bengaluru, Karnataka • NAAC A++ Hub
+                  </p>
+                </div>
               </div>
             </div>
           </div>
