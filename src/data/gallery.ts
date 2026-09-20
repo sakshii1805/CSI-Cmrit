@@ -83,3 +83,5 @@ export const mockGallery: GalleryItem[] = [
     location: 'Conference Hall 1'
   }
 ];
+
+export default mockGallery;
