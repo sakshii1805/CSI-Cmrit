@@ -4,13 +4,14 @@ import { Search, Filter, Calendar, X, AlertCircle, CalendarX2 } from 'lucide-rea
 import { eventsService } from '../services/eventsService';
 import { EventCard } from '../components/events/EventCard';
 import { EventCategory, EventItem } from '../types';
+import { mockEvents } from '../data/events';
 
 export const Events: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const initialCategory = (searchParams.get('category') as EventCategory) || 'All';
 
-  const [events, setEvents] = useState<EventItem[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [events, setEvents] = useState<EventItem[]>(mockEvents);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<EventCategory>(initialCategory);
   const [timeFilter, setTimeFilter] = useState<'all' | 'upcoming' | 'past'>('all');

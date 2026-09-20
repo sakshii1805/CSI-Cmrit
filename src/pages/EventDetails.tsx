@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { eventsService } from '../services/eventsService';
 import { EventItem } from '../types';
+import { mockEvents } from '../data/events';
 import { Badge } from '../components/common/Badge';
 import { Button } from '../components/common/Button';
 import { RegisterModal } from '../components/events/RegisterModal';
@@ -22,8 +23,8 @@ import { useToast } from '../components/common/Toast';
 export const EventDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { showToast } = useToast();
-  const [event, setEvent] = useState<EventItem | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [event, setEvent] = useState<EventItem | null>(() => mockEvents.find((e) => e.slug === id || e.id === id) || null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
 
   useEffect(() => {

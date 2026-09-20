@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
 
 export const HomeAboutRow: React.FC = () => {
   return (
@@ -10,10 +9,10 @@ export const HomeAboutRow: React.FC = () => {
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-          
+
           {/* Left Column: Narrative Story (~65%) */}
           <div className="lg:col-span-8 space-y-6 text-left">
-            
+
             {/* Section Tag */}
             <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-xs font-semibold tracking-wider uppercase">
               About CSI CMRIT
@@ -39,9 +38,6 @@ export const HomeAboutRow: React.FC = () => {
                 className="group inline-flex items-center gap-3.5 px-7 py-3.5 rounded-full text-sm font-semibold text-white bg-gradient-to-r from-blue-600 via-blue-600 to-indigo-600 hover:from-blue-700 hover:via-blue-600 hover:to-indigo-700 shadow-lg shadow-blue-600/25 hover:shadow-xl hover:shadow-blue-600/35 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0"
               >
                 <span className="tracking-wide">Discover Our Story</span>
-                <span className="w-6 h-6 rounded-full bg-white/20 group-hover:bg-white flex items-center justify-center transition-all duration-300">
-                  <ArrowRight className="w-3.5 h-3.5 text-white group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all duration-300" />
-                </span>
               </Link>
             </div>
 

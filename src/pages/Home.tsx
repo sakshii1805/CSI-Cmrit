@@ -3,39 +3,26 @@ import { Link } from 'react-router-dom';
 import {
   ArrowRight,
   Calendar,
-  Megaphone,
-  Camera,
-  Lightbulb,
-  ChevronRight,
   CalendarX2,
-  BellOff,
-  MapPin,
-  Clock,
-  Sparkles
+  MapPin
 } from 'lucide-react';
 import { HeroSection } from '../components/home/HeroSection';
 import { HomeAboutRow } from '../components/home/HomeAboutRow';
+import { WhyJoinCsi } from '../components/home/WhyJoinCsi';
 import { eventsService } from '../services/eventsService';
-import { announcementsService } from '../services/announcementsService';
-import { highlightsService } from '../services/highlightsService';
-import { EventItem, AnnouncementItem, ChapterHighlightItem } from '../types';
+import { EventItem } from '../types';
+import { mockEvents } from '../data/events';
 
 export const Home: React.FC = () => {
-  const [events, setEvents] = useState<EventItem[]>([]);
-  const [announcements, setAnnouncements] = useState<AnnouncementItem[]>([]);
-  const [highlights, setHighlights] = useState<ChapterHighlightItem[]>([]);
+  const [events, setEvents] = useState<EventItem[]>(mockEvents);
 
   useEffect(() => {
     async function loadHomeContent() {
       try {
-        const [evts, anns, hls] = await Promise.all([
-          eventsService.getPublishedEvents(),
-          announcementsService.getPublishedAnnouncements(),
-          highlightsService.getPublishedHighlights()
-        ]);
-        setEvents(evts.data || []);
-        setAnnouncements(anns.data || []);
-        setHighlights(hls.data || []);
+        const evts = await eventsService.getPublishedEvents();
+        if (evts.data && evts.data.length > 0) {
+          setEvents(evts.data);
+        }
       } catch (err) {
         console.error('Failed to load home page content:', err);
       }
@@ -44,8 +31,6 @@ export const Home: React.FC = () => {
   }, []);
 
   const upcomingEvents = events.slice(0, 4);
-  const latestAnnouncements = announcements.slice(0, 4);
-  const highlightThumbnails = highlights.slice(0, 9);
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50">
@@ -75,10 +60,10 @@ export const Home: React.FC = () => {
 
             <Link
               to="/events"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold text-slate-700 bg-white border border-slate-200 hover:border-blue-500 hover:text-blue-600 hover:shadow-sm transition-all shrink-0 active:scale-95"
+              className="group inline-flex items-center gap-2.5 px-6 py-2.5 rounded-full text-xs sm:text-sm font-semibold text-white bg-slate-900 hover:bg-blue-600 shadow-md shadow-slate-900/10 hover:shadow-blue-600/25 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 shrink-0"
             >
               <span>Explore All Events</span>
-              <ArrowRight className="w-4 h-4" />
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform duration-300" />
             </Link>
           </div>
 
@@ -109,14 +94,7 @@ export const Home: React.FC = () => {
                   <div className="space-y-4">
                     {/* Badges */}
                     <div className="flex items-center gap-2.5 flex-wrap">
-                      <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-blue-600 text-white shadow-xs">
-                        {upcomingEvents[0].category}
-                      </span>
-                      <span className="text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/30">
-                        SIH-Pattern Hackathon
-                      </span>
                       <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                         Registration Open
                       </span>
                     </div>
@@ -129,7 +107,7 @@ export const Home: React.FC = () => {
                         </Link>
                       </h3>
                       <p className="text-xs sm:text-sm font-semibold text-blue-600 tracking-wide mt-1">
-                        Innovate • Build • Make An Impact · Think Build Solve
+                        Innovate • Build • Make An Impact
                       </p>
                     </div>
 
@@ -173,7 +151,7 @@ export const Home: React.FC = () => {
                   <div className="pt-4 border-t border-slate-100 flex items-center justify-between flex-wrap gap-3">
                     <div className="flex items-center gap-1.5 text-xs text-slate-500">
                       <MapPin className="w-4 h-4 text-slate-400 shrink-0" />
-                      <span className="font-medium">CMRIT Campus, Kandlakoya</span>
+                      <span className="font-medium">CMRGI, Kandlakoya</span>
                     </div>
 
                     <Link
@@ -181,7 +159,7 @@ export const Home: React.FC = () => {
                       className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-md shadow-blue-500/20 hover:shadow-lg hover:scale-105 active:scale-95"
                     >
                       <span>View Full Event Details</span>
-                      <ArrowRight className="w-4 h-4" />
+
                     </Link>
                   </div>
                 </div>
@@ -282,158 +260,8 @@ export const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* 5. "Be a part of something bigger" Banner */}
-      <section className="py-6 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="rounded-2xl bg-gradient-to-r from-[#071d3a] via-[#0b284e] to-[#071d3a] p-6 sm:p-8 text-white flex flex-col sm:flex-row items-center justify-between gap-6 shadow-md border border-slate-800">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-blue-500/20 border border-blue-400/30 flex items-center justify-center shrink-0">
-                <Lightbulb className="w-6 h-6 text-amber-400" />
-              </div>
-              <div>
-                <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
-                  Be a part of something bigger.
-                </h3>
-                <p className="text-xs sm:text-sm text-slate-300 mt-0.5">
-                  Join CSI CMRIT and be a part of an amazing community of tech enthusiasts!
-                </p>
-              </div>
-            </div>
-
-            <Link
-              to="/join"
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg text-xs sm:text-sm font-semibold text-white bg-blue-600 hover:bg-blue-500 border border-blue-400/40 transition-colors shrink-0 shadow-sm"
-            >
-              <span>Join Us</span>
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* 6. Two-Column: Latest Announcements (Left) + Chapter Highlights (Right) */}
-      <section className="py-12 bg-white border-b border-slate-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-
-            {/* Left: Latest Announcements */}
-            <div className="lg:col-span-6 space-y-4">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                <div className="flex items-center gap-2">
-                  <Megaphone className="w-5 h-5 text-blue-600" />
-                  <h2 className="text-xl font-bold text-slate-900 tracking-tight">
-                    Latest Announcements
-                  </h2>
-                </div>
-                <Link
-                  to="/announcements"
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700"
-                >
-                  <span>View All</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              </div>
-
-              {latestAnnouncements.length > 0 ? (
-                <div className="space-y-3">
-                  {latestAnnouncements.map((ann, idx) => (
-                    <Link
-                      key={idx}
-                      to={`/announcements/${ann.slug || ann.id}`}
-                      className="p-4 rounded-xl border border-slate-200/90 hover:border-blue-300 hover:bg-blue-50/20 bg-white transition-all flex items-center justify-between gap-4 group"
-                    >
-                      <div className="flex items-center gap-3.5 flex-1 min-w-0">
-                        <div className="w-12 h-12 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center shrink-0">
-                          <Megaphone className="w-4 h-4 text-blue-500" />
-                        </div>
-                        <div className="min-w-0">
-                          <h4 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors truncate">
-                            {ann.title}
-                          </h4>
-                          <p className="text-[11px] text-slate-500 truncate mt-0.5">
-                            {ann.summary}
-                          </p>
-                          <div className="mt-1">
-                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded border bg-blue-50 text-blue-700 border-blue-200">
-                              {ann.category}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <ChevronRight className="w-4 h-4 text-slate-400 group-hover:text-blue-600 group-hover:translate-x-0.5 transition-all shrink-0" />
-                    </Link>
-                  ))}
-                </div>
-              ) : (
-                /* Empty State — No Announcements */
-                <div className="bg-slate-50 rounded-xl border border-slate-200 border-dashed p-8 text-center">
-                  <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center mx-auto mb-3 shadow-subtle">
-                    <BellOff className="w-4 h-4 text-slate-400" />
-                  </div>
-                  <p className="text-xs font-semibold text-slate-700 mb-0.5">No announcements yet</p>
-                  <p className="text-[11px] text-slate-500">
-                    Important updates from CSI CMRIT will appear here.
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Right: Gallery */}
-            <div className="lg:col-span-6 space-y-4">
-              <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                <div className="flex items-center gap-2">
-                  <Camera className="w-5 h-5 text-blue-600" />
-                  <h2 className="text-xl font-bold text-slate-900 tracking-tight">
-                    Gallery
-                  </h2>
-                </div>
-                <Link
-                  to="/gallery"
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700"
-                >
-                  <span>View All</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              </div>
-
-              {highlightThumbnails.length > 0 ? (
-                <div className="grid grid-cols-3 gap-2.5">
-                  {highlightThumbnails.map((item) => (
-                    <Link
-                      key={item.id}
-                      to="/gallery"
-                      className="relative aspect-video rounded-xl overflow-hidden group bg-slate-900 border border-slate-200"
-                    >
-                      <img
-                        src={item.imageUrl}
-                        alt={item.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                        loading="lazy"
-                      />
-                      <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <span className="text-[10px] text-white font-medium bg-black/60 px-2 py-1 rounded">
-                          View
-                        </span>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              ) : (
-                /* Empty State — No Chapter Highlights */
-                <div className="bg-slate-50 rounded-xl border border-slate-200 border-dashed p-8 text-center">
-                  <div className="w-10 h-10 rounded-full bg-white border border-slate-200 flex items-center justify-center mx-auto mb-3 shadow-subtle">
-                    <Camera className="w-4 h-4 text-slate-400" />
-                  </div>
-                  <p className="text-xs font-semibold text-slate-700 mb-0.5">No highlights yet</p>
-                  <p className="text-[11px] text-slate-500">
-                    Photos and moments from CSI CMRIT activities will appear here.
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* 5. Why Join CSI CMRIT Section */}
+      <WhyJoinCsi />
     </div>
   );
 };
