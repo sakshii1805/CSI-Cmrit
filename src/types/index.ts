@@ -107,3 +107,29 @@ export interface AdminComment {
   date: string;
   status: 'Pending' | 'Approved' | 'Rejected';
 }
+
+export type SIHCategory = 'Software' | 'Hardware';
+export type SIHComplexity = 'Breakthrough' | 'Moderate' | 'Foundational';
+export type SIHEffort = 'High Effort' | 'Medium Effort' | 'Low Effort';
+
+export interface SIHProblemStatement {
+  id: string;
+  code: string;
+  title: string;
+  organization: string;
+  category: SIHCategory;
+  theme: string;
+  complexity: SIHComplexity;
+  effort: SIHEffort;
+  statusDot: 'green' | 'yellow' | 'blue';
+  deadline: string;
+  daysLeft: number;
+  ideasCount: number;
+  maxIdeas: number;
+  description: string;
+  expectedSolution: string;
+  suggestedStack: string[];
+  teamCompositionGuide: string;
+  evaluatorFocus: string[];
+}
+

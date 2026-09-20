@@ -43,7 +43,7 @@ export const Navbar: React.FC = () => {
           {/* Brand Logo (College Logo) */}
           <Link
             to="/"
-            className="flex items-center gap-3 group focus:outline-none"
+            className="flex items-center gap-3 group focus:outline-none relative py-1"
             aria-label="CSI CMRIT Chapter"
           >
             <div className="w-11 h-11 rounded-full bg-white flex items-center justify-center p-0.5 shadow-sm border border-slate-700/60 shrink-0 overflow-hidden group-hover:scale-105 transition-transform">
@@ -55,13 +55,13 @@ export const Navbar: React.FC = () => {
             </div>
 
             {/* CSI CMRIT text block */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 relative">
               <div className="flex flex-col">
                 <div className="flex items-baseline gap-1.5">
-                  <span className="text-base sm:text-lg font-black text-white tracking-tight leading-none">
+                  <span className="text-base sm:text-lg font-black text-white tracking-tight leading-none group-hover:text-blue-400 transition-colors">
                     CSI
                   </span>
-                  <span className="text-base sm:text-lg font-black text-white tracking-tight leading-none">
+                  <span className="text-base sm:text-lg font-black text-white tracking-tight leading-none group-hover:text-blue-400 transition-colors">
                     CMRIT
                   </span>
                 </div>
@@ -75,26 +75,42 @@ export const Navbar: React.FC = () => {
 
               {/* Subtitles */}
               <div className="hidden sm:flex flex-col text-[11px] text-slate-400 leading-tight">
-                <span>Computer Society of India</span>
-                <span className="text-slate-300 font-medium">CMRIT Chapter</span>
+                <span className="group-hover:text-slate-300 transition-colors">Computer Society of India</span>
+                <span className="text-slate-300 font-medium group-hover:text-blue-300 transition-colors">CMRIT Chapter</span>
               </div>
             </div>
           </Link>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden xl:flex items-center gap-1 sm:gap-2" aria-label="Main Navigation">
+          <nav className="hidden xl:flex items-center gap-1 sm:gap-1.5" aria-label="Main Navigation">
             {navLinks.map((link) => (
               <NavLink
                 key={link.path}
                 to={link.path}
                 className={({ isActive }) =>
-                  `px-3 py-1.5 text-xs font-medium transition-all relative ${isActive
-                    ? 'text-white font-semibold after:content-[""] after:absolute after:bottom-0 after:left-3 after:right-3 after:h-[2px] after:bg-blue-500'
-                    : 'text-slate-300 hover:text-white'
+                  `group relative px-3 py-2 text-xs font-medium transition-all duration-200 flex items-center justify-center ${
+                    isActive
+                      ? 'text-white font-semibold'
+                      : 'text-slate-300 hover:text-white'
                   }`
                 }
               >
-                {link.name}
+                {({ isActive }) => (
+                  <>
+                    <span className="relative z-10 transition-transform duration-200 group-hover:-translate-y-0.5">
+                      {link.name}
+                    </span>
+
+                    {/* Dynamic hover and active line */}
+                    <span
+                      className={`absolute bottom-0 left-2.5 right-2.5 h-[2.5px] rounded-full transition-all duration-300 ease-out transform ${
+                        isActive
+                          ? 'bg-blue-500 scale-x-100 shadow-[0_0_8px_rgba(59,130,246,0.8)] opacity-100'
+                          : 'bg-gradient-to-r from-blue-500 via-sky-400 to-indigo-500 scale-x-0 group-hover:scale-x-100 opacity-0 group-hover:opacity-100 shadow-[0_0_8px_rgba(56,189,248,0.7)] origin-center'
+                      }`}
+                    />
+                  </>
+                )}
               </NavLink>
             ))}
           </nav>
@@ -104,19 +120,21 @@ export const Navbar: React.FC = () => {
             {/* Search (Desktop) */}
             <Link
               to="/events"
-              className="hidden sm:inline-flex p-2 rounded-full text-slate-400 hover:text-white hover:bg-slate-800/80 transition-colors"
+              className="group relative hidden sm:inline-flex p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-900 transition-all overflow-hidden"
               title="Search events and announcements"
             >
-              <Search className="w-4 h-4" />
+              <Search className="w-4 h-4 group-hover:scale-110 transition-transform" />
+              <span className="absolute bottom-0 left-1 right-1 h-[2px] bg-gradient-to-r from-blue-500 to-sky-400 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center rounded-full" />
             </Link>
 
             {/* Admin Login (Desktop) */}
             <Link
               to="/admin/login"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 border border-slate-700 shadow-sm transition-all hover:border-slate-600"
+              className="group relative hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 border border-slate-700 shadow-sm transition-all hover:border-blue-500 overflow-hidden"
             >
-              <Shield className="w-3.5 h-3.5 text-blue-400" />
+              <Shield className="w-3.5 h-3.5 text-blue-400 group-hover:scale-110 transition-transform" />
               <span>Admin</span>
+              <span className="absolute bottom-0 left-2 right-2 h-[2px] bg-gradient-to-r from-blue-500 to-sky-400 scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-center rounded-full" />
             </Link>
 
             {/* CSI Chapter Logo */}
@@ -165,13 +183,15 @@ export const Navbar: React.FC = () => {
               key={link.path}
               to={link.path}
               className={({ isActive }) =>
-                `flex items-center justify-between px-4 py-2.5 rounded-lg text-xs font-semibold transition-colors ${isActive
-                  ? 'text-white bg-blue-600/30 border border-blue-500/40'
-                  : 'text-slate-300 hover:bg-slate-900'
+                `group relative flex items-center justify-between px-4 py-2.5 rounded-lg text-xs font-semibold transition-colors ${
+                  isActive
+                    ? 'text-white bg-blue-600/30 border border-blue-500/40'
+                    : 'text-slate-300 hover:bg-slate-900 hover:text-white'
                 }`
               }
             >
               <span>{link.name}</span>
+              <span className="absolute left-0 top-1.5 bottom-1.5 w-[3px] bg-blue-500 rounded-r-full scale-y-0 group-hover:scale-y-100 transition-transform duration-200" />
             </NavLink>
           ))}
 
