@@ -78,17 +78,31 @@ export const Navbar: React.FC = () => {
               </div>
             </div>
 
-            {/* CMR College Logo — fades out on scroll */}
+            {/* CMR College Logo + label — fades out on scroll */}
             <div
-              className={`transition-all duration-500 overflow-hidden shrink-0 ${isScrolled ? 'max-w-0 opacity-0' : 'max-w-[44px] opacity-100'
+              className={`flex items-center gap-2 transition-all duration-500 overflow-hidden ${isScrolled ? 'max-w-0 opacity-0' : 'max-w-xs opacity-100'
                 }`}
             >
-              <div className="w-8 h-8 rounded-full bg-white/10 border border-white/20 flex items-center justify-center p-1 backdrop-blur-sm">
+              {/* Second vertical divider */}
+              <div className="h-8 w-px bg-slate-600/70 shrink-0" />
+
+              {/* Logo square */}
+              <div className="w-7 h-7 rounded-sm flex items-center justify-center shrink-0">
                 <img
-                  src="/images/college-logo.png"
+                  src="/images/logos/cmr_new_logo.png"
                   alt="CMRIT College Logo"
                   className="w-full h-full object-contain"
                 />
+              </div>
+
+              {/* College name + tagline */}
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[10px] sm:text-[11px] font-semibold text-slate-300 whitespace-nowrap tracking-tight leading-none">
+                  CMR Institute of Technology
+                </span>
+                <span className="text-[8px] sm:text-[9px] font-medium text-slate-400 tracking-widest leading-none whitespace-nowrap">
+                  Explore to Invent
+                </span>
               </div>
             </div>
           </Link>
