@@ -54,7 +54,7 @@ export interface AnnouncementItem {
   isUrgent?: boolean;
 }
 
-export type GalleryCategory = 
+export type ChapterHighlightCategory = 
   | 'All'
   | 'Events'
   | 'Workshops'
@@ -62,15 +62,21 @@ export type GalleryCategory =
   | 'SIH'
   | 'Community';
 
-export interface GalleryItem {
+// Alias for backward compatibility
+export type GalleryCategory = ChapterHighlightCategory;
+
+export interface ChapterHighlightItem {
   id: string;
   title: string;
-  category: Exclude<GalleryCategory, 'All'>;
+  category: Exclude<ChapterHighlightCategory, 'All'>;
   imageUrl: string;
   date: string;
   description: string;
   location?: string;
 }
+
+// Alias for backward compatibility
+export type GalleryItem = ChapterHighlightItem;
 
 export interface JoinApplication {
   id: string;

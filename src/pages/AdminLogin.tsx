@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Shield, Lock, Mail, ArrowLeft, AlertCircle, Sparkles } from 'lucide-react';
+import { Shield, Lock, Mail, ArrowLeft, AlertCircle } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { useToast } from '../components/common/Toast';
 
 export const AdminLogin: React.FC = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
-  const [email, setEmail] = useState('admin@cmritonline.ac.in');
-  const [password, setPassword] = useState('••••••••••••');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Do not authenticate; frontend demo only
-    showToast('Logged into demo admin portal! Backend auth will be connected later.', 'info');
+    // Authentication is not yet implemented — redirects to dashboard UI preview only.
+    showToast('Accessing admin dashboard (frontend preview only). Backend authentication will be connected later.', 'info');
     navigate('/admin/dashboard');
   };
 
@@ -27,7 +27,7 @@ export const AdminLogin: React.FC = () => {
           backgroundSize: '24px 24px'
         }}
       />
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* Top back link */}
       <div className="absolute top-6 left-6 z-10">
@@ -49,30 +49,32 @@ export const AdminLogin: React.FC = () => {
         </div>
 
         <h2 className="text-center text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-          CSI CMRIT
+          CSI CMRIT Admin Portal
         </h2>
         <p className="text-center text-xs font-semibold text-blue-400 uppercase tracking-widest mt-1">
-          Administrative Portal
+          Restricted Access
         </p>
 
         {/* Informational Disclaimer Banner */}
         <div className="mt-6 p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 text-left flex items-start gap-2.5">
           <AlertCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
           <div className="text-xs text-slate-300 leading-relaxed">
-            <span className="font-semibold text-white">Interactive Prototype:</span> Authentication will be connected later. You can click Login to explore the dashboard layout.
+            <span className="font-semibold text-white">Frontend Preview:</span>{' '}
+            Administrator authentication will be connected during backend integration. Only authorized CSI CMRIT administrators will have valid access.
           </div>
         </div>
 
-        {/* Card Box */}
+        {/* Login Card */}
         <div className="mt-6 bg-slate-900/80 backdrop-blur-md py-8 px-6 sm:px-8 border border-slate-800 rounded-2xl shadow-elevated">
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                Executive Email
+              <label htmlFor="admin-email" className="block text-xs font-semibold text-slate-300 mb-1.5">
+                Email / Admin ID
               </label>
               <div className="relative">
                 <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
                 <input
+                  id="admin-email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -83,12 +85,13 @@ export const AdminLogin: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                Access Password
+              <label htmlFor="admin-password" className="block text-xs font-semibold text-slate-300 mb-1.5">
+                Password
               </label>
               <div className="relative">
                 <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5" />
                 <input
+                  id="admin-password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -106,13 +109,13 @@ export const AdminLogin: React.FC = () => {
                 className="w-full"
                 leftIcon={<Shield className="w-4 h-4" />}
               >
-                Enter Demo Dashboard
+                Login
               </Button>
             </div>
           </form>
 
           <div className="mt-6 pt-4 border-t border-slate-800 text-center text-xs text-slate-500">
-            Computer Society of India • CMRIT Student Chapter
+            Computer Society of India &bull; CMRIT Chapter
           </div>
         </div>
       </div>

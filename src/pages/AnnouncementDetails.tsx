@@ -11,7 +11,29 @@ export const AnnouncementDetails: React.FC = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
 
-  const announcement = mockAnnouncements.find((a) => a.slug === id || a.id === id) || mockAnnouncements[0];
+  const announcement = mockAnnouncements.find((a) => a.slug === id || a.id === id);
+
+  // No announcement found (array is empty or invalid ID)
+  if (!announcement) {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4 border border-blue-100">
+          <Bell className="w-7 h-7" />
+        </div>
+        <h1 className="text-xl font-bold text-slate-900 mb-2">Announcement Not Found</h1>
+        <p className="text-sm text-slate-500 max-w-sm mb-6">
+          This announcement does not exist or may have been removed.
+        </p>
+        <Link
+          to="/announcements"
+          className="px-5 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition-colors"
+        >
+          Back to Announcements
+        </Link>
+      </div>
+    );
+  }
+
   const relatedAnnouncements = mockAnnouncements.filter((a) => a.id !== announcement.id).slice(0, 2);
 
   const handleShare = () => {

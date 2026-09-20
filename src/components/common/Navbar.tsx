@@ -23,7 +23,7 @@ export const Navbar: React.FC = () => {
     { name: 'Home', path: '/' },
     { name: 'About', path: '/about' },
     { name: 'Events', path: '/events' },
-    { name: 'Gallery', path: '/gallery' },
+    { name: 'Highlights', path: '/highlights' },
     { name: 'Announcements', path: '/announcements' },
     { name: 'SIH', path: '/sih' },
     { name: 'Join Us', path: '/join' },
