@@ -21,20 +21,26 @@ export const ChapterHighlights: React.FC = () => {
     'Community'
   ];
 
-  useEffect(() => {
-    const fetchHighlights = async () => {
-      try {
-        setIsLoading(true);
-        const res = await highlightsService.getPublishedHighlights();
-        setHighlights(res.data);
-      } catch (err) {
-        console.error('Error fetching highlights:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const fetchHighlights = async () => {
+    try {
+      setIsLoading(true);
+      const res = await highlightsService.getPublishedHighlights();
+      setHighlights(res.data);
+    } catch (err) {
+      console.error('Error fetching highlights:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchHighlights();
+
+    const handleUpdate = () => {
+      fetchHighlights();
+    };
+    window.addEventListener('csi_content_updated', handleUpdate);
+    return () => window.removeEventListener('csi_content_updated', handleUpdate);
   }, []);
 
   const filteredPhotos = useMemo(() => {

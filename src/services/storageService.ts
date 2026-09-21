@@ -1,6 +1,6 @@
 import { supabase } from '../lib/supabaseClient';
 
-export type StorageBucket = 'event-images' | 'highlights' | 'announcements';
+export type StorageBucket = 'event-images' | 'highlights' | 'announcements' | 'gallery';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
 

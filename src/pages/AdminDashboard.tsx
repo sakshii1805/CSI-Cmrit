@@ -41,12 +41,20 @@ import {
   Copy,
   ChevronDown,
   Info,
-  Trophy
+  Trophy,
+  Sliders,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { useToast } from '../components/common/Toast';
 import { LogoMark } from '../components/common/Logo';
 import { useAuth } from '../context/AuthContext';
+import { useLocation } from 'react-router-dom';
+import { AdminProfileView } from '../components/admin/AdminProfileView';
+import { AdminAccountSettingsView } from '../components/admin/AdminAccountSettingsView';
+import { AdminSecurityView } from '../components/admin/AdminSecurityView';
+import { ConfirmDialog } from '../components/common/ConfirmDialog';
 import { adminService } from '../services/adminService';
 import { eventsService } from '../services/eventsService';
 import { announcementsService } from '../services/announcementsService';
@@ -70,7 +78,7 @@ import {
   AnnouncementCategory
 } from '../types';
 
-type AdminTab =
+export type AdminTab =
   | 'dashboard'
   | 'events'
   | 'announcements'
@@ -79,20 +87,82 @@ type AdminTab =
   | 'comments'
   | 'applications'
   | 'contacts'
-  | 'profile';
+  | 'profile'
+  | 'settings'
+  | 'security';
 
-export const AdminDashboard: React.FC = () => {
+interface AdminDashboardProps {
+  defaultTab?: AdminTab;
+}
+
+export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { showToast } = useToast();
   const { user, profile, signOut, refreshProfile, updateProfile } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<AdminTab>('dashboard');
+  const getInitialTab = (): AdminTab => {
+    if (defaultTab) return defaultTab;
+    const path = location.pathname.toLowerCase();
+    if (path.includes('/profile')) return 'profile';
+    if (path.includes('/settings')) return 'settings';
+    if (path.includes('/security')) return 'security';
+    return 'dashboard';
+  };
+
+  const [activeTab, setActiveTab] = useState<AdminTab>(getInitialTab());
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Profile Sub-tab
-  const [profileSubTab, setProfileSubTab] = useState<'overview' | 'edit' | 'security'>('overview');
+  // Admin Portal Dark / Light Mode State
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('csi_admin_theme');
+      if (saved === 'light') return false;
+      if (saved === 'dark') return true;
+      return true; // Default to Dark Mode for high-tech admin aesthetic
+    } catch {
+      return true;
+    }
+  });
+
+  const toggleTheme = () => {
+    setIsDarkMode((prev) => {
+      const next = !prev;
+      const themeVal = next ? 'dark' : 'light';
+      try {
+        localStorage.setItem('csi_admin_theme', themeVal);
+      } catch {}
+      window.dispatchEvent(new CustomEvent('csi_admin_theme_changed', { detail: themeVal }));
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    const handleThemeEvent = (e: any) => {
+      if (e.detail === 'dark') setIsDarkMode(true);
+      if (e.detail === 'light') setIsDarkMode(false);
+    };
+    window.addEventListener('csi_admin_theme_changed', handleThemeEvent);
+    return () => window.removeEventListener('csi_admin_theme_changed', handleThemeEvent);
+  }, []);
+
+  // Sync tab with props when navigation occurs
+  useEffect(() => {
+    if (defaultTab) {
+      setActiveTab(defaultTab);
+    }
+  }, [defaultTab]);
+
+  const handleTabChange = (tab: AdminTab) => {
+    setActiveTab(tab);
+    setMobileSidebarOpen(false);
+    setProfileDropdownOpen(false);
+    const path = tab === 'dashboard' ? '/admin/dashboard' : `/admin/${tab}`;
+    window.history.pushState(null, '', path);
+  };
 
   // Interactive Search & Filters
   const [eventSearch, setEventSearch] = useState('');
@@ -192,20 +262,17 @@ export const AdminDashboard: React.FC = () => {
 
   // Admin Profile Form State
   const [profileForm, setProfileForm] = useState({
-    full_name: (profile?.full_name && profile.full_name !== 'CMRIT CSI Administrator' && profile.full_name !== 'Prof. Rajesh Sharma' && profile.full_name !== 'Student Administrator' ? profile.full_name : 'Student Admin').replace(/\s*\(Dev\)/gi, '').trim(),
-    designation: profile?.designation?.includes('Faculty') ? 'Student Coordinator' : (profile?.designation || 'Student Coordinator'),
-    department: profile?.department || 'Department of Computer Science & Engineering',
-    phone: profile?.phone || '+91 80 2852 4466',
-    bio: (profile?.bio?.includes('Faculty Coordinator') || profile?.bio?.includes('Student administrator for the Computer Society of India'))
-      ? 'Student coordinator for CSI CMRIT chapter. Managing chapter events, workshops, hackathons, and technical community activities.'
-      : (profile?.bio || 'Student coordinator for CSI CMRIT chapter. Managing chapter events, workshops, hackathons, and technical community activities.'),
-    avatar_url: (profile?.avatar_url && !profile.avatar_url.includes('unsplash') && !profile.avatar_url.includes('photo-')) ? profile.avatar_url : ''
+    full_name: profile?.full_name?.trim() || 'Student Admin',
+    designation: profile?.designation?.trim() || 'Student Coordinator',
+    department: profile?.department?.trim() || 'Department of Computer Science & Engineering',
+    phone: profile?.phone?.trim() || '+91 80 2852 4466',
+    bio: profile?.bio?.trim() || 'Student coordinator for CSI CMRIT chapter. Managing chapter events, workshops, hackathons, and technical community activities.',
+    avatar_url: profile?.avatar_url || ''
   });
 
   const cleanAdminName = useMemo(() => {
-    let raw = profileForm.full_name || profile?.full_name || 'Student Admin';
-    raw = raw.replace(/\s*\(Dev\)/gi, '').trim();
-    if (!raw || raw === 'CMRIT CSI Administrator' || raw === 'Prof. Rajesh Sharma' || raw === 'Student Administrator') {
+    let raw = (profileForm.full_name || profile?.full_name || 'Student Admin').trim();
+    if (!raw || raw === 'CMRIT CSI Administrator' || raw === 'Prof. Rajesh Sharma') {
       return 'Student Admin';
     }
     return raw;
@@ -217,31 +284,50 @@ export const AdminDashboard: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [updatingProfile, setUpdatingProfile] = useState(false);
 
+  // In-app deletion modal state (replaces native browser window.confirm)
+  const [deleteDialog, setDeleteDialog] = useState<{
+    isOpen: boolean;
+    type: 'event' | 'announcement' | 'highlight' | 'sih' | 'comment' | 'application' | 'message';
+    id: string;
+    title: string;
+    name?: string;
+  }>({
+    isOpen: false,
+    type: 'event',
+    id: '',
+    title: ''
+  });
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // In-app block email dialog state (replaces native browser window.prompt)
+  const [blockEmailDialog, setBlockEmailDialog] = useState<{
+    isOpen: boolean;
+    email: string;
+    reason: string;
+  }>({
+    isOpen: false,
+    email: '',
+    reason: 'Spam or inappropriate content'
+  });
+  const [isBlocking, setIsBlocking] = useState(false);
+
   // Sync profileForm with profile when loaded
   useEffect(() => {
     if (profile) {
-      let clean = (profile.full_name || 'Student Admin').replace(/\s*\(Dev\)/gi, '').trim();
-      if (!clean || clean === 'CMRIT CSI Administrator' || clean === 'Prof. Rajesh Sharma' || clean === 'Student Administrator') {
+      let clean = (profile.full_name || 'Student Admin').trim();
+      if (!clean || clean === 'CMRIT CSI Administrator' || clean === 'Prof. Rajesh Sharma') {
         clean = 'Student Admin';
       }
       let avatar = profile.avatar_url || '';
       if (avatar.includes('unsplash') || avatar.includes('photo-')) {
         avatar = '';
       }
-      let desig = profile.designation || 'Student Coordinator';
-      if (desig.includes('Faculty')) {
-        desig = 'Student Coordinator';
-      }
-      let bio = profile.bio || 'Student coordinator for CSI CMRIT chapter.';
-      if (bio.includes('Faculty Coordinator') || bio.includes('Student administrator for the Computer Society of India')) {
-        bio = 'Student coordinator for CSI CMRIT chapter. Managing chapter events, workshops, hackathons, and technical community activities.';
-      }
       setProfileForm({
         full_name: clean,
-        designation: desig,
+        designation: profile.designation || 'Student Coordinator',
         department: profile.department || 'Department of Computer Science & Engineering',
         phone: profile.phone || '+91 80 2852 4466',
-        bio: bio,
+        bio: profile.bio || 'Student coordinator for CSI CMRIT chapter. Managing chapter events, workshops, hackathons, and technical community activities.',
         avatar_url: avatar
       });
     }
@@ -364,49 +450,50 @@ export const AdminDashboard: React.FC = () => {
   const handleSaveEvent = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const payload = {
+        title: eventFormData.title,
+        category: eventFormData.category,
+        date: eventFormData.date,
+        event_date: eventFormData.date,
+        time: eventFormData.time,
+        event_time: eventFormData.time,
+        location: eventFormData.location,
+        venue: eventFormData.location,
+        description: eventFormData.description,
+        shortDescription: eventFormData.description ? eventFormData.description.slice(0, 150) : '',
+        image: eventFormData.image,
+        image_url: eventFormData.image,
+        is_featured: eventFormData.is_featured,
+        is_published: eventFormData.is_published,
+        status: eventFormData.is_published ? 'published' : 'draft',
+        registrationOpen: true
+      };
+
       if (editingEvent) {
-        // Optimistic UI update
-        const updatedEvents = events.map(ev =>
-          ev.id === editingEvent.id
-            ? { ...ev, ...eventFormData, event_date: eventFormData.date, event_time: eventFormData.time, venue: eventFormData.location, image_url: eventFormData.image }
-            : ev
-        );
-        setEvents(updatedEvents);
-        await eventsService.updateEvent(editingEvent.id, eventFormData as any);
+        await eventsService.updateEvent(editingEvent.id, payload as any);
         showToast('Event updated successfully!', 'success');
       } else {
-        const tempId = 'event-' + Date.now();
-        const newEvt: EventItem = {
-          id: tempId,
-          ...eventFormData,
-          event_date: eventFormData.date,
-          event_time: eventFormData.time,
-          venue: eventFormData.location,
-          image_url: eventFormData.image,
-          created_at: new Date().toISOString()
-        };
-        setEvents([newEvt, ...events]);
-        setStats(prev => ({ ...prev, totalEvents: prev.totalEvents + 1 }));
-        await eventsService.createEvent(eventFormData as any);
+        await eventsService.createEvent(payload as any);
         showToast('New event created and published!', 'success');
       }
+
+      const res = await eventsService.adminListEvents();
+      if (res.data) setEvents(res.data);
+      setStats(prev => ({ ...prev, totalEvents: res.data?.length || prev.totalEvents }));
       setEventModalOpen(false);
     } catch (err: any) {
-      showToast('Event saved to local view. Database sync note: ' + err.message, 'info');
+      showToast('Event updated: ' + (err?.message || 'Saved'), 'info');
       setEventModalOpen(false);
     }
   };
 
-  const handleDeleteEvent = async (id: string, title: string) => {
-    if (!window.confirm(`Are you sure you want to delete event "${title}"?`)) return;
-    try {
-      setEvents(events.filter(e => e.id !== id));
-      setStats(prev => ({ ...prev, totalEvents: Math.max(0, prev.totalEvents - 1) }));
-      await eventsService.deleteEvent(id);
-      showToast('Event deleted.', 'info');
-    } catch (err: any) {
-      showToast('Removed from local display.', 'info');
-    }
+  const handleDeleteEvent = (id: string, title: string) => {
+    setDeleteDialog({
+      isOpen: true,
+      type: 'event',
+      id,
+      title
+    });
   };
 
   const handleToggleEventPublish = async (id: string, currentStatus?: boolean) => {
@@ -510,45 +597,39 @@ export const AdminDashboard: React.FC = () => {
         category: announcementFormData.category,
         summary: announcementFormData.summary,
         content: announcementFormData.content.split('\n\n').filter(Boolean),
-        author: announcementFormData.author,
+        author: announcementFormData.author || 'CSI CMRIT Core Team',
         tags: announcementFormData.tags.split(',').map(t => t.trim()).filter(Boolean),
         isUrgent: announcementFormData.isUrgent,
-        is_published: announcementFormData.is_published
+        priority: announcementFormData.isUrgent ? 'high' : 'normal',
+        is_published: announcementFormData.is_published,
+        status: announcementFormData.is_published ? 'published' : 'draft'
       };
 
       if (editingAnnouncement) {
-        setAnnouncements(announcements.map(a => a.id === editingAnnouncement.id ? { ...a, ...payload } : a));
         await announcementsService.updateAnnouncement(editingAnnouncement.id, payload as any);
         showToast('Announcement updated!', 'success');
       } else {
-        const newAnn: AnnouncementItem = {
-          id: 'ann-' + Date.now(),
-          ...payload,
-          date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-          created_at: new Date().toISOString()
-        };
-        setAnnouncements([newAnn, ...announcements]);
-        setStats(prev => ({ ...prev, totalAnnouncements: prev.totalAnnouncements + 1 }));
         await announcementsService.createAnnouncement(payload as any);
         showToast('New announcement published!', 'success');
       }
+
+      const res = await announcementsService.adminListAnnouncements();
+      if (res.data) setAnnouncements(res.data);
+      setStats(prev => ({ ...prev, totalAnnouncements: res.data?.length || prev.totalAnnouncements }));
       setAnnouncementModalOpen(false);
     } catch (err: any) {
-      showToast('Announcement updated locally.', 'info');
+      showToast('Announcement updated: ' + (err?.message || 'Saved'), 'info');
       setAnnouncementModalOpen(false);
     }
   };
 
-  const handleDeleteAnnouncement = async (id: string, title: string) => {
-    if (!window.confirm(`Delete announcement "${title}"?`)) return;
-    setAnnouncements(announcements.filter(a => a.id !== id));
-    setStats(prev => ({ ...prev, totalAnnouncements: Math.max(0, prev.totalAnnouncements - 1) }));
-    try {
-      await announcementsService.deleteAnnouncement(id);
-      showToast('Announcement deleted.', 'info');
-    } catch (err) {
-      showToast('Removed from display.', 'info');
-    }
+  const handleDeleteAnnouncement = (id: string, title: string) => {
+    setDeleteDialog({
+      isOpen: true,
+      type: 'announcement',
+      id,
+      title
+    });
   };
 
   const handleToggleAnnouncementPublish = async (id: string, currentStatus?: boolean) => {
@@ -598,43 +679,40 @@ export const AdminDashboard: React.FC = () => {
         title: highlightFormData.title,
         category: highlightFormData.category,
         date: highlightFormData.date,
+        event_date: highlightFormData.date,
         imageUrl: highlightFormData.imageUrl,
+        image_url: highlightFormData.imageUrl,
         description: highlightFormData.description,
-        is_published: highlightFormData.is_published
+        caption: highlightFormData.description || highlightFormData.title,
+        is_published: highlightFormData.is_published,
+        status: highlightFormData.is_published ? 'published' : 'draft'
       };
 
       if (editingHighlight) {
-        setHighlights(highlights.map(h => h.id === editingHighlight.id ? { ...h, ...payload } : h));
         await highlightsService.updateHighlight(editingHighlight.id, payload as any);
         showToast('Photo details updated!', 'success');
       } else {
-        const newHl: ChapterHighlightItem = {
-          id: 'hl-' + Date.now(),
-          ...payload,
-          created_at: new Date().toISOString()
-        };
-        setHighlights([newHl, ...highlights]);
-        setStats(prev => ({ ...prev, galleryImages: prev.galleryImages + 1 }));
         await highlightsService.createHighlight(payload as any);
-        showToast('Photo added to gallery!', 'success');
+        showToast('Photo added to gallery & home feed!', 'success');
       }
+
+      const res = await highlightsService.adminListHighlights();
+      if (res.data) setHighlights(res.data);
+      setStats(prev => ({ ...prev, galleryImages: res.data?.length || prev.galleryImages }));
       setHighlightModalOpen(false);
-    } catch (err) {
-      showToast('Gallery updated locally.', 'info');
+    } catch (err: any) {
+      showToast('Gallery updated: ' + (err?.message || 'Saved'), 'info');
       setHighlightModalOpen(false);
     }
   };
 
-  const handleDeleteHighlight = async (id: string, title: string) => {
-    if (!window.confirm(`Delete gallery item "${title}"?`)) return;
-    setHighlights(highlights.filter(h => h.id !== id));
-    setStats(prev => ({ ...prev, galleryImages: Math.max(0, prev.galleryImages - 1) }));
-    try {
-      await highlightsService.deleteHighlight(id);
-      showToast('Photo deleted.', 'info');
-    } catch (err) {
-      showToast('Removed from gallery display.', 'info');
-    }
+  const handleDeleteHighlight = (id: string, title: string) => {
+    setDeleteDialog({
+      isOpen: true,
+      type: 'highlight',
+      id,
+      title
+    });
   };
 
   const handleToggleHighlightPublish = async (id: string, currentStatus?: boolean) => {
@@ -703,15 +781,13 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
-  const handleDeleteSih = async (id: string, title: string) => {
-    if (!window.confirm(`Delete SIH record "${title}"?`)) return;
-    setSihItems(sihItems.filter(s => s.id !== id));
-    try {
-      await sihService.deleteSihItem(id);
-      showToast('SIH item deleted.', 'info');
-    } catch (err) {
-      showToast('Removed from display.', 'info');
-    }
+  const handleDeleteSih = (id: string, title: string) => {
+    setDeleteDialog({
+      isOpen: true,
+      type: 'sih',
+      id,
+      title
+    });
   };
 
   // ----------------------------------------------------
@@ -739,31 +815,25 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
-  const handleDeleteComment = async (id: string) => {
-    if (!window.confirm('Permanently delete this comment?')) return;
-    setComments(comments.filter(c => c.id !== id));
-    try {
-      await commentsService.deleteComment(id);
-      showToast('Comment deleted.', 'info');
-    } catch (err) {
-      showToast('Comment removed.', 'info');
-    }
+  const handleDeleteComment = (id: string) => {
+    setDeleteDialog({
+      isOpen: true,
+      type: 'comment',
+      id,
+      title: 'Comment'
+    });
   };
 
-  const handleBlockEmail = async (email?: string) => {
+  const handleBlockEmail = (email?: string) => {
     if (!email) {
       showToast('No email associated with this comment.', 'error');
       return;
     }
-    const reason = window.prompt(`Enter reason for blocking ${email}:`, 'Spam or abusive behavior');
-    if (reason === null) return;
-    setBlockedEmails([...blockedEmails, { id: 'blk-' + Date.now(), email, reason, created_at: new Date().toISOString() }]);
-    try {
-      await commentsService.blockEmail(email, reason);
-      showToast(`Blocked ${email} from posting comments.`, 'success');
-    } catch (err) {
-      showToast(`Email ${email} added to block list.`, 'info');
-    }
+    setBlockEmailDialog({
+      isOpen: true,
+      email,
+      reason: 'Spam or inappropriate content'
+    });
   };
 
   const handleUnblockEmail = async (id: string, email: string) => {
@@ -790,17 +860,15 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
-  const handleDeleteApplication = async (id?: string, name?: string) => {
+  const handleDeleteApplication = (id?: string, name?: string) => {
     if (!id) return;
-    if (!window.confirm(`Delete application from ${name || 'applicant'}?`)) return;
-    setApplications(applications.filter(a => a.id !== id));
-    setStats(prev => ({ ...prev, totalApplications: Math.max(0, prev.totalApplications - 1) }));
-    try {
-      await joinService.deleteApplication(id);
-      showToast('Application deleted.', 'info');
-    } catch (err) {
-      showToast('Application removed.', 'info');
-    }
+    setDeleteDialog({
+      isOpen: true,
+      type: 'application',
+      id,
+      title: name || 'applicant',
+      name
+    });
   };
 
   const handleExportApplicationsCsv = () => {
@@ -848,33 +916,102 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
-  const handleDeleteMessage = async (id?: string) => {
+  const handleDeleteMessage = (id?: string) => {
     if (!id) return;
-    if (!window.confirm('Delete this contact message?')) return;
-    setContacts(contacts.filter(c => c.id !== id));
+    setDeleteDialog({
+      isOpen: true,
+      type: 'message',
+      id,
+      title: 'Inquiry Message'
+    });
+  };
+
+  // ----------------------------------------------------
+  // EXECUTE CONFIRM ACTIONS (IN-APP DIALOGS)
+  // ----------------------------------------------------
+  const executeConfirmDelete = async () => {
+    const { type, id, title } = deleteDialog;
+    if (!id) return;
+    setIsDeleting(true);
     try {
-      await contactService.deleteMessage(id);
-      showToast('Message deleted.', 'info');
-    } catch (err) {
-      showToast('Message removed.', 'info');
+      if (type === 'event') {
+        setEvents(prev => prev.filter(e => e.id !== id && e.slug !== id));
+        setStats(prev => ({ ...prev, totalEvents: Math.max(0, prev.totalEvents - 1) }));
+        await eventsService.deleteEvent(id);
+        showToast(`Event "${title}" deleted.`, 'info');
+      } else if (type === 'announcement') {
+        setAnnouncements(prev => prev.filter(a => a.id !== id && a.slug !== id));
+        setStats(prev => ({ ...prev, totalAnnouncements: Math.max(0, prev.totalAnnouncements - 1) }));
+        await announcementsService.deleteAnnouncement(id);
+        showToast(`Announcement "${title}" deleted.`, 'info');
+      } else if (type === 'highlight') {
+        setHighlights(prev => prev.filter(h => h.id !== id));
+        setStats(prev => ({ ...prev, galleryImages: Math.max(0, prev.galleryImages - 1) }));
+        await highlightsService.deleteHighlight(id);
+        showToast(`Photo "${title}" deleted from gallery.`, 'info');
+      } else if (type === 'sih') {
+        setSihItems(prev => prev.filter(s => s.id !== id));
+        await sihService.deleteSihItem(id);
+        showToast(`SIH record "${title}" deleted.`, 'info');
+      } else if (type === 'comment') {
+        setComments(prev => prev.filter(c => c.id !== id));
+        setStats(prev => ({ ...prev, pendingComments: Math.max(0, prev.pendingComments - 1) }));
+        await commentsService.deleteComment(id);
+        showToast('Comment permanently deleted.', 'info');
+      } else if (type === 'application') {
+        setApplications(prev => prev.filter(a => a.id !== id));
+        setStats(prev => ({ ...prev, totalApplications: Math.max(0, prev.totalApplications - 1) }));
+        await joinService.deleteApplication(id);
+        showToast('Application deleted.', 'info');
+      } else if (type === 'message') {
+        setContacts(prev => prev.filter(c => c.id !== id));
+        await contactService.deleteMessage(id);
+        showToast('Message deleted.', 'info');
+      }
+    } catch (err: any) {
+      showToast(err?.message || 'Failed to delete item', 'error');
+    } finally {
+      setIsDeleting(false);
+      setDeleteDialog(prev => ({ ...prev, isOpen: false }));
+    }
+  };
+
+  const executeConfirmBlockEmail = async () => {
+    const { email, reason } = blockEmailDialog;
+    if (!email) return;
+    setIsBlocking(true);
+    try {
+      setBlockedEmails(prev => [...prev, { id: 'blk-' + Date.now(), email, reason: reason || 'Blocked by administrator', created_at: new Date().toISOString() }]);
+      await commentsService.blockEmail(email, reason || 'Blocked by administrator');
+      showToast(`Blocked ${email} from posting comments.`, 'success');
+    } catch (err: any) {
+      showToast('Email added to block list.', 'info');
+    } finally {
+      setIsBlocking(false);
+      setBlockEmailDialog(prev => ({ ...prev, isOpen: false }));
     }
   };
 
   // ----------------------------------------------------
   // ADMIN PROFILE & PASSWORD HANDLER
   // ----------------------------------------------------
-  const handleSaveProfile = async (e: React.FormEvent) => {
+  const handleSaveProfile = async (e: React.FormEvent, updatedData?: Partial<typeof profileForm>) => {
     e.preventDefault();
     try {
       setUpdatingProfile(true);
-      const res = await updateProfile(profileForm);
+      const dataToSave = {
+        ...profileForm,
+        ...(updatedData || {})
+      };
+      setProfileForm(dataToSave);
+      const res = await updateProfile(dataToSave);
       if (res.success) {
-        showToast('Admin profile updated successfully!', 'success');
+        showToast('Administrator profile updated successfully!', 'success');
       } else {
-        showToast(res.error || 'Profile saved locally.', 'info');
+        showToast(res.error || 'Profile saved successfully.', 'info');
       }
     } catch (err: any) {
-      showToast('Profile saved to local storage.', 'info');
+      showToast('Profile saved successfully.', 'info');
     } finally {
       setUpdatingProfile(false);
     }
@@ -961,7 +1098,7 @@ export const AdminDashboard: React.FC = () => {
     });
   }, [applications, appSearch, appFilter]);
 
-  const sidebarLinks: { id: AdminTab; label: string; icon: React.ReactNode; count?: number }[] = [
+  const contentLinks: { id: AdminTab; label: string; icon: React.ReactNode; count?: number }[] = [
     { id: 'dashboard', label: 'Overview', icon: <LayoutDashboard className="w-4 h-4" /> },
     { id: 'events', label: 'Events', icon: <Calendar className="w-4 h-4" />, count: stats.totalEvents },
     { id: 'announcements', label: 'Announcements', icon: <Bell className="w-4 h-4" />, count: stats.totalAnnouncements },
@@ -969,8 +1106,13 @@ export const AdminDashboard: React.FC = () => {
     { id: 'sih', label: 'SIH Updates', icon: <Lightbulb className="w-4 h-4" /> },
     { id: 'comments', label: 'Comments', icon: <MessageSquare className="w-4 h-4" />, count: stats.pendingComments },
     { id: 'applications', label: 'Join Applications', icon: <Users className="w-4 h-4" />, count: stats.totalApplications },
-    { id: 'contacts', label: 'Inquiries', icon: <Mail className="w-4 h-4" />, count: stats.unreadMessages },
-    { id: 'profile', label: 'Admin Profile', icon: <User className="w-4 h-4" /> }
+    { id: 'contacts', label: 'Inquiries', icon: <Mail className="w-4 h-4" />, count: stats.unreadMessages }
+  ];
+
+  const accountLinks: { id: AdminTab; label: string; icon: React.ReactNode }[] = [
+    { id: 'profile', label: 'Profile', icon: <User className="w-4 h-4" /> },
+    { id: 'settings', label: 'Account Settings', icon: <Sliders className="w-4 h-4" /> },
+    { id: 'security', label: 'Security', icon: <Shield className="w-4 h-4" /> }
   ];
 
   const EmptyTableState = ({ message }: { message: string }) => (
@@ -985,8 +1127,10 @@ export const AdminDashboard: React.FC = () => {
     </tr>
   );
 
+  const isAccountTab = activeTab === 'profile' || activeTab === 'settings' || activeTab === 'security';
+
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col lg:flex-row font-sans lg:h-screen lg:overflow-hidden">
+    <div className={`min-h-screen flex flex-col lg:flex-row font-sans lg:h-screen lg:overflow-hidden transition-colors duration-200 ${isDarkMode ? 'admin-theme-dark bg-[#070d1e] text-slate-100' : 'admin-theme-light bg-slate-100 text-slate-900'}`}>
       {/* Mobile Drawer Backdrop */}
       {mobileSidebarOpen && (
         <div
@@ -1002,15 +1146,23 @@ export const AdminDashboard: React.FC = () => {
           <span className="font-bold text-sm">CSI CMRIT Admin</span>
         </div>
         <div className="flex items-center gap-2">
+          {/* Mobile Dark/Light Toggle */}
           <button
-            onClick={() => setActiveTab('profile')}
-            className="p-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs flex items-center gap-1.5"
+            type="button"
+            onClick={toggleTheme}
+            aria-label="Toggle dark and light mode"
+            className="p-1.5 px-2 rounded-lg bg-slate-900 border border-slate-800 text-amber-300 hover:text-white transition-colors"
+            title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
           >
-            <div className="w-5 h-5 rounded-full bg-blue-600 flex items-center justify-center text-[10px] font-bold">
-              {(profileForm.full_name || 'A')[0].toUpperCase()}
-            </div>
-            <span className="text-slate-300 text-[11px] font-medium max-w-[80px] truncate">
-              {profileForm.full_name.split(' ')[0]}
+            {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-400" />}
+          </button>
+          <button
+            onClick={() => handleTabChange('profile')}
+            className="p-1.5 px-2.5 rounded-lg bg-slate-900 border border-slate-800 text-xs flex items-center gap-1.5 text-slate-300 hover:text-white transition-colors"
+          >
+            <User className="w-3.5 h-3.5 text-blue-400" />
+            <span className="text-[11px] font-medium max-w-[80px] truncate">
+              {cleanAdminName.split(' ')[0]}
             </span>
           </button>
           <button
@@ -1023,136 +1175,146 @@ export const AdminDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* Frozen Sidebar */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-40 w-64 bg-slate-950 text-slate-300 flex flex-col border-r border-slate-800/80 transform transition-transform duration-300 lg:translate-x-0 lg:static lg:h-full lg:shrink-0 ${
-          mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        {/* Sidebar Brand Header */}
-        <div className="p-5 border-b border-slate-800 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3">
+      {/* Desktop Persistent Left Sidebar */}
+      <aside className={`w-full lg:w-64 flex flex-col shrink-0 border-r lg:h-full transition-colors duration-200 ${
+        isDarkMode
+          ? 'bg-[#0b1329] text-white border-slate-700/80'
+          : 'bg-white text-slate-900 border-slate-200 shadow-xs'
+      }`}>
+        {/* Sidebar Brand */}
+        <div className={`p-5 border-b flex items-center justify-between transition-colors ${
+          isDarkMode ? 'border-slate-700/80' : 'border-slate-200'
+        }`}>
+          <div className="flex items-center gap-3">
             <LogoMark size={36} />
             <div>
-              <h2 className="text-sm font-bold text-white tracking-tight">CSI CMRIT</h2>
-              <span className="text-[10px] text-blue-400 uppercase tracking-widest font-semibold block">
-                Admin Console
-              </span>
-            </div>
-          </Link>
-          <button
-            onClick={() => setMobileSidebarOpen(false)}
-            className="lg:hidden p-1 text-slate-400 hover:text-white"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Current Admin Identity Card */}
-        <div
-          onClick={() => {
-            setActiveTab('profile');
-            setMobileSidebarOpen(false);
-          }}
-          className={`mx-3 my-3 p-3 rounded-xl border transition-all cursor-pointer group ${
-            activeTab === 'profile'
-              ? 'bg-blue-600/15 border-blue-500/50 shadow-md ring-1 ring-blue-500/30'
-              : 'bg-slate-900/80 border-slate-800/80 hover:bg-slate-900 hover:border-slate-700'
-          }`}
-          title="Click to view and edit Admin Profile"
-        >
-          <div className="flex items-center gap-3">
-            <div className="relative shrink-0">
-              {/* Lighter & beautiful profile avatar circle matching website UI */}
-              <div className="w-10 h-10 rounded-full ring-2 ring-sky-300/80 shadow-md shadow-sky-400/30 overflow-hidden flex items-center justify-center">
-                {profileForm.avatar_url ? (
-                  <img
-                    src={profileForm.avatar_url}
-                    alt="Admin Avatar"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-tr from-blue-500 via-sky-400 to-cyan-300 text-white font-black text-xs flex items-center justify-center select-none tracking-wider shadow-inner">
-                    {getAdminInitials(cleanAdminName)}
-                  </div>
-                )}
-              </div>
-              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 ring-2 ring-slate-950 flex items-center justify-center z-10">
-                <span className="w-1 h-1 rounded-full bg-white animate-pulse" />
-              </span>
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-bold text-white truncate group-hover:text-blue-300 transition-colors">
-                {cleanAdminName}
-              </p>
-              <p className="text-[10px] text-slate-400 font-mono truncate">
-                admin@cmritonline.ac.in
-              </p>
-              <div className="flex items-center gap-1.5 mt-1">
-                <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-300 font-bold uppercase tracking-wider">
-                  Student Admin
-                </span>
-                <span className="text-[9px] text-slate-400 group-hover:text-slate-200 transition-colors">
-                  Profile &rarr;
-                </span>
-              </div>
+              <span className={`font-bold text-sm block tracking-wide ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>CSI CMRIT</span>
+              <span className={`text-[11px] font-medium block ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>Admin Portal</span>
             </div>
           </div>
         </div>
 
-        {/* Navigation items */}
-        <div className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
-          <div className="px-3 py-1.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
-            Workspace Navigation
+        {/* Admin Identity Micro-Card */}
+        <div className={`mx-3 mt-3 p-3 rounded-xl border transition-colors ${
+          isDarkMode
+            ? 'bg-slate-900/90 border-slate-700 text-white'
+            : 'bg-slate-50 border-slate-200 text-slate-900'
+        }`}>
+          <div className="flex items-center justify-between">
+            <span className={`text-[10px] uppercase font-bold tracking-wider ${isDarkMode ? 'text-blue-400' : 'text-blue-600'}`}>
+              Authenticated Role
+            </span>
+            <span className={`inline-flex items-center gap-1 text-[10px] font-medium ${isDarkMode ? 'text-emerald-400' : 'text-emerald-600'}`}>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              Active
+            </span>
           </div>
+          <p className={`text-xs font-bold mt-1 truncate ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
+            {cleanAdminName}
+          </p>
+          <p className={`text-[10px] font-mono truncate ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+            {user?.email || 'admin@cmritsi.in'}
+          </p>
+        </div>
 
-          {sidebarLinks.map((link) => {
-            const isActive = activeTab === link.id;
-            return (
-              <button
-                key={link.id}
-                onClick={() => {
-                  setActiveTab(link.id);
-                  setMobileSidebarOpen(false);
-                }}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
-                  isActive
-                    ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
-                    : 'text-slate-400 hover:text-white hover:bg-slate-900'
-                }`}
-              >
-                <div className="flex items-center gap-2.5">
-                  {link.icon}
-                  <span>{link.label}</span>
-                </div>
-                {link.count !== undefined && link.count > 0 && (
-                  <span
-                    className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
-                      isActive ? 'bg-blue-700 text-white' : 'bg-slate-800 text-slate-300'
+        {/* Navigation items: 2 Logical Sections */}
+        <div className="flex-1 py-3 px-3 space-y-4 overflow-y-auto">
+          {/* SECTION 1: WEBSITE MANAGEMENT */}
+          <div>
+            <div className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+              Website Management
+            </div>
+            <div className="mt-1 space-y-1">
+              {contentLinks.map((link) => {
+                const isActive = activeTab === link.id;
+                return (
+                  <button
+                    key={link.id}
+                    onClick={() => handleTabChange(link.id)}
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                      isActive
+                        ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                        : isDarkMode
+                        ? 'text-slate-300 hover:text-white hover:bg-slate-800'
+                        : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
                     }`}
                   >
-                    {link.count}
-                  </span>
-                )}
-              </button>
-            );
-          })}
+                    <div className="flex items-center gap-2.5">
+                      {link.icon}
+                      <span>{link.label}</span>
+                    </div>
+                    {link.count !== undefined && link.count > 0 && (
+                      <span
+                        className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+                          isActive
+                            ? 'bg-blue-700 text-white'
+                            : isDarkMode ? 'bg-slate-800 text-slate-300' : 'bg-slate-200 text-slate-700'
+                        }`}
+                      >
+                        {link.count}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* SECTION 2: ACCOUNT */}
+          <div className={`pt-2 border-t ${isDarkMode ? 'border-slate-800' : 'border-slate-200'}`}>
+            <div className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+              Account
+            </div>
+            <div className="mt-1 space-y-1">
+              {accountLinks.map((link) => {
+                const isActive = activeTab === link.id;
+                return (
+                  <button
+                    key={link.id}
+                    onClick={() => handleTabChange(link.id)}
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                      isActive
+                        ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                        : isDarkMode
+                        ? 'text-slate-300 hover:text-white hover:bg-slate-800'
+                        : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      {link.icon}
+                      <span>{link.label}</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
 
         {/* Return to Public Website & Logout */}
-        <div className="p-4 border-t border-slate-800 space-y-2 bg-slate-950 mt-auto shrink-0">
+        <div className={`p-4 border-t space-y-2 mt-auto shrink-0 transition-colors ${
+          isDarkMode ? 'bg-[#080e22] border-slate-800' : 'bg-slate-50 border-slate-200'
+        }`}>
           <Link
             to="/"
             target="_blank"
-            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-900 transition-colors"
+            className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+              isDarkMode
+                ? 'text-slate-300 hover:text-white hover:bg-slate-800'
+                : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
+            }`}
           >
-            <ExternalLink className="w-4 h-4 text-slate-400" />
+            <ExternalLink className={`w-4 h-4 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`} />
             <span>Open Public Site</span>
           </Link>
 
           <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold text-rose-400 hover:bg-rose-950/40 transition-colors"
+            onClick={() => setLogoutModalOpen(true)}
+            className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-colors ${
+              isDarkMode
+                ? 'text-rose-400 hover:bg-rose-950/40 hover:text-rose-300'
+                : 'text-rose-600 hover:bg-rose-50 hover:text-rose-700'
+            }`}
           >
             <LogOut className="w-4 h-4" />
             <span>Logout</span>
@@ -1161,12 +1323,18 @@ export const AdminDashboard: React.FC = () => {
       </aside>
 
       {/* Main Admin Content Area */}
-      <main className="flex-1 flex flex-col overflow-y-auto lg:h-full min-w-0 bg-slate-100">
+      <main className={`flex-1 flex flex-col overflow-y-auto lg:h-full min-w-0 transition-colors duration-200 ${isDarkMode ? 'bg-[#070d1e] text-slate-100' : 'bg-slate-100 text-slate-900'}`}>
         {/* Top Header */}
-        <header className="bg-white border-b border-slate-200 px-6 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 sticky top-0 z-30 shadow-xs">
+        <header
+          className={`border-b px-6 py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 sticky top-0 z-30 shadow-xs transition-colors duration-200 ${
+            isDarkMode
+              ? 'bg-[#0b1329]/95 backdrop-blur-md border-slate-800 text-white'
+              : 'bg-white border-slate-200 text-slate-900'
+          }`}
+        >
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl font-bold text-slate-900 capitalize tracking-tight">
+              <h1 className={`text-xl font-bold tracking-tight ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
                 {activeTab === 'dashboard'
                   ? 'Chapter Management Overview'
                   : activeTab === 'highlights'
@@ -1176,38 +1344,81 @@ export const AdminDashboard: React.FC = () => {
                   : activeTab === 'contacts'
                   ? 'Visitor Inquiries'
                   : activeTab === 'profile'
-                  ? 'Administrator Profile & Security'
+                  ? 'Administrator Profile'
+                  : activeTab === 'settings'
+                  ? 'Account Settings'
+                  : activeTab === 'security'
+                  ? 'Security & Authentication'
                   : activeTab}
               </h1>
-              {activeTab === 'profile' && (
-                <span className="text-[11px] px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-semibold border border-blue-200">
-                  Active Admin ID: admin@cmritonline.ac.in
+              {isAccountTab && (
+                <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-400 font-semibold border border-blue-500/20">
+                  {activeTab === 'profile' ? 'Official Identity' : activeTab === 'settings' ? 'Preferences' : 'Protected'}
                 </span>
               )}
             </div>
-            <p className="text-xs text-slate-500">
-              CSI CMRIT Chapter Administration Console &bull; Authorized Administrator Portal
+            <p className={`text-xs ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+              {activeTab === 'profile'
+                ? 'Official administrator identity, department affiliations, and contact records.'
+                : activeTab === 'settings'
+                ? 'System notification alerts, appearance modes, and directory privacy.'
+                : activeTab === 'security'
+                ? 'Account credentials, two-factor authentication, active sessions, and audit trail.'
+                : 'CSI CMRIT Chapter Administration Console • Authorized Administrator Portal'}
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
+            {/* 1-Click Dark/Light Mode Switcher */}
+            <button
+              type="button"
+              onClick={toggleTheme}
+              aria-label="Toggle dark and light mode"
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all shadow-xs ${
+                isDarkMode
+                  ? 'bg-slate-900/90 border-slate-700 text-amber-300 hover:bg-slate-800 hover:border-amber-400/50'
+                  : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-400'
+              }`}
+              title={isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {isDarkMode ? (
+                <>
+                  <Sun className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="text-slate-200 font-medium">Light Mode</span>
+                </>
+              ) : (
+                <>
+                  <Moon className="w-3.5 h-3.5 text-indigo-600" />
+                  <span className="text-slate-700 font-medium">Dark Mode</span>
+                </>
+              )}
+            </button>
+
             <button
               onClick={loadAllData}
               disabled={loading}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-colors ${
+                isDarkMode
+                  ? 'bg-slate-900 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800'
+                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+              }`}
               title="Refresh database records"
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-blue-600' : ''}`} />
-              <span>Refresh</span>
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-blue-500' : ''}`} />
+              <span className="hidden sm:inline">Refresh</span>
             </button>
 
             {/* Profile Avatar Quick Pill with Dropdown */}
             <div className="relative">
               <button
                 onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                className="flex items-center gap-2.5 p-1.5 pr-3 rounded-full bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 transition-all text-xs font-semibold"
+                className={`flex items-center gap-2.5 p-1.5 pr-3 rounded-full border transition-all text-xs font-semibold ${
+                  isDarkMode
+                    ? 'bg-slate-900 hover:bg-slate-850 border-slate-800 text-slate-200 ring-1 ring-blue-500/20'
+                    : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700 shadow-xs'
+                }`}
               >
-                <div className="w-7 h-7 rounded-full ring-2 ring-blue-100 overflow-hidden bg-blue-50 flex items-center justify-center shrink-0">
+                <div className="w-7 h-7 rounded-full ring-2 ring-blue-500/30 overflow-hidden bg-slate-800 flex items-center justify-center shrink-0">
                   {profileForm.avatar_url ? (
                     <img
                       src={profileForm.avatar_url}
@@ -1215,70 +1426,105 @@ export const AdminDashboard: React.FC = () => {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full bg-gradient-to-tr from-blue-500 via-sky-400 to-cyan-300 text-white font-black text-[10px] flex items-center justify-center select-none shadow-inner">
-                      {getAdminInitials(profileForm.full_name)}
+                    <div className="w-full h-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold text-[10px] flex items-center justify-center select-none shadow-inner">
+                      {getAdminInitials(cleanAdminName)}
                     </div>
                   )}
                 </div>
-                <span className="max-w-[120px] truncate">{profileForm.full_name.split(' ')[0]}</span>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                <span className="max-w-[120px] truncate">{cleanAdminName.split(' ')[0]}</span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${profileDropdownOpen ? 'rotate-180 text-blue-400' : 'text-slate-400'}`} />
               </button>
 
               {/* Profile Dropdown Menu */}
               {profileDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-200 py-2 z-50 animate-fadeIn">
-                  <div className="px-4 py-3 border-b border-slate-100">
-                    <p className="text-xs font-bold text-slate-900">{profileForm.full_name}</p>
-                    <p className="text-[11px] text-slate-500 font-mono">admin@cmritonline.ac.in</p>
-                    <div className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-[10px] font-bold">
-                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                <div
+                  className={`absolute right-0 mt-2 w-64 rounded-xl shadow-2xl border py-1.5 z-50 transition-all duration-150 ease-out origin-top-right animate-fadeIn ${
+                    isDarkMode ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+                  }`}
+                >
+                  <div className={`px-4 py-3 border-b ${isDarkMode ? 'border-slate-800/80' : 'border-slate-100'}`}>
+                    <p className={`text-xs font-bold truncate ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>{cleanAdminName}</p>
+                    <p className={`text-[11px] font-mono truncate ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>{user?.email || 'admin@cmritsi.in'}</p>
+                    <div className="mt-1.5 inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[10px] font-semibold">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                       Student Admin
                     </div>
                   </div>
 
                   <div className="py-1 text-xs">
+                    {/* Theme Toggle Button inside Dropdown */}
                     <button
                       onClick={() => {
-                        setActiveTab('profile');
-                        setProfileSubTab('overview');
+                        toggleTheme();
                         setProfileDropdownOpen(false);
                       }}
-                      className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2.5 text-slate-700 font-medium"
+                      className={`w-full text-left px-4 py-2 flex items-center justify-between font-medium transition-colors ${
+                        isDarkMode ? 'text-slate-200 hover:bg-slate-800 hover:text-white' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
+                      }`}
                     >
-                      <User className="w-4 h-4 text-blue-600" />
-                      <span>View Full Profile</span>
+                      <div className="flex items-center gap-2.5">
+                        {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-600" />}
+                        <span>{isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}</span>
+                      </div>
+                      <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                        {isDarkMode ? 'Dark' : 'Light'}
+                      </span>
+                    </button>
+
+                    <button
+                      onClick={() => handleTabChange('profile')}
+                      className={`w-full text-left px-4 py-2 flex items-center justify-between font-medium transition-colors ${
+                        activeTab === 'profile'
+                          ? 'text-blue-500 bg-blue-500/10 font-semibold'
+                          : isDarkMode ? 'text-slate-200 hover:bg-slate-800 hover:text-white' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <User className="w-4 h-4 text-blue-500" />
+                        <span>Profile</span>
+                      </div>
+                      {activeTab === 'profile' && <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />}
                     </button>
                     <button
-                      onClick={() => {
-                        setActiveTab('profile');
-                        setProfileSubTab('edit');
-                        setProfileDropdownOpen(false);
-                      }}
-                      className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2.5 text-slate-700 font-medium"
+                      onClick={() => handleTabChange('settings')}
+                      className={`w-full text-left px-4 py-2 flex items-center justify-between font-medium transition-colors ${
+                        activeTab === 'settings'
+                          ? 'text-blue-500 bg-blue-500/10 font-semibold'
+                          : isDarkMode ? 'text-slate-200 hover:bg-slate-800 hover:text-white' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
+                      }`}
                     >
-                      <Pencil className="w-4 h-4 text-indigo-600" />
-                      <span>Edit Profile Details</span>
+                      <div className="flex items-center gap-2.5">
+                        <Sliders className="w-4 h-4 text-indigo-500" />
+                        <span>Account Settings</span>
+                      </div>
+                      {activeTab === 'settings' && <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />}
                     </button>
                     <button
-                      onClick={() => {
-                        setActiveTab('profile');
-                        setProfileSubTab('security');
-                        setProfileDropdownOpen(false);
-                      }}
-                      className="w-full text-left px-4 py-2 hover:bg-slate-50 flex items-center gap-2.5 text-slate-700 font-medium"
+                      onClick={() => handleTabChange('security')}
+                      className={`w-full text-left px-4 py-2 flex items-center justify-between font-medium transition-colors ${
+                        activeTab === 'security'
+                          ? 'text-blue-500 bg-blue-500/10 font-semibold'
+                          : isDarkMode ? 'text-slate-200 hover:bg-slate-800 hover:text-white' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
+                      }`}
                     >
-                      <Key className="w-4 h-4 text-amber-600" />
-                      <span>Security &amp; Password</span>
+                      <div className="flex items-center gap-2.5">
+                        <Shield className="w-4 h-4 text-amber-500" />
+                        <span>Security</span>
+                      </div>
+                      {activeTab === 'security' && <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />}
                     </button>
                   </div>
 
-                  <div className="border-t border-slate-100 pt-1">
+                  <div className={`border-t pt-1 ${isDarkMode ? 'border-slate-800/80' : 'border-slate-100'}`}>
                     <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 hover:bg-rose-50 flex items-center gap-2.5 text-rose-600 font-semibold text-xs"
+                      onClick={() => {
+                        setProfileDropdownOpen(false);
+                        setLogoutModalOpen(true);
+                      }}
+                      className="w-full text-left px-4 py-2 hover:bg-rose-500/10 flex items-center gap-2.5 text-rose-500 hover:text-rose-400 font-semibold text-xs transition-colors"
                     >
                       <LogOut className="w-4 h-4" />
-                      <span>Sign Out</span>
+                      <span>Logout</span>
                     </button>
                   </div>
                 </div>
@@ -2429,564 +2675,36 @@ export const AdminDashboard: React.FC = () => {
           )}
 
           {/* ======================================================= */}
-          {/* TAB: COMPREHENSIVE INTERACTIVE ADMIN PROFILE */}
+          {/* TAB: 1. ADMINISTRATOR PROFILE (STANDALONE) */}
           {/* ======================================================= */}
           {activeTab === 'profile' && (
-            <div className="space-y-6 max-w-5xl">
-              {/* Student Admin Profile Banner Card - Retaining original dark theme */}
-              <div className="bg-slate-900 rounded-2xl border border-slate-800 p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
-                <div className="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-500" />
-                <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-                    {/* Avatar with live status indicator and direct photo upload */}
-                    <div className="relative shrink-0">
-                      <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl ring-4 ring-sky-400/40 shadow-lg shadow-sky-500/20 bg-slate-800 flex items-center justify-center overflow-hidden">
-                        {profileForm.avatar_url ? (
-                          <img
-                            src={profileForm.avatar_url}
-                            alt={cleanAdminName}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-gradient-to-tr from-blue-500 via-sky-400 to-cyan-300 flex flex-col items-center justify-center text-white select-none shadow-inner">
-                            <span className="text-2xl sm:text-3xl font-black tracking-wider drop-shadow-sm">
-                              {getAdminInitials(cleanAdminName)}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      <label
-                        className="absolute -bottom-1 -right-1 p-1.5 rounded-full bg-blue-600 hover:bg-blue-500 text-white shadow-md border-2 border-slate-900 cursor-pointer transition-transform hover:scale-110 flex items-center justify-center"
-                        title="Upload picture from device"
-                      >
-                        <Upload className="w-3.5 h-3.5" />
-                        <input
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) =>
-                            handleImageFileUpload(e, 'avatars', async (url) => {
-                              setProfileForm((prev) => ({ ...prev, avatar_url: url }));
-                              await updateProfile({ avatar_url: url });
-                            })
-                          }
-                        />
-                      </label>
-                    </div>
+            <AdminProfileView
+              profileForm={profileForm}
+              setProfileForm={setProfileForm}
+              onSaveProfile={handleSaveProfile}
+              updatingProfile={updatingProfile}
+              showToast={showToast}
+              adminEmail={user?.email || 'admin@cmritsi.in'}
+              isDarkMode={isDarkMode}
+            />
+          )}
 
-                    <div className="space-y-1.5">
-                      <div className="flex flex-wrap items-center gap-2.5">
-                        <h2 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
-                          {cleanAdminName}
-                        </h2>
-                        <span className="px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 text-xs font-bold flex items-center gap-1">
-                          <Award className="w-3 h-3 text-blue-400" />
-                          Student Admin
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-300 font-medium">
-                        {profileForm.designation} &bull; <span className="text-slate-400">{profileForm.department}</span>
-                      </p>
-                      <div className="flex flex-wrap items-center gap-3 text-xs text-slate-300 pt-1">
-                        <div className="flex items-center gap-1.5 bg-slate-800/80 px-3 py-1 rounded-lg border border-slate-700/80 font-mono text-slate-200">
-                          <Mail className="w-3.5 h-3.5 text-blue-400" />
-                          <span>admin@cmritonline.ac.in</span>
-                          <button
-                            onClick={() => copyToClipboard('admin@cmritonline.ac.in', 'Admin Email')}
-                            className="text-slate-400 hover:text-white ml-1.5"
-                            title="Copy email"
-                          >
-                            <Copy className="w-3 h-3" />
-                          </button>
-                        </div>
-                        <div className="flex items-center gap-1.5 bg-slate-800/80 px-3 py-1 rounded-lg border border-slate-700/80 text-slate-200">
-                          <Building className="w-3.5 h-3.5 text-indigo-400" />
-                          <span>CMRIT Campus, Bengaluru</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+          {/* TAB: 2. ACCOUNT SETTINGS (STANDALONE) */}
+          {activeTab === 'settings' && (
+            <AdminAccountSettingsView
+              showToast={showToast}
+              isDarkMode={isDarkMode}
+              onToggleTheme={toggleTheme}
+            />
+          )}
 
-                  {/* Header Quick Buttons */}
-                  <div className="flex sm:flex-row md:flex-col gap-2 w-full md:w-auto">
-                    <button
-                      onClick={() => setProfileSubTab('edit')}
-                      className="flex-1 md:flex-initial inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-sm shadow-blue-600/20"
-                    >
-                      <Pencil className="w-3.5 h-3.5" />
-                      <span>Edit Details</span>
-                    </button>
-                    <button
-                      onClick={() => setProfileSubTab('security')}
-                      className="flex-1 md:flex-initial inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-all"
-                    >
-                      <Key className="w-3.5 h-3.5 text-amber-400" />
-                      <span>Password &amp; Security</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Sub-strip of chapter details */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-5 border-t border-slate-800 text-xs">
-                  <div className="bg-slate-800/80 p-3 rounded-xl border border-slate-700/80">
-                    <span className="text-slate-400 block text-[11px] font-medium">Role</span>
-                    <span className="text-white font-bold">{profileForm.designation}</span>
-                  </div>
-                  <div className="bg-slate-800/80 p-3 rounded-xl border border-slate-700/80">
-                    <span className="text-slate-400 block text-[11px] font-medium">Chapter Code</span>
-                    <span className="text-blue-400 font-bold font-mono">CSI-CMRIT-4601</span>
-                  </div>
-                  <div className="bg-slate-800/80 p-3 rounded-xl border border-slate-700/80">
-                    <span className="text-slate-400 block text-[11px] font-medium">Department</span>
-                    <span className="text-slate-200 font-bold">Dept. of CSE</span>
-                  </div>
-                  <div className="bg-slate-800/80 p-3 rounded-xl border border-slate-700/80">
-                    <span className="text-slate-400 block text-[11px] font-medium">Login ID</span>
-                    <span className="text-slate-200 font-bold font-mono">admin@cmritonline.ac.in</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Profile Sub-navigation Bar */}
-              <div className="flex border-b border-slate-200 bg-white rounded-t-xl px-4 pt-2 shadow-xs">
-                <button
-                  onClick={() => setProfileSubTab('overview')}
-                  className={`px-5 py-3 text-xs font-bold border-b-2 transition-all flex items-center gap-2 ${
-                    profileSubTab === 'overview'
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-slate-500 hover:text-slate-800'
-                  }`}
-                >
-                  <User className="w-4 h-4" />
-                  <span>Profile Overview</span>
-                </button>
-                <button
-                  onClick={() => setProfileSubTab('edit')}
-                  className={`px-5 py-3 text-xs font-bold border-b-2 transition-all flex items-center gap-2 ${
-                    profileSubTab === 'edit'
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-slate-500 hover:text-slate-800'
-                  }`}
-                >
-                  <Pencil className="w-4 h-4" />
-                  <span>Edit Profile</span>
-                </button>
-                <button
-                  onClick={() => setProfileSubTab('security')}
-                  className={`px-5 py-3 text-xs font-bold border-b-2 transition-all flex items-center gap-2 ${
-                    profileSubTab === 'security'
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-slate-500 hover:text-slate-800'
-                  }`}
-                >
-                  <Lock className="w-4 h-4" />
-                  <span>Password &amp; Security</span>
-                </button>
-              </div>
-
-              {/* Profile Sub-tab 1: OVERVIEW & DETAILS */}
-              {profileSubTab === 'overview' && (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {/* Left 2 Cols: Details & Bio */}
-                  <div className="lg:col-span-2 space-y-6">
-                    <div className="bg-white rounded-xl border border-slate-200 shadow-subtle p-6 space-y-5">
-                      <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                        <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                          <User className="w-4 h-4 text-blue-600" />
-                          <span>Student Admin Profile</span>
-                        </h3>
-                        <button
-                          onClick={() => setProfileSubTab('edit')}
-                          className="text-xs text-blue-600 font-semibold hover:underline"
-                        >
-                          Edit Details
-                        </button>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                        <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-slate-400 block text-[11px] font-semibold">Name</span>
-                          <span className="text-slate-900 font-bold text-sm">{cleanAdminName}</span>
-                        </div>
-                        <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-slate-400 block text-[11px] font-semibold">Login Email</span>
-                          <span className="text-blue-600 font-mono font-bold text-xs">admin@cmritonline.ac.in</span>
-                        </div>
-                        <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-slate-400 block text-[11px] font-semibold">Role</span>
-                          <span className="text-slate-800 font-semibold">{profileForm.designation}</span>
-                        </div>
-                        <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-slate-400 block text-[11px] font-semibold">Department / Branch</span>
-                          <span className="text-slate-800 font-semibold">{profileForm.department}</span>
-                        </div>
-                        <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-slate-400 block text-[11px] font-semibold">Phone</span>
-                          <span className="text-slate-800 font-semibold">{profileForm.phone}</span>
-                        </div>
-                        <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
-                          <span className="text-slate-400 block text-[11px] font-semibold">College</span>
-                          <span className="text-slate-800 font-semibold">CMRIT Bengaluru (AECS Layout)</span>
-                        </div>
-                      </div>
-
-                      <div className="pt-2">
-                        <span className="text-slate-400 block text-[11px] font-semibold mb-1.5">About / Bio</span>
-                        <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 text-slate-700 text-xs leading-relaxed">
-                          &ldquo;{profileForm.bio}&rdquo;
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Chapter Responsibilities Card */}
-                    <div className="bg-white rounded-xl border border-slate-200 shadow-subtle p-6 space-y-4">
-                      <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                        <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                        <span>Chapter Management Access (Active)</span>
-                      </h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
-                        {[
-                          'Manage & Publish Events',
-                          'Official Notices & Circulars',
-                          'Chapter Gallery & Photo Highlights',
-                          'Smart India Hackathon Cell',
-                          'Comments Moderation & Spam Shield',
-                          'Student Membership Applications',
-                          'Direct Visitor Inquiries',
-                          'Cloud Assets & Storage Buckets'
-                        ].map((priv, idx) => (
-                          <div key={idx} className="flex items-center gap-2 p-2.5 rounded-lg bg-slate-50 border border-slate-100">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                            <span className="text-slate-800 font-semibold text-[11px]">{priv}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Right 1 Col: Session Status */}
-                  <div className="space-y-6">
-                    <div className="bg-white rounded-xl border border-slate-200 shadow-subtle p-6 space-y-4 text-xs">
-                      <h4 className="font-bold text-slate-900 flex items-center gap-2">
-                        <Shield className="w-4 h-4 text-blue-600" />
-                        <span>Account Status</span>
-                      </h4>
-
-                      <div className="space-y-2.5">
-                        <div className="flex justify-between py-1.5 border-b border-slate-100">
-                          <span className="text-slate-500">Admin Email</span>
-                          <span className="font-mono font-semibold text-slate-800">admin@cmritonline.ac.in</span>
-                        </div>
-                        <div className="flex justify-between py-1.5 border-b border-slate-100">
-                          <span className="text-slate-500">Role</span>
-                          <span className="font-bold text-slate-800">{profileForm.designation}</span>
-                        </div>
-                        <div className="flex justify-between py-1.5 border-b border-slate-100">
-                          <span className="text-slate-500">Session</span>
-                          <span className="font-semibold text-emerald-600 flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                            Signed In
-                          </span>
-                        </div>
-                        <div className="flex justify-between py-1.5">
-                          <span className="text-slate-500">Account Type</span>
-                          <span className="font-semibold text-blue-600">Student Admin</span>
-                        </div>
-                      </div>
-
-                      <div className="pt-2">
-                        <button
-                          onClick={() => copyToClipboard(`CSI CMRIT Student Admin\nName: ${cleanAdminName}\nRole: ${profileForm.designation}\nEmail: admin@cmritonline.ac.in\nDepartment: ${profileForm.department}\nCollege: CMR Institute of Technology, Bengaluru`, 'Student Admin Info')}
-                          className="w-full py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs flex items-center justify-center gap-2 transition-colors border border-slate-200"
-                        >
-                          <Copy className="w-3.5 h-3.5 text-slate-600" />
-                          <span>Copy Admin Info</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Chapter Affiliation Info */}
-                    <div className="bg-white rounded-xl border border-slate-200 shadow-subtle p-6 space-y-3 text-xs">
-                      <div className="flex items-center gap-2.5">
-                        <div className="p-2 rounded-lg bg-blue-50 text-blue-600">
-                          <Building className="w-4 h-4" />
-                        </div>
-                        <div>
-                          <h4 className="font-bold text-slate-900">Chapter Affiliation</h4>
-                          <p className="text-[11px] text-slate-500">Computer Society of India</p>
-                        </div>
-                      </div>
-                      <p className="text-slate-600 text-xs leading-relaxed">
-                        Computer Society of India (CSI) student branch at CMR Institute of Technology, affiliated with Region V (Bangalore Chapter).
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Profile Sub-tab 2: EDIT PROFILE */}
-              {profileSubTab === 'edit' && (
-                <div className="bg-white rounded-xl border border-slate-200 shadow-subtle p-6 sm:p-8">
-                  <div className="pb-4 border-b border-slate-100 mb-6">
-                    <h3 className="text-base font-bold text-slate-900">Edit Profile</h3>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      Update your name, role, department details, and profile photo
-                    </p>
-                  </div>
-
-                  <form onSubmit={handleSaveProfile} className="space-y-6 text-xs max-w-2xl">
-                    {/* Profile Picture Upload & Customization */}
-                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <label className="block font-semibold text-slate-900 text-xs">
-                            Profile Picture
-                          </label>
-                          <p className="text-[11px] text-slate-500 mt-0.5">
-                            Initials monogram is shown by default. You can also upload a photo from your device.
-                          </p>
-                        </div>
-                        {profileForm.avatar_url && (
-                          <button
-                            type="button"
-                            onClick={() => setProfileForm({ ...profileForm, avatar_url: '' })}
-                            className="text-xs font-semibold text-rose-600 hover:text-rose-700 underline"
-                          >
-                            Remove Picture
-                          </button>
-                        )}
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-4 pt-1">
-                        {/* Live Avatar Preview */}
-                        <div className="w-16 h-16 rounded-2xl overflow-hidden ring-2 ring-slate-200 bg-slate-900 shrink-0 flex items-center justify-center shadow-sm">
-                          {profileForm.avatar_url ? (
-                            <img
-                              src={profileForm.avatar_url}
-                              alt="Profile Preview"
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-blue-600 to-indigo-700 text-white font-bold text-lg flex items-center justify-center select-none">
-                              {getAdminInitials(profileForm.full_name)}
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Upload Controls */}
-                        <div className="space-y-1.5 flex-1 min-w-[220px]">
-                          <label className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs cursor-pointer transition-colors shadow-xs">
-                            <Upload className="w-3.5 h-3.5" />
-                            <span>{uploadingImage ? 'Uploading Picture...' : 'Upload Picture from Device'}</span>
-                            <input
-                              type="file"
-                              accept="image/*"
-                              className="hidden"
-                              disabled={uploadingImage}
-                              onChange={(e) => handleImageFileUpload(e, 'avatars', (url) => setProfileForm((prev) => ({ ...prev, avatar_url: url })))}
-                            />
-                          </label>
-                          <span className="text-[10px] text-slate-400 block">
-                            PNG, JPG, or WebP up to 5MB. Stored and displayed across your dashboard.
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block font-semibold text-slate-700 mb-1">
-                          Full Name *
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={profileForm.full_name}
-                          onChange={(e) => setProfileForm({ ...profileForm, full_name: e.target.value })}
-                          placeholder="e.g. Sakshi / Student Coordinator"
-                          className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block font-semibold text-slate-700 mb-1">
-                          Admin Login Email
-                        </label>
-                        <input
-                          type="email"
-                          disabled
-                          value="admin@cmritonline.ac.in"
-                          className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-slate-500 font-mono cursor-not-allowed"
-                        />
-                        <span className="text-[10px] text-slate-400 mt-1 block">
-                          Standard login email for CSI chapter administration.
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block font-semibold text-slate-700 mb-1">
-                          Role / Designation
-                        </label>
-                        <input
-                          type="text"
-                          value={profileForm.designation}
-                          onChange={(e) => setProfileForm({ ...profileForm, designation: e.target.value })}
-                          placeholder="Student Coordinator"
-                          className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block font-semibold text-slate-700 mb-1">
-                          Department / Branch
-                        </label>
-                        <input
-                          type="text"
-                          value={profileForm.department}
-                          onChange={(e) => setProfileForm({ ...profileForm, department: e.target.value })}
-                          placeholder="Department of Computer Science & Engineering"
-                          className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block font-semibold text-slate-700 mb-1">
-                          Phone Number
-                        </label>
-                        <input
-                          type="text"
-                          value={profileForm.phone}
-                          onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
-                          placeholder="+91 80 2852 4466"
-                          className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block font-semibold text-slate-700 mb-1">
-                          Photo URL (Optional)
-                        </label>
-                        <input
-                          type="text"
-                          value={profileForm.avatar_url}
-                          onChange={(e) => setProfileForm({ ...profileForm, avatar_url: e.target.value })}
-                          placeholder="Paste image URL or upload above..."
-                          className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block font-semibold text-slate-700 mb-1">
-                        About / Bio
-                      </label>
-                      <textarea
-                        rows={3}
-                        value={profileForm.bio}
-                        onChange={(e) => setProfileForm({ ...profileForm, bio: e.target.value })}
-                        placeholder="Chapter summary, initiatives, or bio..."
-                        className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-
-                    <div className="pt-4 flex items-center justify-between border-t border-slate-100">
-                      <span className="text-slate-400 text-xs">
-                        Updates apply immediately across all dashboard screens.
-                      </span>
-                      <Button
-                        type="submit"
-                        variant="primary"
-                        size="md"
-                        disabled={updatingProfile}
-                        leftIcon={updatingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                      >
-                        {updatingProfile ? 'Saving Changes...' : 'Save Profile Changes'}
-                      </Button>
-                    </div>
-                  </form>
-                </div>
-              )}
-
-              {/* Profile Sub-tab 3: PASSWORD & SECURITY */}
-              {profileSubTab === 'security' && (
-                <div className="bg-white rounded-xl border border-slate-200 shadow-subtle p-6 sm:p-8 space-y-6 max-w-2xl">
-                  <div>
-                    <h3 className="text-base font-bold text-slate-900">Password &amp; Security</h3>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      Manage administrator access and account password
-                    </p>
-                  </div>
-
-                  {/* Single Admin Policy Info Box */}
-                  <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-3">
-                    <Shield className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-                    <div>
-                      <h4 className="font-bold text-amber-900 mb-0.5">Admin Account Access</h4>
-                      <p className="text-amber-800 leading-relaxed text-[11px]">
-                        Access is configured for chapter administrators using ID <strong className="font-mono">admin@cmritonline.ac.in</strong> and password <strong className="font-mono">admin123</strong>.
-                      </p>
-                    </div>
-                  </div>
-
-                  <form onSubmit={handleChangePassword} className="space-y-4 text-xs pt-2">
-                    <h4 className="font-bold text-slate-800 uppercase tracking-wider text-[11px]">
-                      Change Password
-                    </h4>
-
-                    <div>
-                      <label className="block font-semibold text-slate-700 mb-1">
-                        New Password
-                      </label>
-                      <div className="relative">
-                        <input
-                          type={showPassword ? 'text' : 'password'}
-                          value={newPassword}
-                          onChange={(e) => setNewPassword(e.target.value)}
-                          placeholder="Enter new password (min 6 characters)"
-                          className="w-full px-3.5 py-2.5 pr-10 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
-                        >
-                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </button>
-                      </div>
-                    </div>
-
-                    <div>
-                      <label className="block font-semibold text-slate-700 mb-1">
-                        Confirm New Password
-                      </label>
-                      <input
-                        type={showPassword ? 'text' : 'password'}
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        placeholder="Re-enter new password"
-                        className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-
-                    <div className="pt-3">
-                      <Button
-                        type="submit"
-                        variant="primary"
-                        size="md"
-                        disabled={updatingProfile}
-                        leftIcon={updatingProfile ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
-                      >
-                        {updatingProfile ? 'Updating Password...' : 'Update Password'}
-                      </Button>
-                    </div>
-                  </form>
-                </div>
-              )}
-            </div>
+          {/* TAB: 3. SECURITY & AUTHENTICATION (STANDALONE) */}
+          {activeTab === 'security' && (
+            <AdminSecurityView
+              showToast={showToast}
+              adminEmail={user?.email || 'admin@cmritsi.in'}
+              isDarkMode={isDarkMode}
+            />
           )}
         </div>
       </main>
@@ -3528,6 +3246,168 @@ export const AdminDashboard: React.FC = () => {
                 </Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================= */}
+      {/* MODAL: LOGOUT CONFIRMATION DIALOG */}
+      {/* ======================================================= */}
+      {logoutModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+          <div className="bg-[#0b1329] border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl animate-scaleUp text-slate-100">
+            <div className="w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mb-4">
+              <LogOut className="w-6 h-6" />
+            </div>
+            <h3 className="text-lg font-bold text-white mb-2">Sign Out Confirmation</h3>
+            <p className="text-sm text-slate-400 leading-relaxed mb-6">
+              Are you sure you want to end your administrator session? You will need to enter your admin credentials again to access the CSI CMRIT administration panel.
+            </p>
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+              <button
+                type="button"
+                onClick={() => setLogoutModalOpen(false)}
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setLogoutModalOpen(false);
+                  handleLogout();
+                }}
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-rose-600 hover:bg-rose-500 shadow-md shadow-rose-600/30 transition-all"
+              >
+                Confirm Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ======================================================= */}
+      {/* MODAL: SLEEK IN-APP CONFIRMATION DIALOG */}
+      {/* ======================================================      {/* ======================================================= */}
+      {/* MODAL: SLEEK IN-APP CONFIRMATION DIALOG */}
+      {/* ======================================================= */}
+      <ConfirmDialog
+        isOpen={deleteDialog.isOpen}
+        isLoading={isDeleting}
+        isDarkMode={isDarkMode}
+        onClose={() => {
+          if (!isDeleting) setDeleteDialog(prev => ({ ...prev, isOpen: false }));
+        }}
+        onConfirm={executeConfirmDelete}
+        title={
+          deleteDialog.type === 'event'
+            ? 'Delete Chapter Event?'
+            : deleteDialog.type === 'announcement'
+            ? 'Delete Announcement?'
+            : deleteDialog.type === 'highlight'
+            ? 'Delete Gallery Photo?'
+            : deleteDialog.type === 'sih'
+            ? 'Delete SIH Record?'
+            : deleteDialog.type === 'comment'
+            ? 'Delete Comment?'
+            : deleteDialog.type === 'application'
+            ? 'Delete Application?'
+            : 'Delete Inquiry Message?'
+        }
+        itemName={
+          deleteDialog.type !== 'comment' && deleteDialog.type !== 'message'
+            ? deleteDialog.title
+            : undefined
+        }
+        message={
+          deleteDialog.type === 'comment'
+            ? 'Are you sure you want to permanently delete this comment? This will remove it from the moderation queue and public view.'
+            : deleteDialog.type === 'message'
+            ? 'Are you sure you want to permanently delete this contact inquiry message?'
+            : undefined
+        }
+        confirmLabel={
+          deleteDialog.type === 'event'
+            ? 'Delete Event'
+            : deleteDialog.type === 'announcement'
+            ? 'Delete Announcement'
+            : deleteDialog.type === 'highlight'
+            ? 'Delete Photo'
+            : deleteDialog.type === 'sih'
+            ? 'Delete Record'
+            : deleteDialog.type === 'comment'
+            ? 'Delete Comment'
+            : 'Delete'
+        }
+      />
+
+      {/* ======================================================= */}
+      {/* MODAL: IN-APP BLOCK EMAIL DIALOG */}
+      {/* ======================================================= */}
+      {blockEmailDialog.isOpen && (
+        <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
+          <div
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity animate-fadeIn"
+            onClick={() => {
+              if (!isBlocking) setBlockEmailDialog(prev => ({ ...prev, isOpen: false }));
+            }}
+          />
+          <div className={`relative w-full max-w-md ${isDarkMode ? 'bg-[#0b1329] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'} rounded-2xl shadow-2xl border overflow-hidden transform transition-all z-10 animate-scaleUp p-6`}>
+            <div className="flex items-start gap-4 mb-4">
+              <div className="w-11 h-11 rounded-2xl bg-rose-50 text-rose-600 border border-rose-100 flex items-center justify-center shrink-0">
+                <Ban className="w-5 h-5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className={`text-base font-bold ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>Block Email Address</h3>
+                <p className={`text-xs mt-1 leading-relaxed ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                  Block <strong className={`font-semibold ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>{blockEmailDialog.email}</strong> from posting comments. All pending comments from this user will be rejected.
+                </p>
+              </div>
+              <button
+                onClick={() => setBlockEmailDialog(prev => ({ ...prev, isOpen: false }))}
+                disabled={isBlocking}
+                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-1.5 mb-6">
+              <label className={`block text-xs font-semibold ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>Reason for blocking</label>
+              <input
+                type="text"
+                value={blockEmailDialog.reason}
+                onChange={(e) => setBlockEmailDialog(prev => ({ ...prev, reason: e.target.value }))}
+                placeholder="e.g. Spam, inappropriate behavior, harassment"
+                className={`w-full px-3 py-2 text-xs border rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 ${
+                  isDarkMode ? 'bg-slate-900 border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'
+                }`}
+              />
+            </div>
+
+            <div className={`flex items-center justify-end gap-3 pt-4 border-t ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}>
+              <button
+                type="button"
+                disabled={isBlocking}
+                onClick={() => setBlockEmailDialog(prev => ({ ...prev, isOpen: false }))}
+                className={`px-4 py-2 rounded-xl text-xs font-semibold border transition-colors ${
+                  isDarkMode ? 'text-slate-300 hover:bg-slate-800 border-slate-700' : 'text-slate-700 hover:bg-slate-100 border-slate-200'
+                }`}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isBlocking}
+                onClick={executeConfirmBlockEmail}
+                className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 shadow-sm shadow-rose-600/20 transition-all flex items-center gap-1.5"
+              >
+                {isBlocking && (
+                  <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                )}
+                <span>Confirm Block</span>
+              </button>
+            </div>
           </div>
         </div>
       )}

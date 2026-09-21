@@ -11,6 +11,8 @@ import { Home } from './pages/Home';
 import { About } from './pages/About';
 import { Events } from './pages/Events';
 import { EventDetails } from './pages/EventDetails';
+import { GalleryPage } from './pages/GalleryPage';
+import { GalleryDetail } from './pages/GalleryDetail';
 import { ChapterHighlights } from './pages/ChapterHighlights';
 import { Announcements } from './pages/Announcements';
 import { AnnouncementDetails } from './pages/AnnouncementDetails';
@@ -82,7 +84,8 @@ export const App: React.FC = () => {
               <Route path="/about" element={<About />} />
               <Route path="/events" element={<Events />} />
               <Route path="/events/:id" element={<EventDetails />} />
-              <Route path="/gallery" element={<ChapterHighlights />} />
+              <Route path="/gallery" element={<GalleryPage />} />
+              <Route path="/gallery/:id" element={<GalleryDetail />} />
               <Route path="/highlights" element={<ChapterHighlights />} />
               <Route path="/announcements" element={<Announcements />} />
               <Route path="/announcements/:id" element={<AnnouncementDetails />} />
@@ -95,10 +98,42 @@ export const App: React.FC = () => {
             {/* Admin Section (Standalone Layout — no public Navbar/Footer) */}
             <Route path="/admin/login" element={<AdminLogin />} />
             <Route
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <AdminDashboard defaultTab="dashboard" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/admin/dashboard"
               element={
                 <ProtectedRoute>
-                  <AdminDashboard />
+                  <AdminDashboard defaultTab="dashboard" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/profile"
+              element={
+                <ProtectedRoute>
+                  <AdminDashboard defaultTab="profile" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/settings"
+              element={
+                <ProtectedRoute>
+                  <AdminDashboard defaultTab="settings" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/security"
+              element={
+                <ProtectedRoute>
+                  <AdminDashboard defaultTab="security" />
                 </ProtectedRoute>
               }
             />

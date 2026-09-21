@@ -2,6 +2,9 @@
 // Types for CSI CMRIT Application & Supabase Models
 // ==============================================================================
 
+// --- Content Status (shared across content types) ---
+export type ContentStatus = 'draft' | 'published' | 'unpublished' | 'archived';
+
 // --- Admin Authentication & Profile ---
 export type AdminRole = 'admin' | 'super_admin';
 
@@ -44,7 +47,7 @@ export interface EventItem {
   organizer?: string;
   highlights?: string[];
   registration_link?: string | null;
-  status?: 'draft' | 'published';
+  status?: ContentStatus;
   created_by?: string | null;
   created_at?: string;
   updated_at?: string;
@@ -78,6 +81,8 @@ export type AnnouncementCategory =
   | 'Registration'
   | 'Opportunity';
 
+export type AnnouncementPriority = 'high' | 'medium' | 'low' | 'normal';
+
 export interface AnnouncementItem {
   id: string;
   slug?: string;
@@ -87,7 +92,8 @@ export interface AnnouncementItem {
   content: string[] | string;
   image_url?: string | null;
   attachment_url?: string | null;
-  status?: 'draft' | 'published';
+  priority?: AnnouncementPriority;
+  status?: ContentStatus;
   published_at?: string | null;
   created_by?: string | null;
   created_at?: string;
@@ -122,7 +128,7 @@ export interface ChapterHighlightItem {
   event_date?: string | null;
   caption?: string | null;
   image_url?: string;
-  status?: 'draft' | 'published';
+  status?: ContentStatus;
   created_at?: string;
   updated_at?: string;
 
@@ -135,6 +141,46 @@ export interface ChapterHighlightItem {
 }
 
 export type GalleryItem = ChapterHighlightItem;
+
+// --- Gallery Posts (Multi-image gallery system) ---
+export interface GalleryPost {
+  id: string;
+  slug: string;
+  title: string;
+  description?: string | null;
+  category: string;
+  cover_image?: string | null;
+  event_date?: string | null;
+  tags?: string[];
+  status: ContentStatus;
+  created_by?: string | null;
+  created_at: string;
+  updated_at?: string;
+  // Joined data
+  images?: GalleryImage[];
+  image_count?: number;
+}
+
+export interface GalleryImage {
+  id: string;
+  gallery_post_id: string;
+  image_url: string;
+  caption?: string | null;
+  display_order: number;
+  created_at?: string;
+}
+
+// --- Activity Log ---
+export interface ActivityLogItem {
+  id: string;
+  admin_id?: string | null;
+  admin_name?: string | null;
+  action: string;
+  target_type: string;
+  target_id?: string | null;
+  target_title?: string | null;
+  created_at: string;
+}
 
 // --- SIH Items (Teams, Projects, Achievements, Updates) ---
 export type SihItemType = 'team' | 'project' | 'update' | 'achievement' | 'problem_statement' | string;
@@ -150,7 +196,7 @@ export interface SihItem {
   team_name?: string;
   problem_code?: string;
   image_url?: string | null;
-  status?: 'draft' | 'published' | string;
+  status?: ContentStatus | string;
   is_published?: boolean;
   created_at?: string;
   updated_at?: string;
@@ -191,7 +237,7 @@ export interface ContactMessage {
 }
 
 // --- Comments System ---
-export type CommentTargetType = 'highlight' | 'event' | 'announcement';
+export type CommentTargetType = 'highlight' | 'event' | 'announcement' | 'gallery_post';
 
 export interface CommentItem {
   id: string;
