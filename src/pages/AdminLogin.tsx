@@ -43,8 +43,9 @@ export const AdminLogin: React.FC = () => {
       return;
     }
 
-    if (cleanEmail !== 'admin@cmritonline.ac.in' || cleanPass !== 'admin123') {
-      const msg = 'Invalid credentials. Only admin@cmritonline.ac.in with password admin123 can log in.';
+    const isValidAdmin = (cleanEmail === 'admin@cmritsi.in' || cleanEmail === 'admin@cmritonline.ac.in') && cleanPass === 'admin123';
+    if (!isValidAdmin) {
+      const msg = 'Invalid credentials. Please use admin@cmritsi.in or admin@cmritonline.ac.in with password admin123.';
       setErrorMessage(msg);
       showToast(msg, 'error');
       triggerShake();

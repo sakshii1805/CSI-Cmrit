@@ -10,19 +10,26 @@ export const Announcements: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<AnnouncementCategory>('All');
 
-  useEffect(() => {
-    async function loadAnnouncements() {
-      try {
-        setLoading(true);
-        const res = await announcementsService.getPublishedAnnouncements();
-        setAnnouncements(res.data || []);
-      } catch (err) {
-        console.error('Failed to load announcements:', err);
-      } finally {
-        setLoading(false);
-      }
+  async function loadAnnouncements() {
+    try {
+      setLoading(true);
+      const res = await announcementsService.getPublishedAnnouncements();
+      setAnnouncements(res.data || []);
+    } catch (err) {
+      console.error('Failed to load announcements:', err);
+    } finally {
+      setLoading(false);
     }
+  }
+
+  useEffect(() => {
     loadAnnouncements();
+
+    const handleUpdate = () => {
+      loadAnnouncements();
+    };
+    window.addEventListener('csi_content_updated', handleUpdate);
+    return () => window.removeEventListener('csi_content_updated', handleUpdate);
   }, []);
 
   const categories: AnnouncementCategory[] = [
@@ -123,8 +130,8 @@ export const Announcements: React.FC = () => {
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
                 className={`text-xs px-3.5 py-1.5 rounded-full font-medium whitespace-nowrap transition-all ${selectedCategory === cat
-                    ? 'bg-blue-600 text-white shadow-xs font-semibold'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200/60'
+                  ? 'bg-blue-600 text-white shadow-xs font-semibold'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200/60'
                   }`}
               >
                 {cat}

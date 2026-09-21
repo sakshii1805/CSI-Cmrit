@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 import { eventsService } from '../services/eventsService';
 import { EventItem } from '../types';
-import { mockEvents } from '../data/events';
 import { Badge } from '../components/common/Badge';
 import { Button } from '../components/common/Button';
 import { RegisterModal } from '../components/events/RegisterModal';
@@ -23,8 +22,8 @@ import { useToast } from '../components/common/Toast';
 export const EventDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const { showToast } = useToast();
-  const [event, setEvent] = useState<EventItem | null>(() => mockEvents.find((e) => e.slug === id || e.id === id) || null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [event, setEvent] = useState<EventItem | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
 
   useEffect(() => {
@@ -271,6 +270,16 @@ export const EventDetails: React.FC = () => {
           </div>
         </div>
       </div>
+      {/* Public Comments Section */}
+      {event && (
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+          <CommentSection
+            targetType="event"
+            targetId={event.id}
+            targetTitle={event.title}
+          />
+        </div>
+      )}
 
       {/* Registration Modal Dialog */}
       <RegisterModal

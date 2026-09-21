@@ -40,13 +40,11 @@ export const getSavedProfile = (): AdminProfile => {
     if (saved) {
       const parsed = JSON.parse(saved);
       let changed = false;
+      // Only fix empty names or known dummy placeholders
       if (
         !parsed.full_name ||
         parsed.full_name === 'CMRIT CSI Administrator' ||
-        parsed.full_name === 'Prof. Rajesh Sharma' ||
-        parsed.full_name === 'Student Administrator' ||
-        parsed.full_name.includes('(Dev)') ||
-        parsed.full_name.includes('Dev')
+        parsed.full_name === 'Prof. Rajesh Sharma'
       ) {
         parsed.full_name = 'Student Admin';
         changed = true;
@@ -58,18 +56,9 @@ export const getSavedProfile = (): AdminProfile => {
       }
       if (
         !parsed.designation ||
-        parsed.designation.includes('Faculty') ||
         parsed.designation === 'Lead Faculty Coordinator / Chapter Lead'
       ) {
         parsed.designation = 'Student Coordinator';
-        changed = true;
-      }
-      if (
-        !parsed.bio ||
-        parsed.bio.includes('Faculty Coordinator') ||
-        parsed.bio.includes('Student administrator for the Computer Society of India')
-      ) {
-        parsed.bio = 'Student coordinator for CSI CMRIT chapter. Managing chapter events, workshops, hackathons, and technical community activities.';
         changed = true;
       }
       const merged = { ...DEFAULT_ADMIN_PROFILE, ...parsed };
@@ -152,6 +141,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             .update({
               full_name: updated.full_name,
               avatar_url: updated.avatar_url,
+              phone: updated.phone,
+              designation: updated.designation,
+              department: updated.department,
+              bio: updated.bio,
               updated_at: updated.updated_at
             })
             .eq('id', user.id);
@@ -176,10 +169,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             const savedProfile = getSavedProfile();
             // Strictly check that the session belongs to admin@cmritonline.ac.in
             if (parsed.user?.email?.toLowerCase() === 'admin@cmritonline.ac.in') {
-              let cleanFullName = (parsed.profile?.full_name?.includes('(Dev)') || parsed.user?.user_metadata?.full_name?.includes('(Dev)'))
-                ? 'Student Admin'
-                : (parsed.profile?.full_name || savedProfile.full_name);
-              if (!cleanFullName || cleanFullName === 'CMRIT CSI Administrator' || cleanFullName === 'Prof. Rajesh Sharma' || cleanFullName === 'Student Administrator') {
+              let cleanFullName = savedProfile.full_name || parsed.profile?.full_name || 'Student Admin';
+              if (cleanFullName === 'CMRIT CSI Administrator' || cleanFullName === 'Prof. Rajesh Sharma') {
                 cleanFullName = 'Student Admin';
               }
               let cleanAvatar = parsed.profile?.avatar_url ?? savedProfile.avatar_url ?? '';
