@@ -53,9 +53,6 @@ export const Home: React.FC = () => {
               <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.15]">
                 Upcoming Events &amp; Workshops
               </h2>
-              <p className="text-sm sm:text-base text-slate-600 max-w-2xl leading-relaxed">
-                Register for hands-on technical bootcamps, 24-hour hackathons, and competitive coding sprints hosted by CSI CMRIT.
-              </p>
             </div>
 
             <Link
@@ -120,27 +117,28 @@ export const Home: React.FC = () => {
                       <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80">
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Prizes</span>
                         <span className="text-sm font-black text-slate-900 mt-0.5 block">₹35,000 Pool</span>
-                        <span className="text-[10px] text-emerald-600 font-semibold">1st: ₹20k · 2nd: ₹10k</span>
+
                       </div>
 
                       <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80">
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Prelims</span>
                         <span className="text-sm font-black text-slate-900 mt-0.5 block">26 Sept 2026</span>
-                        <span className="text-[10px] text-blue-600 font-semibold">8-10 min pitch + Q&amp;A</span>
+
                       </div>
 
                       <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 col-span-2 sm:col-span-1">
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Team Size</span>
                         <span className="text-sm font-black text-slate-900 mt-0.5 block">6 Members</span>
-                        <span className="text-[10px] text-purple-600 font-semibold">CMRIT · Min 1 Girl</span>
+
                       </div>
                     </div>
 
                     {/* Coordinators & Registration Info */}
                     <div className="pt-2 text-xs text-slate-500 space-y-1">
                       <p>
-                        <strong className="text-slate-700">Student Coordinators:</strong> B. Akshitha (+91 95734 69911) &amp; Medi Sumeet (+91 80748 29165)
+                        <strong className="text-slate-700">Student Coordinators:</strong> B. Akshitha (+91 95734 69911) <br></br>&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp; Medi Sumeet (+91 80748 29165)
                       </p>
+                      <br></br>
                       <p>
                         <strong className="text-slate-700">Fee:</strong> ₹1,200 per team (Applicable only for shortlisted teams)
                       </p>

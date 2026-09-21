@@ -62,17 +62,14 @@ export const Navbar: React.FC = () => {
               className={`flex items-center gap-2.5 transition-all duration-500 overflow-hidden ${isScrolled ? 'max-w-0 opacity-0' : 'max-w-xs opacity-100'
                 }`}
             >
-              {/* Vertical divider */}
-              <div className="h-8 w-px bg-slate-600/70 shrink-0" />
-
               {/* Text */}
               <div className="flex flex-col gap-0.5 min-w-0">
                 <span className="text-[11px] sm:text-[12px] font-semibold text-white whitespace-nowrap tracking-tight leading-none">
                   Computer Society of India
                 </span>
                 <span className="inline-flex items-center gap-1 whitespace-nowrap">
-                  <span className="text-[9px] sm:text-[10px] font-medium text-slate-400  tracking-widest leading-none">
-                    CMRIT Chapter
+                  <span className="text-[8px] sm:text-[9px] font-medium text-slate-400 tracking-widest leading-none whitespace-nowrap">
+                    CMRIT Student Chapter
                   </span>
                 </span>
               </div>
