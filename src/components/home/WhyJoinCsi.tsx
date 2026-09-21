@@ -49,7 +49,7 @@ export const WhyJoinCsi: React.FC = () => {
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-indigo-50/40 rounded-full blur-3xl pointer-events-none -mr-20 -mb-20" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 text-blue-700 text-xs font-semibold tracking-wider uppercase">
@@ -99,15 +99,9 @@ export const WhyJoinCsi: React.FC = () => {
         {/* Bottom CTA Banner */}
         <div className="rounded-3xl bg-gradient-to-r from-slate-950 via-[#0a1b33] to-slate-950 p-8 sm:p-12 text-white border border-slate-800 shadow-xl flex flex-col lg:flex-row items-center justify-between gap-8">
           <div className="space-y-3 text-center lg:text-left max-w-xl">
-            <span className="text-xs font-bold uppercase tracking-widest text-blue-400">
-              Open to all branches &amp; years
-            </span>
             <h3 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
               Ready to elevate your engineering journey?
             </h3>
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Membership registration is open for undergraduate students of CMR Institute of Technology, Hyderabad.
-            </p>
           </div>
 
           <div className="flex items-center gap-3 sm:gap-4 flex-wrap justify-center shrink-0">
