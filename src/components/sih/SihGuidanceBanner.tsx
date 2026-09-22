@@ -216,11 +216,11 @@ export const SihGuidanceBanner: React.FC<SihGuidanceBannerProps> = ({ onJoinClic
       {/* Zoom Modal for Flyer */}
       {isFlyerZoomOpen && (
         <div 
-          className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 sm:p-6"
+          className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6"
           onClick={() => setIsFlyerZoomOpen(false)}
         >
           <div 
-            className="relative max-w-2xl w-full bg-white rounded-2xl overflow-hidden shadow-2xl border border-slate-300 animate-in fade-in zoom-in duration-200 p-8 text-slate-900"
+            className="relative max-w-2xl w-full bg-white rounded-3xl overflow-hidden shadow-2xl shadow-slate-900/20 border border-slate-200/90 animate-scaleUp p-6 sm:p-8 text-slate-900"
             onClick={(e) => e.stopPropagation()}
           >
             <button

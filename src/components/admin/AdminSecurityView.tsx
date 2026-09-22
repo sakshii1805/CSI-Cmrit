@@ -27,7 +27,7 @@ interface AdminSecurityViewProps {
 export const AdminSecurityView: React.FC<AdminSecurityViewProps> = ({
   showToast,
   adminEmail = 'admin@cmritsi.in',
-  isDarkMode = true
+  isDarkMode = false
 }) => {
   // Modals state
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
@@ -103,14 +103,14 @@ export const AdminSecurityView: React.FC<AdminSecurityViewProps> = ({
     showToast('All other active sessions have been terminated.', 'info');
   };
 
-  const cardBg = isDarkMode ? 'bg-[#0b1329] border-slate-800/80 text-white' : 'bg-white border-slate-200 text-slate-900 shadow-xs';
-  const innerCardBg = isDarkMode ? 'bg-slate-900/60 border-slate-800/80 text-white' : 'bg-slate-50 border-slate-200 text-slate-900';
+  const cardBg = isDarkMode ? 'bg-[#0b1329] border-slate-800/80 text-white' : 'bg-white border-slate-200/90 text-slate-900 shadow-sm';
+  const innerCardBg = isDarkMode ? 'bg-slate-900/60 border-slate-800/80 text-white' : 'bg-slate-50 border-slate-200/80 text-slate-900';
   const headingColor = isDarkMode ? 'text-white' : 'text-slate-900';
   const subtextColor = isDarkMode ? 'text-slate-400' : 'text-slate-600';
-  const labelColor = isDarkMode ? 'text-slate-400' : 'text-slate-600 font-bold';
-  const borderDivider = isDarkMode ? 'border-slate-800' : 'border-slate-200';
-  const modalBg = isDarkMode ? 'bg-[#0b1329] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900 shadow-2xl';
-  const inputBg = isDarkMode ? 'bg-slate-900 border-slate-700 text-white focus:border-blue-500' : 'bg-white border-slate-300 text-slate-900 focus:border-blue-600';
+  const labelColor = isDarkMode ? 'text-slate-400' : 'text-slate-700 font-semibold';
+  const borderDivider = isDarkMode ? 'border-slate-800' : 'border-slate-100';
+  const modalBg = 'bg-white border border-slate-200/90 text-slate-900 shadow-2xl shadow-slate-900/15 rounded-3xl';
+  const inputBg = isDarkMode ? 'bg-slate-900 border-slate-700 text-white focus:border-blue-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-blue-600 focus:bg-white';
 
   return (
     <div className={`max-w-4xl mx-auto space-y-6 animate-fadeIn ${isDarkMode ? 'text-slate-100' : 'text-slate-900'}`}>
@@ -302,8 +302,8 @@ export const AdminSecurityView: React.FC<AdminSecurityViewProps> = ({
       {/* MODAL 1: CHANGE PASSWORD */}
       {/* ========================================================= */}
       {passwordModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className={`${modalBg} rounded-2xl max-w-md w-full p-6 border shadow-2xl animate-fadeIn`}>
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className={`${modalBg} rounded-3xl max-w-md w-full p-6 sm:p-7 border shadow-2xl animate-scaleUp`}>
             <div className={`flex items-center justify-between pb-4 border-b ${borderDivider} mb-4`}>
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-xl bg-blue-500/10 text-blue-500 border border-blue-500/20">
@@ -402,8 +402,8 @@ export const AdminSecurityView: React.FC<AdminSecurityViewProps> = ({
       {/* MODAL 2: TWO-FACTOR AUTHENTICATION (2FA) */}
       {/* ========================================================= */}
       {twoFactorModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className={`${modalBg} rounded-2xl max-w-md w-full p-6 border shadow-2xl animate-fadeIn space-y-4`}>
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className={`${modalBg} rounded-3xl max-w-md w-full p-6 sm:p-7 border shadow-2xl animate-scaleUp space-y-4`}>
             <div className={`flex items-center justify-between pb-4 border-b ${borderDivider}`}>
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
@@ -474,8 +474,8 @@ export const AdminSecurityView: React.FC<AdminSecurityViewProps> = ({
       {/* MODAL 3: ACTIVE SESSIONS */}
       {/* ========================================================= */}
       {sessionsModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className={`${modalBg} rounded-2xl max-w-lg w-full p-6 border shadow-2xl animate-fadeIn space-y-4`}>
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className={`${modalBg} rounded-3xl max-w-lg w-full p-6 sm:p-7 border shadow-2xl animate-scaleUp space-y-4`}>
             <div className={`flex items-center justify-between pb-4 border-b ${borderDivider}`}>
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">
@@ -544,8 +544,8 @@ export const AdminSecurityView: React.FC<AdminSecurityViewProps> = ({
       {/* MODAL 4: LOGIN ACTIVITY LOG */}
       {/* ========================================================= */}
       {activityModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className={`${modalBg} rounded-2xl max-w-lg w-full p-6 border shadow-2xl animate-fadeIn space-y-4`}>
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className={`${modalBg} rounded-3xl max-w-lg w-full p-6 sm:p-7 border shadow-2xl animate-scaleUp space-y-4`}>
             <div className={`flex items-center justify-between pb-4 border-b ${borderDivider}`}>
               <div className="flex items-center gap-2">
                 <div className="p-2 rounded-xl bg-blue-500/10 text-blue-500 border border-blue-500/20">

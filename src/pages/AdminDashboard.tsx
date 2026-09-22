@@ -114,6 +114,10 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(() => {
+    const path = location.pathname.toLowerCase();
+    return path.includes('/profile') || path.includes('/settings') || path.includes('/security');
+  });
   const [loading, setLoading] = useState(true);
 
   // Admin Portal Dark / Light Mode State
@@ -1260,38 +1264,74 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
             </div>
           </div>
 
-          {/* SECTION 2: ACCOUNT */}
+          {/* SECTION 2: ACCOUNT (EXPANDABLE OPTION LIST) */}
           <div className={`pt-2 border-t ${isDarkMode ? 'border-slate-800' : 'border-slate-200'}`}>
-            <div className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-              Account
-            </div>
-            <div className="mt-1 space-y-1">
-              {accountLinks.map((link) => {
-                const isActive = activeTab === link.id;
-                return (
-                  <button
-                    key={link.id}
-                    onClick={() => handleTabChange(link.id)}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
-                      isActive
-                        ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
-                        : isDarkMode
-                        ? 'text-slate-300 hover:text-white hover:bg-slate-800'
-                        : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => setAccountMenuOpen(!accountMenuOpen)}
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                isAccountTab
+                  ? isDarkMode ? 'bg-slate-800 text-white border border-slate-700' : 'bg-blue-50 text-blue-700 border border-blue-200/80 shadow-xs'
+                  : isDarkMode
+                  ? 'text-slate-300 hover:text-white hover:bg-slate-800'
+                  : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${
+                  isAccountTab
+                    ? 'bg-blue-600 text-white'
+                    : isDarkMode ? 'bg-slate-800 text-slate-400' : 'bg-slate-200 text-slate-700'
+                }`}>
+                  <User className="w-3.5 h-3.5" />
+                </div>
+                <span>Account</span>
+              </div>
+              <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${accountMenuOpen ? 'rotate-180 text-blue-600' : 'text-slate-400'}`} />
+            </button>
+
+            {/* Option List Revealed on Click */}
+            {accountMenuOpen && (
+              <div className="mt-1 pl-2 space-y-1 animate-fadeIn border-l-2 border-blue-500/30 ml-4 my-1">
+                {accountLinks.map((link) => {
+                  const isActive = activeTab === link.id;
+                  return (
+                    <button
+                      key={link.id}
+                      onClick={() => handleTabChange(link.id)}
+                      className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
+                        isActive
+                          ? 'bg-blue-600 text-white shadow-xs'
+                          : isDarkMode
+                          ? 'text-slate-300 hover:text-white hover:bg-slate-800'
+                          : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
+                      }`}
+                    >
                       {link.icon}
                       <span>{link.label}</span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
+                    </button>
+                  );
+                })}
+
+                {/* Logout option in Account list */}
+                <button
+                  type="button"
+                  onClick={() => setLogoutModalOpen(true)}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-colors ${
+                    isDarkMode
+                      ? 'text-rose-400 hover:bg-rose-950/40 hover:text-rose-300'
+                      : 'text-rose-600 hover:bg-rose-50 hover:text-rose-700'
+                  }`}
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Logout</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Return to Public Website & Logout */}
+        {/* Bottom Utility: Return to Public Website */}
         <div className={`p-4 border-t space-y-2 mt-auto shrink-0 transition-colors ${
           isDarkMode ? 'bg-[#080e22] border-slate-800' : 'bg-slate-50 border-slate-200'
         }`}>
@@ -1307,18 +1347,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
             <ExternalLink className={`w-4 h-4 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`} />
             <span>Open Public Site</span>
           </Link>
-
-          <button
-            onClick={() => setLogoutModalOpen(true)}
-            className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-colors ${
-              isDarkMode
-                ? 'text-rose-400 hover:bg-rose-950/40 hover:text-rose-300'
-                : 'text-rose-600 hover:bg-rose-50 hover:text-rose-700'
-            }`}
-          >
-            <LogOut className="w-4 h-4" />
-            <span>Logout</span>
-          </button>
         </div>
       </aside>
 
@@ -1451,77 +1479,17 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
                     </div>
                   </div>
 
-                  <div className="py-1 text-xs">
-                    {/* Theme Toggle Button inside Dropdown */}
-                    <button
-                      onClick={() => {
-                        toggleTheme();
-                        setProfileDropdownOpen(false);
-                      }}
-                      className={`w-full text-left px-4 py-2 flex items-center justify-between font-medium transition-colors ${
-                        isDarkMode ? 'text-slate-200 hover:bg-slate-800 hover:text-white' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        {isDarkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-600" />}
-                        <span>{isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}</span>
-                      </div>
-                      <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-500 border border-blue-500/20">
-                        {isDarkMode ? 'Dark' : 'Light'}
-                      </span>
-                    </button>
-
-                    <button
-                      onClick={() => handleTabChange('profile')}
-                      className={`w-full text-left px-4 py-2 flex items-center justify-between font-medium transition-colors ${
-                        activeTab === 'profile'
-                          ? 'text-blue-500 bg-blue-500/10 font-semibold'
-                          : isDarkMode ? 'text-slate-200 hover:bg-slate-800 hover:text-white' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <User className="w-4 h-4 text-blue-500" />
-                        <span>Profile</span>
-                      </div>
-                      {activeTab === 'profile' && <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />}
-                    </button>
-                    <button
-                      onClick={() => handleTabChange('settings')}
-                      className={`w-full text-left px-4 py-2 flex items-center justify-between font-medium transition-colors ${
-                        activeTab === 'settings'
-                          ? 'text-blue-500 bg-blue-500/10 font-semibold'
-                          : isDarkMode ? 'text-slate-200 hover:bg-slate-800 hover:text-white' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <Sliders className="w-4 h-4 text-indigo-500" />
-                        <span>Account Settings</span>
-                      </div>
-                      {activeTab === 'settings' && <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />}
-                    </button>
-                    <button
-                      onClick={() => handleTabChange('security')}
-                      className={`w-full text-left px-4 py-2 flex items-center justify-between font-medium transition-colors ${
-                        activeTab === 'security'
-                          ? 'text-blue-500 bg-blue-500/10 font-semibold'
-                          : isDarkMode ? 'text-slate-200 hover:bg-slate-800 hover:text-white' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <Shield className="w-4 h-4 text-amber-500" />
-                        <span>Security</span>
-                      </div>
-                      {activeTab === 'security' && <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />}
-                    </button>
-                  </div>
-
-                  <div className={`border-t pt-1 ${isDarkMode ? 'border-slate-800/80' : 'border-slate-100'}`}>
+                  <div className="p-1.5">
                     <button
                       onClick={() => {
                         setProfileDropdownOpen(false);
                         setLogoutModalOpen(true);
                       }}
-                      className="w-full text-left px-4 py-2 hover:bg-rose-500/10 flex items-center gap-2.5 text-rose-500 hover:text-rose-400 font-semibold text-xs transition-colors"
+                      className={`w-full text-left px-3.5 py-2.5 rounded-xl flex items-center gap-2.5 font-semibold text-xs transition-colors ${
+                        isDarkMode
+                          ? 'hover:bg-rose-950/40 text-rose-400 hover:text-rose-300'
+                          : 'hover:bg-rose-50 text-rose-600 hover:text-rose-700'
+                      }`}
                     >
                       <LogOut className="w-4 h-4" />
                       <span>Logout</span>
@@ -2713,15 +2681,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
       {/* MODAL: ADD / EDIT EVENT */}
       {/* ======================================================= */}
       {eventModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 my-8 animate-fadeIn">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
-              <h3 className="text-base font-bold text-slate-900">
-                {editingEvent ? 'Edit Chapter Event' : 'Create New Event'}
-              </h3>
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl shadow-slate-900/15 border border-slate-200/90 my-8 animate-scaleUp">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center shadow-xs">
+                  <Calendar className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900 tracking-tight">
+                    {editingEvent ? 'Edit Chapter Event' : 'Create New Event'}
+                  </h3>
+                  <p className="text-xs text-slate-500">CMRIT CSI Chapter Event Management</p>
+                </div>
+              </div>
               <button
                 onClick={() => setEventModalOpen(false)}
-                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
+                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+                aria-label="Close dialog"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -2878,15 +2855,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
       {/* MODAL: ADD / EDIT ANNOUNCEMENT */}
       {/* ======================================================= */}
       {announcementModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 my-8 animate-fadeIn">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
-              <h3 className="text-base font-bold text-slate-900">
-                {editingAnnouncement ? 'Edit Announcement' : 'New Circular / Notice'}
-              </h3>
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl shadow-slate-900/15 border border-slate-200/90 my-8 animate-scaleUp">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center shadow-xs">
+                  <Bell className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900 tracking-tight">
+                    {editingAnnouncement ? 'Edit Announcement' : 'New Circular / Notice'}
+                  </h3>
+                  <p className="text-xs text-slate-500">Official CSI Chapter Notice Board</p>
+                </div>
+              </div>
               <button
                 onClick={() => setAnnouncementModalOpen(false)}
-                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
+                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+                aria-label="Close dialog"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -3006,15 +2992,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
       {/* MODAL: ADD / EDIT GALLERY HIGHLIGHT */}
       {/* ======================================================= */}
       {highlightModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 my-8 animate-fadeIn">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
-              <h3 className="text-base font-bold text-slate-900">
-                {editingHighlight ? 'Edit Gallery Photo' : 'Upload Chapter Photo'}
-              </h3>
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl shadow-slate-900/15 border border-slate-200/90 my-8 animate-scaleUp">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center shadow-xs">
+                  <Camera className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900 tracking-tight">
+                    {editingHighlight ? 'Edit Gallery Photo' : 'Upload Chapter Photo'}
+                  </h3>
+                  <p className="text-xs text-slate-500">CSI Media & Chapter Gallery</p>
+                </div>
+              </div>
               <button
                 onClick={() => setHighlightModalOpen(false)}
-                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
+                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+                aria-label="Close dialog"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -3135,15 +3130,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
       {/* MODAL: ADD / EDIT SIH RECORD */}
       {/* ======================================================= */}
       {sihModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 my-8 animate-fadeIn">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
-              <h3 className="text-base font-bold text-slate-900">
-                {editingSih ? 'Edit SIH Record' : 'Add SIH Update / Team'}
-              </h3>
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl shadow-slate-900/15 border border-slate-200/90 my-8 animate-scaleUp">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center shadow-xs">
+                  <Trophy className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900 tracking-tight">
+                    {editingSih ? 'Edit SIH Record' : 'Add SIH Update / Team'}
+                  </h3>
+                  <p className="text-xs text-slate-500">Smart India Hackathon Management</p>
+                </div>
+              </div>
               <button
                 onClick={() => setSihModalOpen(false)}
-                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
+                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+                aria-label="Close dialog"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -3251,23 +3255,30 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
       )}
 
       {/* ======================================================= */}
-      {/* MODAL: LOGOUT CONFIRMATION DIALOG */}
+      {/* MODAL: LOGOUT CONFIRMATION DIALOG (MATCHES WEBSITE THEME BLUE) */}
       {/* ======================================================= */}
       {logoutModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
-          <div className="bg-[#0b1329] border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl animate-scaleUp text-slate-100">
-            <div className="w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mb-4">
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
+          <div className="relative bg-white border border-slate-200/90 rounded-3xl max-w-md w-full p-6 sm:p-7 shadow-2xl shadow-slate-900/15 animate-scaleUp text-slate-900">
+            <button
+              onClick={() => setLogoutModalOpen(false)}
+              className="absolute top-5 right-5 p-1.5 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+              aria-label="Close dialog"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center mb-4 shadow-xs">
               <LogOut className="w-6 h-6" />
             </div>
-            <h3 className="text-lg font-bold text-white mb-2">Sign Out Confirmation</h3>
-            <p className="text-sm text-slate-400 leading-relaxed mb-6">
+            <h3 className="text-xl font-bold text-slate-900 tracking-tight mb-2">Sign Out Confirmation</h3>
+            <p className="text-sm text-slate-600 leading-relaxed mb-6 font-normal">
               Are you sure you want to end your administrator session? You will need to enter your admin credentials again to access the CSI CMRIT administration panel.
             </p>
-            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
               <button
                 type="button"
                 onClick={() => setLogoutModalOpen(false)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 transition-colors"
+                className="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200/80 border border-slate-200/80 transition-all"
               >
                 Cancel
               </button>
@@ -3277,7 +3288,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
                   setLogoutModalOpen(false);
                   handleLogout();
                 }}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-rose-600 hover:bg-rose-500 shadow-md shadow-rose-600/30 transition-all"
+                className="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md shadow-blue-500/25 hover:shadow-lg transition-all"
               >
                 Confirm Logout
               </button>
@@ -3287,8 +3298,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
       )}
 
       {/* ======================================================= */}
-      {/* MODAL: SLEEK IN-APP CONFIRMATION DIALOG */}
-      {/* ======================================================      {/* ======================================================= */}
       {/* MODAL: SLEEK IN-APP CONFIRMATION DIALOG */}
       {/* ======================================================= */}
       <ConfirmDialog
@@ -3347,52 +3356,49 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
       {blockEmailDialog.isOpen && (
         <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true">
           <div
-            className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs transition-opacity animate-fadeIn"
+            className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity animate-fadeIn"
             onClick={() => {
               if (!isBlocking) setBlockEmailDialog(prev => ({ ...prev, isOpen: false }));
             }}
           />
-          <div className={`relative w-full max-w-md ${isDarkMode ? 'bg-[#0b1329] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'} rounded-2xl shadow-2xl border overflow-hidden transform transition-all z-10 animate-scaleUp p-6`}>
+          <div className="relative w-full max-w-md bg-white border border-slate-200/90 text-slate-900 rounded-3xl shadow-2xl shadow-slate-900/15 overflow-hidden transform transition-all z-10 animate-scaleUp p-6 sm:p-7">
             <div className="flex items-start gap-4 mb-4">
-              <div className="w-11 h-11 rounded-2xl bg-rose-50 text-rose-600 border border-rose-100 flex items-center justify-center shrink-0">
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 flex items-center justify-center shrink-0 shadow-xs">
                 <Ban className="w-5 h-5" />
               </div>
-              <div className="flex-1 min-w-0">
-                <h3 className={`text-base font-bold ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>Block Email Address</h3>
-                <p className={`text-xs mt-1 leading-relaxed ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
-                  Block <strong className={`font-semibold ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>{blockEmailDialog.email}</strong> from posting comments. All pending comments from this user will be rejected.
+              <div className="flex-1 min-w-0 pt-0.5">
+                <h3 className="text-lg font-bold text-slate-900 tracking-tight leading-tight">Block Email Address</h3>
+                <p className="text-xs sm:text-sm mt-1.5 leading-relaxed text-slate-600 font-normal">
+                  Block <strong className="font-semibold text-slate-900">{blockEmailDialog.email}</strong> from posting comments. All pending comments from this user will be rejected.
                 </p>
               </div>
               <button
                 onClick={() => setBlockEmailDialog(prev => ({ ...prev, isOpen: false }))}
                 disabled={isBlocking}
-                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg"
+                className="p-1.5 -mt-1 -mr-1 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
+                aria-label="Close dialog"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             <div className="space-y-1.5 mb-6">
-              <label className={`block text-xs font-semibold ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>Reason for blocking</label>
+              <label className="block text-xs font-semibold text-slate-700">Reason for blocking</label>
               <input
                 type="text"
                 value={blockEmailDialog.reason}
                 onChange={(e) => setBlockEmailDialog(prev => ({ ...prev, reason: e.target.value }))}
                 placeholder="e.g. Spam, inappropriate behavior, harassment"
-                className={`w-full px-3 py-2 text-xs border rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500 ${
-                  isDarkMode ? 'bg-slate-900 border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'
-                }`}
+                className="w-full px-3.5 py-2.5 text-xs border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 text-slate-900 placeholder-slate-400"
               />
             </div>
 
-            <div className={`flex items-center justify-end gap-3 pt-4 border-t ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}>
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
               <button
                 type="button"
                 disabled={isBlocking}
                 onClick={() => setBlockEmailDialog(prev => ({ ...prev, isOpen: false }))}
-                className={`px-4 py-2 rounded-xl text-xs font-semibold border transition-colors ${
-                  isDarkMode ? 'text-slate-300 hover:bg-slate-800 border-slate-700' : 'text-slate-700 hover:bg-slate-100 border-slate-200'
-                }`}
+                className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all disabled:opacity-50 bg-slate-100 hover:bg-slate-200/80 text-slate-700 hover:text-slate-900 border border-slate-200/80"
               >
                 Cancel
               </button>
@@ -3400,7 +3406,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
                 type="button"
                 disabled={isBlocking}
                 onClick={executeConfirmBlockEmail}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-rose-600 hover:bg-rose-700 shadow-sm shadow-rose-600/20 transition-all flex items-center gap-1.5"
+                className="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-md shadow-blue-500/25 hover:shadow-lg transition-all flex items-center gap-1.5 disabled:opacity-50"
               >
                 {isBlocking && (
                   <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

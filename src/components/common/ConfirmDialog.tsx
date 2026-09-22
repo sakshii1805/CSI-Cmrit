@@ -56,55 +56,43 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       role="dialog"
       aria-modal="true"
     >
-      {/* Backdrop */}
+      {/* Backdrop with soft modern frosted blur matching website theme */}
       <div
-        className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs transition-opacity animate-fadeIn"
+        className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity animate-fadeIn"
         onClick={() => {
           if (!isLoading) onClose();
         }}
         aria-hidden="true"
       />
 
-      {/* Dialog Card */}
+      {/* Dialog Card - matching website theme white rounded card with elegant shadow */}
       <div
-        className={`relative w-full max-w-md rounded-2xl shadow-2xl overflow-hidden transform transition-all z-10 animate-scaleUp ${
-          isDarkMode
-            ? 'bg-[#0b1329] border border-slate-800 text-white'
-            : 'bg-white border border-slate-200 text-slate-900'
-        }`}
+        className="relative w-full max-w-md rounded-3xl shadow-2xl shadow-slate-900/15 overflow-hidden transform transition-all z-10 animate-scaleUp bg-white border border-slate-200/90 text-slate-900"
       >
-        <div className="p-6">
+        <div className="p-6 sm:p-7">
           <div className="flex items-start gap-4">
-            {/* Icon */}
+            {/* Icon badge matching website theme pastel squircle */}
             <div
-              className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${
-                isDanger
-                  ? isDarkMode
-                    ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                    : 'bg-rose-50 text-rose-600 border border-rose-100'
-                  : isDarkMode
-                  ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
-                  : 'bg-amber-50 text-amber-600 border border-amber-100'
-              }`}
+              className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 shadow-xs bg-blue-50 text-blue-600 border border-blue-100"
             >
               {isDanger ? <Trash2 className="w-5 h-5" /> : <AlertTriangle className="w-5 h-5" />}
             </div>
 
             {/* Texts */}
-            <div className="flex-1 min-w-0">
-              <h3 className={`text-base font-bold leading-tight ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
+            <div className="flex-1 min-w-0 pt-0.5">
+              <h3 className="text-lg font-bold text-slate-900 tracking-tight leading-tight">
                 {title}
               </h3>
               {message ? (
-                <p className={`text-xs sm:text-sm mt-1.5 leading-relaxed ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                <p className="text-xs sm:text-sm mt-1.5 leading-relaxed text-slate-600 font-normal">
                   {message}
                 </p>
               ) : itemName ? (
-                <p className={`text-xs sm:text-sm mt-1.5 leading-relaxed ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
-                  Are you sure you want to permanently delete <strong className={`font-bold ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>&ldquo;{itemName}&rdquo;</strong>? This action cannot be undone.
+                <p className="text-xs sm:text-sm mt-1.5 leading-relaxed text-slate-600 font-normal">
+                  Are you sure you want to permanently delete <strong className="font-semibold text-slate-900">&ldquo;{itemName}&rdquo;</strong>? This action cannot be undone.
                 </p>
               ) : (
-                <p className={`text-xs sm:text-sm mt-1.5 leading-relaxed ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                <p className="text-xs sm:text-sm mt-1.5 leading-relaxed text-slate-600 font-normal">
                   Are you sure you want to proceed with this deletion?
                 </p>
               )}
@@ -114,9 +102,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             <button
               onClick={onClose}
               disabled={isLoading}
-              className={`p-1 -mt-1 -mr-1 rounded-lg transition-colors ${
-                isDarkMode ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-100'
-              }`}
+              className="p-1.5 -mt-1 -mr-1 rounded-xl text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
               aria-label="Close dialog"
             >
               <X className="w-4 h-4" />
@@ -124,16 +110,12 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           </div>
 
           {/* Action Buttons */}
-          <div className={`mt-6 flex items-center justify-end gap-3 pt-4 border-t ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`}>
+          <div className="mt-6 flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
             <button
               type="button"
               disabled={isLoading}
               onClick={onClose}
-              className={`px-4 py-2 rounded-xl text-xs font-semibold transition-colors disabled:opacity-50 ${
-                isDarkMode
-                  ? 'bg-slate-850 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-750'
-                  : 'bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 border border-slate-200'
-              }`}
+              className="px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all disabled:opacity-50 bg-slate-100 hover:bg-slate-200/80 text-slate-700 hover:text-slate-900 border border-slate-200/80"
             >
               {cancelLabel}
             </button>
@@ -141,11 +123,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
               type="button"
               disabled={isLoading}
               onClick={onConfirm}
-              className={`px-4 py-2 rounded-xl text-xs font-bold text-white transition-all shadow-sm flex items-center gap-1.5 ${
-                isDanger
-                  ? 'bg-rose-600 hover:bg-rose-700 active:bg-rose-800 shadow-rose-600/20'
-                  : 'bg-amber-600 hover:bg-amber-700 active:bg-amber-800 shadow-amber-600/20'
-              } disabled:opacity-50`}
+              className="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white transition-all shadow-md flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-blue-500/25 hover:shadow-lg disabled:opacity-50"
             >
               {isLoading && (
                 <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
