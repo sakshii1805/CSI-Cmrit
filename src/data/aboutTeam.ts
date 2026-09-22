@@ -12,7 +12,7 @@ export const facultyCoordinator = {
   department: 'Computer Science & Engineering',
   institution: 'CMR Institute of Technology, Hyderabad',
   initials: 'SR',
-  photo: undefined as string | undefined,
+  photo: '/images/Team/faculty.jpeg',
   details: [
     'Guides the CSI CMRIT Student Chapter on academics, events, and professional ethics.',
     'Mentors student officers on workshops, hackathons, and industry outreach.',
@@ -23,12 +23,14 @@ export const facultyCoordinator = {
 
 /** Core Team 2025–26. Names and photos can be filled from the Instagram announcement. */
 export const teamLeads: TeamLead[] = [
-  { name: '', role: 'Chairperson', initials: 'CH' },
-  { name: '', role: 'Vice Chairperson', initials: 'VC' },
-  { name: '', role: 'Secretary', initials: 'SE' },
-  { name: '', role: 'Treasurer', initials: 'TR' },
-  { name: '', role: 'Technical Lead', initials: 'TL' },
-  { name: '', role: 'Event Lead', initials: 'EL' },
-  { name: '', role: 'Design Lead', initials: 'DL' },
-  { name: '', role: 'Media Lead', initials: 'ML' },
+  { name: 'President', role: 'Chairperson', initials: 'PR', photo: '/images/Team/president.jpeg' },
+  { name: 'Vice President', role: 'Vice Chairperson', initials: 'VP', photo: '/images/Team/vice president.jpeg' },
+  { name: 'Secretary', role: 'Secretary', initials: 'SE', photo: '/images/Team/secretary.jpeg' },
+  { name: 'Treasurer', role: 'Treasurer', initials: 'TR', photo: '/images/Team/treasurer.jpeg' },
+  { name: 'Technical Lead', role: 'Technical Lead', initials: 'TL', photo: '/images/Team/technical_lead.jpeg' },
+  { name: 'Event Lead', role: 'Event Lead', initials: 'EL', photo: '/images/Team/event_lead.jpeg' },
+  { name: 'Documentation Lead', role: 'Design Lead', initials: 'DL', photo: '/images/Team/documentation lead.jpeg' },
+  { name: 'Social Media Lead', role: 'Media Lead', initials: 'SM', photo: '/images/Team/social_media_lead.jpeg' },
+  { name: 'Joint Secretary', role: 'Joint Secretary', initials: 'JS', photo: '/images/Team/joint_secretary.jpeg' },
+  { name: 'Volunteer Coordinator', role: 'Volunteer Coordinator', initials: 'VC', photo: '/images/Team/volunteer_coordinator.jpeg' },
 ];

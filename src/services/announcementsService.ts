@@ -37,9 +37,8 @@ const getStoredAnnouncements = (): AnnouncementItem[] => {
     const forbiddenIds = new Set(['ann-02', 'ann-03', 'ann-04', 'ann-05', 'mock-ann-1', 'mock-ann-2', 'mock-ann-3']);
     parsed = parsed.filter(p => !forbiddenIds.has(p.id) && !deleted.has(p.id) && !p.title.includes('Membership Drive') && !p.title.includes('Call for Core Student Coordinators'));
 
-    // Ensure baseline Hackathon announcement (ann-01) is present ONLY if admin hasn't deleted it
-    const hasHackathon = parsed.some(p => p.id === 'ann-01' || p.slug === 'sih-2026-internal-screening');
-    if (!hasHackathon && !deleted.has('ann-01') && !deleted.has('sih-2026-internal-screening') && mockAnnouncements.length > 0) {
+    // Ensure baseline announcements are present ONLY if admin hasn't deleted them
+    if (!parsed.some(p => p.id === 'ann-avishkar-2026') && !deleted.has('ann-avishkar-2026') && mockAnnouncements.length > 0) {
       parsed.push(mockAnnouncements[0]);
     }
 

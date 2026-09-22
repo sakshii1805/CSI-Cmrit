@@ -38,7 +38,7 @@ export const JoinUs: React.FC = () => {
     'Cloud Computing & DevOps',
     'Artificial Intelligence & ML',
     'Cybersecurity & Ethical Hacking',
-    'Smart India Hackathon (SIH)',
+    'National Hackathons',
     'Event Management & Media'
   ];
 
@@ -352,8 +352,8 @@ export const JoinUs: React.FC = () => {
                     <Code className="w-4 h-4" />
                   </div>
                   <div>
-                    <h5 className="text-xs font-bold text-slate-900">SIH Hackathon Incubation</h5>
-                    <p className="text-xs text-slate-500">Mentorship, team formation, and pitch deck validation for Smart India Hackathon.</p>
+                    <h5 className="text-xs font-bold text-slate-900">Hackathon Incubation</h5>
+                    <p className="text-xs text-slate-500">Mentorship, team formation, and pitch deck validation for national hackathons.</p>
                   </div>
                 </div>
 

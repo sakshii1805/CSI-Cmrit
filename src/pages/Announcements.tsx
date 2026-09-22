@@ -37,6 +37,7 @@ export const Announcements: React.FC = () => {
     'General',
     'Hackathon',
     'Workshop',
+    'Event',
     'Registration',
     'Opportunity'
   ];

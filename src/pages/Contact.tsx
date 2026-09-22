@@ -86,7 +86,7 @@ export const Contact: React.FC = () => {
               Get in Touch
             </h1>
             <p className="text-base sm:text-lg text-slate-300 leading-relaxed font-normal">
-              Have questions regarding workshops, event registrations, student chapter membership, or SIH team mentoring? Reach out to our student coordinator council.
+              Have questions regarding workshops, event registrations, student chapter membership, or hackathon team mentoring? Reach out to our student coordinator council.
             </p>
           </div>
         </div>

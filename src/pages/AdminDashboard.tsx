@@ -59,7 +59,6 @@ import { adminService } from '../services/adminService';
 import { eventsService } from '../services/eventsService';
 import { announcementsService } from '../services/announcementsService';
 import { highlightsService } from '../services/highlightsService';
-import { sihService } from '../services/sihService';
 import { commentsService } from '../services/commentsService';
 import { joinService } from '../services/joinService';
 import { contactService } from '../services/contactService';
@@ -69,7 +68,6 @@ import {
   EventItem,
   AnnouncementItem,
   ChapterHighlightItem,
-  SihItem,
   CommentItem,
   JoinApplication,
   ContactMessage,
@@ -83,7 +81,6 @@ export type AdminTab =
   | 'events'
   | 'announcements'
   | 'highlights'
-  | 'sih'
   | 'comments'
   | 'applications'
   | 'contacts'
@@ -170,7 +167,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
   const [announcementSearch, setAnnouncementSearch] = useState('');
   const [announcementCategoryFilter, setAnnouncementCategoryFilter] = useState<string>('All');
   const [highlightSearch, setHighlightSearch] = useState('');
-  const [sihSearch, setSihSearch] = useState('');
   const [commentFilter, setCommentFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   const [appFilter, setAppFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   const [appSearch, setAppSearch] = useState('');
@@ -189,7 +185,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
   const [events, setEvents] = useState<EventItem[]>([]);
   const [announcements, setAnnouncements] = useState<AnnouncementItem[]>([]);
   const [highlights, setHighlights] = useState<ChapterHighlightItem[]>([]);
-  const [sihItems, setSihItems] = useState<SihItem[]>([]);
   const [comments, setComments] = useState<CommentItem[]>([]);
   const [blockedEmails, setBlockedEmails] = useState<BlockedEmail[]>([]);
   const [applications, setApplications] = useState<JoinApplication[]>([]);
@@ -237,19 +232,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
     is_published: true
   });
 
-  // SIH Modal
-  const [sihModalOpen, setSihModalOpen] = useState(false);
-  const [editingSih, setEditingSih] = useState<SihItem | null>(null);
-  const [sihFormData, setSihFormData] = useState({
-    title: '',
-    category: 'Update' as 'Team' | 'Update' | 'Achievement' | 'Resource',
-    content: '',
-    team_name: '',
-    problem_code: '',
-    status: 'Announced',
-    is_published: true
-  });
-
   const getAdminInitials = (name?: string) => {
     if (!name) return 'AD';
     const clean = name.replace(/^(Prof\.|Dr\.|Mr\.|Mrs\.|Ms\.)\s+/i, '').trim();
@@ -287,7 +269,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
   // In-app deletion modal state (replaces native browser window.confirm)
   const [deleteDialog, setDeleteDialog] = useState<{
     isOpen: boolean;
-    type: 'event' | 'announcement' | 'highlight' | 'sih' | 'comment' | 'application' | 'message';
+    type: 'event' | 'announcement' | 'highlight' | 'comment' | 'application' | 'message';
     id: string;
     title: string;
     name?: string;
@@ -352,7 +334,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
         eventsService.adminListEvents(),
         announcementsService.adminListAnnouncements(),
         highlightsService.adminListHighlights(),
-        sihService.adminListSihItems(),
         commentsService.adminListComments(),
         commentsService.getBlockedEmails(),
         joinService.adminListApplications(),
@@ -362,7 +343,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
       const evts = allEvents.data || [];
       const anns = allAnnouncements.data || [];
       const hls = allHighlights.data || [];
-      const sihs = allSih.data || [];
       const cmts = allComments.data || [];
       const blk = allBlocked.data || [];
       const apps = allApps.data || [];
@@ -371,7 +351,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
       setEvents(evts);
       setAnnouncements(anns);
       setHighlights(hls);
-      setSihItems(sihs);
       setComments(cmts);
       setBlockedEmails(blk);
       setApplications(apps);
@@ -729,68 +708,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
   // ----------------------------------------------------
   // SIH CRUD HANDLERS
   // ----------------------------------------------------
-  const openNewSihModal = () => {
-    setEditingSih(null);
-    setSihFormData({
-      title: '',
-      category: 'Update',
-      content: '',
-      team_name: '',
-      problem_code: '',
-      status: 'Shortlisted',
-      is_published: true
-    });
-    setSihModalOpen(true);
-  };
-
-  const openEditSihModal = (item: SihItem) => {
-    setEditingSih(item);
-    setSihFormData({
-      title: item.title,
-      category: (item.category as any) || 'Update',
-      content: item.content || '',
-      team_name: item.team_name || '',
-      problem_code: item.problem_code || '',
-      status: item.status || 'Shortlisted',
-      is_published: item.is_published !== false
-    });
-    setSihModalOpen(true);
-  };
-
-  const handleSaveSih = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      if (editingSih) {
-        setSihItems(sihItems.map(s => s.id === editingSih.id ? { ...s, ...sihFormData } : s));
-        await sihService.updateSihItem(editingSih.id, sihFormData as any);
-        showToast('SIH update saved!', 'success');
-      } else {
-        const newSih: SihItem = {
-          id: 'sih-' + Date.now(),
-          ...sihFormData,
-          created_at: new Date().toISOString()
-        };
-        setSihItems([newSih, ...sihItems]);
-        await sihService.createSihItem(sihFormData as any);
-        showToast('SIH update published!', 'success');
-      }
-      setSihModalOpen(false);
-    } catch (err) {
-      showToast('SIH item saved locally.', 'info');
-      setSihModalOpen(false);
-    }
-  };
-
-  const handleDeleteSih = (id: string, title: string) => {
-    setDeleteDialog({
-      isOpen: true,
-      type: 'sih',
-      id,
-      title
-    });
-  };
-
-  // ----------------------------------------------------
+// ----------------------------------------------------
   // COMMENT MODERATION HANDLERS
   // ----------------------------------------------------
   const handleApproveComment = async (id: string) => {
@@ -949,10 +867,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
         setStats(prev => ({ ...prev, galleryImages: Math.max(0, prev.galleryImages - 1) }));
         await highlightsService.deleteHighlight(id);
         showToast(`Photo "${title}" deleted from gallery.`, 'info');
-      } else if (type === 'sih') {
-        setSihItems(prev => prev.filter(s => s.id !== id));
-        await sihService.deleteSihItem(id);
-        showToast(`SIH record "${title}" deleted.`, 'info');
       } else if (type === 'comment') {
         setComments(prev => prev.filter(c => c.id !== id));
         setStats(prev => ({ ...prev, pendingComments: Math.max(0, prev.pendingComments - 1) }));
@@ -1103,7 +1017,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
     { id: 'events', label: 'Events', icon: <Calendar className="w-4 h-4" />, count: stats.totalEvents },
     { id: 'announcements', label: 'Announcements', icon: <Bell className="w-4 h-4" />, count: stats.totalAnnouncements },
     { id: 'highlights', label: 'Gallery', icon: <Camera className="w-4 h-4" />, count: stats.galleryImages },
-    { id: 'sih', label: 'SIH Updates', icon: <Lightbulb className="w-4 h-4" /> },
     { id: 'comments', label: 'Comments', icon: <MessageSquare className="w-4 h-4" />, count: stats.pendingComments },
     { id: 'applications', label: 'Join Applications', icon: <Users className="w-4 h-4" />, count: stats.totalApplications },
     { id: 'contacts', label: 'Inquiries', icon: <Mail className="w-4 h-4" />, count: stats.unreadMessages }
@@ -1634,25 +1547,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
                     <div className="text-3xl font-extrabold text-slate-900">{stats.galleryImages}</div>
                     <div className="text-xs text-emerald-600 font-semibold mt-1 flex items-center gap-1">
                       <span>Curate Photos &rarr;</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 4. SIH Cell */}
-                <div
-                  onClick={() => setActiveTab('sih')}
-                  className="p-5 rounded-2xl border border-slate-200 bg-white shadow-xs hover:shadow-md hover:border-amber-400 transition-all cursor-pointer group flex flex-col justify-between"
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500">SIH Cell</span>
-                    <div className="p-2.5 rounded-xl bg-amber-50 text-amber-600 group-hover:scale-110 transition-transform">
-                      <Trophy className="w-5 h-5" />
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-3xl font-extrabold text-slate-900">{sihItems.length}</div>
-                    <div className="text-xs text-amber-600 font-semibold mt-1 flex items-center gap-1">
-                      <span>SIH Challenges &rarr;</span>
                     </div>
                   </div>
                 </div>

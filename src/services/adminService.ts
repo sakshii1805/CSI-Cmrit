@@ -7,7 +7,6 @@ export interface AdminStats {
   totalAnnouncements: number;
   publishedAnnouncements: number;
   galleryImages: number;
-  sihItems: number;
   totalApplications: number;
   pendingApplications: number;
   pendingComments: number;
@@ -28,7 +27,6 @@ export const adminService = {
         announcementsRes,
         pubAnnouncementsRes,
         highlightsRes,
-        sihRes,
         appsRes,
         pendingAppsRes,
         pendingCommentsRes,
@@ -41,7 +39,6 @@ export const adminService = {
         supabase.from('announcements').select('id', { count: 'exact', head: true }),
         supabase.from('announcements').select('id', { count: 'exact', head: true }).eq('status', 'published'),
         supabase.from('highlights').select('id', { count: 'exact', head: true }),
-        supabase.from('sih_items').select('id', { count: 'exact', head: true }),
         supabase.from('join_applications').select('id', { count: 'exact', head: true }),
         supabase.from('join_applications').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
         supabase.from('comments').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
@@ -56,7 +53,6 @@ export const adminService = {
         totalAnnouncements: announcementsRes.count || 0,
         publishedAnnouncements: pubAnnouncementsRes.count || 0,
         galleryImages: highlightsRes.count || 0,
-        sihItems: sihRes.count || 0,
         totalApplications: appsRes.count || 0,
         pendingApplications: pendingAppsRes.count || 0,
         pendingComments: pendingCommentsRes.count || 0,
@@ -72,7 +68,6 @@ export const adminService = {
         totalAnnouncements: 0,
         publishedAnnouncements: 0,
         galleryImages: 0,
-        sihItems: 0,
         totalApplications: 0,
         pendingApplications: 0,
         pendingComments: 0,

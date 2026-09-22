@@ -16,7 +16,6 @@ import { GalleryDetail } from './pages/GalleryDetail';
 import { ChapterHighlights } from './pages/ChapterHighlights';
 import { Announcements } from './pages/Announcements';
 import { AnnouncementDetails } from './pages/AnnouncementDetails';
-import { SIH } from './pages/SIH';
 import { JoinUs } from './pages/JoinUs';
 import { Contact } from './pages/Contact';
 import { AdminLogin } from './pages/AdminLogin';
@@ -89,7 +88,6 @@ export const App: React.FC = () => {
               <Route path="/highlights" element={<ChapterHighlights />} />
               <Route path="/announcements" element={<Announcements />} />
               <Route path="/announcements/:id" element={<AnnouncementDetails />} />
-              <Route path="/sih" element={<SIH />} />
               <Route path="/join" element={<JoinUs />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="*" element={<NotFound />} />
