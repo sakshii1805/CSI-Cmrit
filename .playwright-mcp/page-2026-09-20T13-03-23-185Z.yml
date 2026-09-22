@@ -1,0 +1,136 @@
+- generic [ref=f4e3]:
+  - banner [ref=f4e4]:
+    - generic [ref=f4e6]:
+      - link "CSI CMRIT Chapter" [ref=f4e7] [cursor=pointer]:
+        - /url: /
+        - generic [ref=f4e14]:
+          - generic [ref=f4e15]:
+            - generic [ref=f4e16]:
+              - generic [ref=f4e17]: CSI
+              - generic [ref=f4e18]: CMRIT
+            - generic [ref=f4e19]: Chapter
+          - generic [ref=f4e21]:
+            - generic [ref=f4e22]: Computer Society of India
+            - generic [ref=f4e23]: CMRIT Chapter
+      - navigation "Main Navigation" [ref=f4e24]:
+        - link "Home" [ref=f4e25] [cursor=pointer]:
+          - /url: /
+        - link "About" [ref=f4e26] [cursor=pointer]:
+          - /url: /about
+        - link "Events" [ref=f4e27] [cursor=pointer]:
+          - /url: /events
+        - link "Highlights" [ref=f4e28] [cursor=pointer]:
+          - /url: /highlights
+        - link "Announcements" [ref=f4e29] [cursor=pointer]:
+          - /url: /announcements
+        - link "SIH" [ref=f4e30] [cursor=pointer]:
+          - /url: /sih
+        - link "Join Us" [ref=f4e31] [cursor=pointer]:
+          - /url: /join
+        - link "Contact" [ref=f4e32] [cursor=pointer]:
+          - /url: /contact
+      - generic [ref=f4e33]:
+        - link "Search events and announcements" [ref=f4e34] [cursor=pointer]:
+          - /url: /events
+        - link "Admin" [ref=f4e38] [cursor=pointer]:
+          - /url: /admin/login
+  - main [ref=f4e42]:
+    - generic [ref=f4e43]:
+      - generic [ref=f4e46]:
+        - generic [ref=f4e47]: Chapter Liaison & Desk
+        - heading "Get in Touch" [level=1] [ref=f4e52]
+        - paragraph [ref=f4e53]: Direct access to chapter leads, faculty advisors, and coordinators.
+        - paragraph [ref=f4e54]: Have questions regarding workshops, event registrations, student chapter membership, or SIH team mentoring? Reach out to our student coordinator council.
+      - generic [ref=f4e56]:
+        - generic [ref=f4e58]:
+          - generic [ref=f4e59]:
+            - generic [ref=f4e60]:
+              - generic [ref=f4e61]: // CHAPTER DIRECTORY
+              - text: Liaison & Registry Desk
+            - generic [ref=f4e62]: MONITORED
+          - generic [ref=f4e63]:
+            - generic [ref=f4e69]:
+              - generic [ref=f4e70]: Official Dispatch Email
+              - link "csi@cmritonline.ac.in" [ref=f4e71] [cursor=pointer]:
+                - /url: mailto:csi@cmritonline.ac.in
+              - paragraph [ref=f4e72]: Inquiries monitored daily. Expected turnaround is 24–48 hours on academic weekdays.
+            - generic [ref=f4e78]:
+              - generic [ref=f4e79]: Chapter Headquarters
+              - paragraph [ref=f4e80]: CMR Institute of Technology (CMRIT)
+              - paragraph [ref=f4e81]: Kandlakoya, Medchal Road, Hyderabad – 501401, Telangana, India.
+              - generic [ref=f4e82]: Tech Block • Lab 4 / Innovation Cell
+            - generic [ref=f4e88]:
+              - generic [ref=f4e89]: Desk Working Hours
+              - paragraph [ref=f4e90]: "Monday – Friday: 09:30 – 16:30 IST"
+              - paragraph [ref=f4e91]: Weekend bootcamps, code sprints, and internal jury rounds follow published event schedules.
+        - generic [ref=f4e93]:
+          - generic [ref=f4e94]:
+            - text: Direct Inquiries
+            - heading "Transmit a Message" [level=2] [ref=f4e95]
+            - paragraph [ref=f4e96]: Have a suggestion, mentorship request, or partnership proposal? Fill out the form below.
+          - generic [ref=f4e97]:
+            - generic [ref=f4e98]:
+              - generic [ref=f4e99]:
+                - generic [ref=f4e100]: Your Name *
+                - textbox "e.g. Ananya Rao" [ref=f4e105]
+              - generic [ref=f4e106]:
+                - generic [ref=f4e107]: Email Address *
+                - textbox "name@example.com" [ref=f4e112]
+            - generic [ref=f4e113]:
+              - generic [ref=f4e114]: Subject / Topic
+              - textbox "e.g. Inquiry regarding CodeSprint 2026 eligibility" [ref=f4e115]
+            - generic [ref=f4e116]:
+              - generic [ref=f4e117]: Message Content *
+              - textbox "Provide detailed information regarding your inquiry..." [ref=f4e118]
+            - button "Send Inbound Message" [ref=f4e120] [cursor=pointer]
+  - contentinfo [ref=f4e126]:
+    - generic [ref=f4e127]:
+      - generic [ref=f4e128]:
+        - generic [ref=f4e129]:
+          - 'link "CSI CSI CMRIT Computer Society of India Institutional Chapter #CMRIT-HYD" [ref=f4e130] [cursor=pointer]':
+            - /url: /
+            - generic [ref=f4e131]: CSI
+            - generic [ref=f4e132]:
+              - generic [ref=f4e133]:
+                - generic [ref=f4e134]: CSI
+                - generic [ref=f4e135]: CMRIT
+              - generic [ref=f4e136]: Computer Society of India
+              - generic [ref=f4e137]: "Institutional Chapter #CMRIT-HYD"
+          - paragraph [ref=f4e138]: Empowering undergraduate engineering students through technical rigor, national competitions, and hands-on laboratory workshops.
+        - generic [ref=f4e139]:
+          - heading "Directory" [level=4] [ref=f4e140]
+          - generic [ref=f4e141]:
+            - link "Home" [ref=f4e142] [cursor=pointer]:
+              - /url: /
+            - link "Notices" [ref=f4e143] [cursor=pointer]:
+              - /url: /announcements
+            - link "Charter" [ref=f4e144] [cursor=pointer]:
+              - /url: /about
+            - link "SIH Cell" [ref=f4e145] [cursor=pointer]:
+              - /url: /sih
+            - link "Calendar" [ref=f4e146] [cursor=pointer]:
+              - /url: /events
+            - link "Membership" [ref=f4e147] [cursor=pointer]:
+              - /url: /join
+            - link "Archive" [ref=f4e148] [cursor=pointer]:
+              - /url: /highlights
+            - link "Contact" [ref=f4e149] [cursor=pointer]:
+              - /url: /contact
+        - generic [ref=f4e150]:
+          - heading "Channels" [level=4] [ref=f4e151]
+          - generic [ref=f4e152]:
+            - link "Instagram" [ref=f4e153] [cursor=pointer]:
+              - /url: https://instagram.com
+            - link "LinkedIn" [ref=f4e156] [cursor=pointer]:
+              - /url: https://linkedin.com
+            - link "YouTube" [ref=f4e159] [cursor=pointer]:
+              - /url: https://youtube.com
+        - generic [ref=f4e162]:
+          - heading "Liaison Desk" [level=4] [ref=f4e163]
+          - generic [ref=f4e164]:
+            - link "csi@cmritonline.ac.in" [ref=f4e169] [cursor=pointer]:
+              - /url: mailto:csi@cmritonline.ac.in
+            - generic [ref=f4e170]: CMR Institute of TechnologyKandlakoya, Hyderabad – 501401
+      - generic [ref=f4e175]:
+        - paragraph [ref=f4e176]: © 2026 Computer Society of India • CMRIT Chapter. All rights reserved.
+        - paragraph [ref=f4e177]: Engineering for Public Good

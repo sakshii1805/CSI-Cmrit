@@ -1,0 +1,201 @@
+- generic [ref=f1e3]:
+  - banner [ref=f1e4]:
+    - generic [ref=f1e6]:
+      - link "CSI CMRIT Chapter" [ref=f1e7] [cursor=pointer]:
+        - /url: /
+        - generic [ref=f1e14]:
+          - generic [ref=f1e15]:
+            - generic [ref=f1e16]:
+              - generic [ref=f1e17]: CSI
+              - generic [ref=f1e18]: CMRIT
+            - generic [ref=f1e19]: Chapter
+          - generic [ref=f1e21]:
+            - generic [ref=f1e22]: Computer Society of India
+            - generic [ref=f1e23]: CMRIT Chapter
+      - navigation "Main Navigation" [ref=f1e24]:
+        - link "Home" [ref=f1e25] [cursor=pointer]:
+          - /url: /
+        - link "About" [ref=f1e26] [cursor=pointer]:
+          - /url: /about
+        - link "Events" [ref=f1e27] [cursor=pointer]:
+          - /url: /events
+        - link "Highlights" [ref=f1e28] [cursor=pointer]:
+          - /url: /highlights
+        - link "Announcements" [ref=f1e29] [cursor=pointer]:
+          - /url: /announcements
+        - link "SIH" [ref=f1e30] [cursor=pointer]:
+          - /url: /sih
+        - link "Join Us" [ref=f1e31] [cursor=pointer]:
+          - /url: /join
+        - link "Contact" [ref=f1e32] [cursor=pointer]:
+          - /url: /contact
+      - generic [ref=f1e33]:
+        - link "Search events and announcements" [ref=f1e34] [cursor=pointer]:
+          - /url: /events
+        - link "Admin Login" [ref=f1e38] [cursor=pointer]:
+          - /url: /admin/login
+  - main [ref=f1e42]:
+    - generic [ref=f1e43]:
+      - generic [ref=f1e44]:
+        - generic:
+          - img "CMR Institute of Technology Campus Building"
+        - generic [ref=f1e46]:
+          - paragraph [ref=f1e47]: COMPUTER SOCIETY OF INDIA • CMRIT CHAPTER
+          - heading "Learn. Build. Innovate." [level=1] [ref=f1e48]
+          - paragraph [ref=f1e49]: Empowering students through technology, collaboration, innovation and meaningful experiences.
+          - generic [ref=f1e50]:
+            - link "Explore Events" [ref=f1e51] [cursor=pointer]:
+              - /url: /events
+            - link "Join CSI" [ref=f1e55] [cursor=pointer]:
+              - /url: /join
+      - generic [ref=f1e59]:
+        - generic [ref=f1e60]:
+          - generic [ref=f1e61]:
+            - heading "About CSI CMRIT" [level=3] [ref=f1e62]
+            - paragraph [ref=f1e63]: CSI CMRIT is a student chapter of the Computer Society of India, bringing together technology enthusiasts, learners and innovators to build skills, solve real-world problems and create meaningful opportunities.
+          - link "Learn More" [ref=f1e65] [cursor=pointer]:
+            - /url: /about
+        - generic [ref=f1e69]:
+          - heading "What We Do" [level=3] [ref=f1e70]
+          - generic [ref=f1e71]:
+            - heading "Technical Workshops" [level=4] [ref=f1e76]
+            - heading "Coding & Competitions" [level=4] [ref=f1e85]
+            - heading "Hackathons" [level=4] [ref=f1e93]
+            - heading "Industry Sessions" [level=4] [ref=f1e100]
+            - heading "Innovation" [level=4] [ref=f1e105]
+            - heading "Community & Networking" [level=4] [ref=f1e113]
+        - generic [ref=f1e115]:
+          - img "Code editor on laptop screen" [ref=f1e116]
+          - generic [ref=f1e117]: Learn • Collaborate • Grow
+      - generic [ref=f1e120]:
+        - generic [ref=f1e121]:
+          - heading "Explore Our Domains" [level=2] [ref=f1e122]
+          - paragraph [ref=f1e123]: Be a part of something bigger. Discover opportunities, learn new skills and connect with like-minded people.
+        - generic [ref=f1e124]:
+          - link "Technology" [ref=f1e125] [cursor=pointer]:
+            - /url: /events?category=Workshops
+          - link "Events" [ref=f1e130] [cursor=pointer]:
+            - /url: /events
+          - link "Workshops" [ref=f1e135] [cursor=pointer]:
+            - /url: /events?category=Workshops
+          - link "Competitions" [ref=f1e141] [cursor=pointer]:
+            - /url: /events?category=Competitions
+          - link "SIH" [ref=f1e150] [cursor=pointer]:
+            - /url: /sih
+          - link "Community" [ref=f1e155] [cursor=pointer]:
+            - /url: /gallery
+          - link "Innovation" [ref=f1e163] [cursor=pointer]:
+            - /url: /sih
+      - generic [ref=f1e172]:
+        - generic [ref=f1e173]:
+          - generic [ref=f1e174]:
+            - heading "Upcoming Events" [level=2] [ref=f1e175]
+            - paragraph [ref=f1e176]: Workshops, competitions, hackathons and more — organized by CSI CMRIT.
+          - link "View All Events" [ref=f1e177] [cursor=pointer]:
+            - /url: /events
+        - generic [ref=f1e181]:
+          - heading "No upcoming events" [level=3] [ref=f1e187]
+          - paragraph [ref=f1e188]: Events and activities will appear here when they are announced by chapter administrators.
+          - link "Go to Events" [ref=f1e189] [cursor=pointer]:
+            - /url: /events
+      - generic [ref=f1e195]:
+        - generic [ref=f1e200]:
+          - heading "Be a part of something bigger." [level=3] [ref=f1e201]
+          - paragraph [ref=f1e202]: Join CSI CMRIT and be a part of an amazing community of tech enthusiasts!
+        - link "Join Us" [ref=f1e203] [cursor=pointer]:
+          - /url: /join
+      - generic [ref=f1e209]:
+        - generic [ref=f1e210]:
+          - generic [ref=f1e211]:
+            - heading "Latest Announcements" [level=2] [ref=f1e216]
+            - link "View All" [ref=f1e217] [cursor=pointer]:
+              - /url: /announcements
+          - generic [ref=f1e221]:
+            - paragraph [ref=f1e228]: No announcements yet
+            - paragraph [ref=f1e229]: Important updates from CSI CMRIT will appear here.
+        - generic [ref=f1e230]:
+          - generic [ref=f1e231]:
+            - heading "Chapter Highlights" [level=2] [ref=f1e236]
+            - link "View All" [ref=f1e237] [cursor=pointer]:
+              - /url: /highlights
+          - generic [ref=f1e241]:
+            - paragraph [ref=f1e246]: No highlights yet
+            - paragraph [ref=f1e247]: Photos and moments from CSI CMRIT activities will appear here.
+      - generic [ref=f1e250]:
+        - generic [ref=f1e251]:
+          - generic [ref=f1e252]:
+            - heading "Smart India Hackathon (SIH)" [level=3] [ref=f1e253]
+            - paragraph [ref=f1e254]: Innovate • Build • Make a Difference
+            - paragraph [ref=f1e255]: CSI CMRIT actively supports students participating in SIH — India's largest open innovation hackathon for engineering students. We guide teams from ideation to prototype presentation.
+            - paragraph [ref=f1e257]: SIH updates, participating teams, and chapter achievements will be published here as they are available.
+          - link "Learn About SIH" [ref=f1e259] [cursor=pointer]:
+            - /url: /sih
+        - generic [ref=f1e263]:
+          - generic [ref=f1e264]:
+            - generic [ref=f1e265]:
+              - heading "Join CSI CMRIT" [level=3] [ref=f1e271]
+              - paragraph [ref=f1e272]: Be a part of a vibrant community of learners, creators and innovators.
+              - list [ref=f1e273]:
+                - listitem [ref=f1e274]:
+                  - generic [ref=f1e277]: Skill Development
+                - listitem [ref=f1e278]:
+                  - generic [ref=f1e281]: Hands-on Workshops
+                - listitem [ref=f1e282]:
+                  - generic [ref=f1e285]: Networking Opportunities
+                - listitem [ref=f1e286]:
+                  - generic [ref=f1e289]: Certifications
+                - listitem [ref=f1e290]:
+                  - generic [ref=f1e293]: National & International Events
+            - link "Apply Now" [ref=f1e295] [cursor=pointer]:
+              - /url: /join
+          - img "CSI CMRIT Students Team" [ref=f1e300]
+  - contentinfo [ref=f1e301]:
+    - generic [ref=f1e302]:
+      - generic [ref=f1e303]:
+        - link "CSI CMRIT Computer Society of India CMRIT Chapter" [ref=f1e305] [cursor=pointer]:
+          - /url: /
+          - generic [ref=f1e312]:
+            - generic [ref=f1e313]:
+              - generic [ref=f1e314]: CSI
+              - generic [ref=f1e315]: CMRIT
+            - generic [ref=f1e316]: Computer Society of India
+            - generic [ref=f1e317]: CMRIT Chapter
+        - generic [ref=f1e318]:
+          - heading "Quick Links" [level=4] [ref=f1e319]
+          - generic [ref=f1e320]:
+            - link "Home" [ref=f1e321] [cursor=pointer]:
+              - /url: /
+            - link "Announcements" [ref=f1e322] [cursor=pointer]:
+              - /url: /announcements
+            - link "About" [ref=f1e323] [cursor=pointer]:
+              - /url: /about
+            - link "SIH" [ref=f1e324] [cursor=pointer]:
+              - /url: /sih
+            - link "Events" [ref=f1e325] [cursor=pointer]:
+              - /url: /events
+            - link "Join Us" [ref=f1e326] [cursor=pointer]:
+              - /url: /join
+            - link "Highlights" [ref=f1e327] [cursor=pointer]:
+              - /url: /highlights
+            - link "Contact" [ref=f1e328] [cursor=pointer]:
+              - /url: /contact
+        - generic [ref=f1e329]:
+          - heading "Follow Us" [level=4] [ref=f1e330]
+          - generic [ref=f1e331]:
+            - link "Instagram" [ref=f1e332] [cursor=pointer]:
+              - /url: https://instagram.com
+            - link "LinkedIn" [ref=f1e335] [cursor=pointer]:
+              - /url: https://linkedin.com
+            - link "YouTube" [ref=f1e338] [cursor=pointer]:
+              - /url: https://youtube.com
+            - link "X" [ref=f1e341] [cursor=pointer]:
+              - /url: https://twitter.com
+        - generic [ref=f1e344]:
+          - heading "Contact Us" [level=4] [ref=f1e345]
+          - generic [ref=f1e346]:
+            - link "csicmrit@cmrit.ac.in" [ref=f1e351] [cursor=pointer]:
+              - /url: mailto:csicmrit@cmrit.ac.in
+            - generic [ref=f1e352]: CMR Institute of TechnologyHyderabad, Telangana
+      - generic [ref=f1e357]:
+        - paragraph [ref=f1e358]: © 2025 CSI CMRIT Chapter. All rights reserved.
+        - paragraph [ref=f1e359]: Technology for a better tomorrow

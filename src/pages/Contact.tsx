@@ -185,7 +185,7 @@ export const Contact: React.FC = () => {
                         type="text"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                        placeholder="e.g. Sakshi Mala"
+                        placeholder="e.g. Rahul Sharma"
                         className={`w-full pl-9 pr-3 py-2 text-sm rounded-lg border focus:outline-none focus:ring-2 ${errors.name ? 'border-rose-400 focus:ring-rose-200' : 'border-slate-200 focus:ring-blue-100 focus:border-blue-600'
                           }`}
                       />
