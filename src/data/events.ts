@@ -3,7 +3,7 @@ import { EventItem } from '../types';
 export const mockEvents: EventItem[] = [
   {
     id: 'avishkaar-2026',
-    title: 'AVISHKAAR: SIH-Pattern Hackathon',
+    title: 'AVISHKAAR 2026 — Annual Technical Festival & Hackathon',
     slug: 'avishkaar-2026',
     category: 'Hackathons',
     date: '9 – 10 October 2026',
@@ -12,10 +12,10 @@ export const mockEvents: EventItem[] = [
     venue: 'CMR Institute of Technology (UGC Autonomous), Kandlakoya, Hyderabad',
     mode: 'In-person',
 
-    description: 'AVISHKAAR is the flagship SIH-pattern hackathon organized by the Computer Society of India (CSI) CMRIT Student Chapter. Geared towards "Ideas, Code, Impact" and "Think, Build, Solve", teams of 6 CMRIT students will tackle 20 pre-selected problem statements across technology and real-world innovation.',
+    description: 'AVISHKAAR 2026 is the flagship annual technical festival and hackathon organized by the Computer Society of India (CSI) CMRIT Student Chapter. Geared towards "Ideas, Code, Impact" and "Think, Build, Solve", teams of 6 CMRIT students will tackle 20 pre-selected problem statements across technology and real-world innovation.',
     highlights: [
       'Top 3 Cash Prizes: 1st Prize ₹20,000, 1st Runner-Up ₹10,000, 2nd Runner-Up ₹5,000 (Total ₹35,000 pool)',
-      '20 Pre-selected Problem Statements aligned with national SIH standards',
+      '20 Pre-selected Problem Statements across technology and innovation domains',
       'Preliminary Round: 26 September 2026 (Short 8-10 min presentation + Q&A)',
       'Grand Finale: 9 – 10 October 2026 (Only shortlisted teams advance)',
       'Registration Fee: ₹1,200 per team (Applicable only for shortlisted teams)',

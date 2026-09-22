@@ -59,7 +59,6 @@ import { adminService } from '../services/adminService';
 import { eventsService } from '../services/eventsService';
 import { announcementsService } from '../services/announcementsService';
 import { highlightsService } from '../services/highlightsService';
-import { sihService } from '../services/sihService';
 import { commentsService } from '../services/commentsService';
 import { joinService } from '../services/joinService';
 import { contactService } from '../services/contactService';
@@ -69,7 +68,6 @@ import {
   EventItem,
   AnnouncementItem,
   ChapterHighlightItem,
-  SihItem,
   CommentItem,
   JoinApplication,
   ContactMessage,
@@ -83,7 +81,6 @@ export type AdminTab =
   | 'events'
   | 'announcements'
   | 'highlights'
-  | 'sih'
   | 'comments'
   | 'applications'
   | 'contacts'
@@ -174,7 +171,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
   const [announcementSearch, setAnnouncementSearch] = useState('');
   const [announcementCategoryFilter, setAnnouncementCategoryFilter] = useState<string>('All');
   const [highlightSearch, setHighlightSearch] = useState('');
-  const [sihSearch, setSihSearch] = useState('');
   const [commentFilter, setCommentFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   const [appFilter, setAppFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   const [appSearch, setAppSearch] = useState('');
@@ -193,7 +189,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
   const [events, setEvents] = useState<EventItem[]>([]);
   const [announcements, setAnnouncements] = useState<AnnouncementItem[]>([]);
   const [highlights, setHighlights] = useState<ChapterHighlightItem[]>([]);
-  const [sihItems, setSihItems] = useState<SihItem[]>([]);
   const [comments, setComments] = useState<CommentItem[]>([]);
   const [blockedEmails, setBlockedEmails] = useState<BlockedEmail[]>([]);
   const [applications, setApplications] = useState<JoinApplication[]>([]);
@@ -241,19 +236,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
     is_published: true
   });
 
-  // SIH Modal
-  const [sihModalOpen, setSihModalOpen] = useState(false);
-  const [editingSih, setEditingSih] = useState<SihItem | null>(null);
-  const [sihFormData, setSihFormData] = useState({
-    title: '',
-    category: 'Update' as 'Team' | 'Update' | 'Achievement' | 'Resource',
-    content: '',
-    team_name: '',
-    problem_code: '',
-    status: 'Announced',
-    is_published: true
-  });
-
   const getAdminInitials = (name?: string) => {
     if (!name) return 'AD';
     const clean = name.replace(/^(Prof\.|Dr\.|Mr\.|Mrs\.|Ms\.)\s+/i, '').trim();
@@ -291,7 +273,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
   // In-app deletion modal state (replaces native browser window.confirm)
   const [deleteDialog, setDeleteDialog] = useState<{
     isOpen: boolean;
-    type: 'event' | 'announcement' | 'highlight' | 'sih' | 'comment' | 'application' | 'message';
+    type: 'event' | 'announcement' | 'highlight' | 'comment' | 'application' | 'message';
     id: string;
     title: string;
     name?: string;
@@ -346,7 +328,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
         allEvents,
         allAnnouncements,
         allHighlights,
-        allSih,
         allComments,
         allBlocked,
         allApps,
@@ -356,7 +337,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
         eventsService.adminListEvents(),
         announcementsService.adminListAnnouncements(),
         highlightsService.adminListHighlights(),
-        sihService.adminListSihItems(),
         commentsService.adminListComments(),
         commentsService.getBlockedEmails(),
         joinService.adminListApplications(),
@@ -366,7 +346,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
       const evts = allEvents.data || [];
       const anns = allAnnouncements.data || [];
       const hls = allHighlights.data || [];
-      const sihs = allSih.data || [];
       const cmts = allComments.data || [];
       const blk = allBlocked.data || [];
       const apps = allApps.data || [];
@@ -375,7 +354,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
       setEvents(evts);
       setAnnouncements(anns);
       setHighlights(hls);
-      setSihItems(sihs);
       setComments(cmts);
       setBlockedEmails(blk);
       setApplications(apps);
@@ -728,71 +706,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
     } catch (err) {
       showToast(`Visibility toggled.`, 'info');
     }
-  };
-
-  // ----------------------------------------------------
-  // SIH CRUD HANDLERS
-  // ----------------------------------------------------
-  const openNewSihModal = () => {
-    setEditingSih(null);
-    setSihFormData({
-      title: '',
-      category: 'Update',
-      content: '',
-      team_name: '',
-      problem_code: '',
-      status: 'Shortlisted',
-      is_published: true
-    });
-    setSihModalOpen(true);
-  };
-
-  const openEditSihModal = (item: SihItem) => {
-    setEditingSih(item);
-    setSihFormData({
-      title: item.title,
-      category: (item.category as any) || 'Update',
-      content: item.content || '',
-      team_name: item.team_name || '',
-      problem_code: item.problem_code || '',
-      status: item.status || 'Shortlisted',
-      is_published: item.is_published !== false
-    });
-    setSihModalOpen(true);
-  };
-
-  const handleSaveSih = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      if (editingSih) {
-        setSihItems(sihItems.map(s => s.id === editingSih.id ? { ...s, ...sihFormData } : s));
-        await sihService.updateSihItem(editingSih.id, sihFormData as any);
-        showToast('SIH update saved!', 'success');
-      } else {
-        const newSih: SihItem = {
-          id: 'sih-' + Date.now(),
-          ...sihFormData,
-          created_at: new Date().toISOString()
-        };
-        setSihItems([newSih, ...sihItems]);
-        await sihService.createSihItem(sihFormData as any);
-        showToast('SIH update published!', 'success');
-      }
-      setSihModalOpen(false);
-    } catch (err) {
-      showToast('SIH item saved locally.', 'info');
-      setSihModalOpen(false);
-    }
-  };
-
-  const handleDeleteSih = (id: string, title: string) => {
-    setDeleteDialog({
-      isOpen: true,
-      type: 'sih',
-      id,
-      title
-    });
-  };
+};
 
   // ----------------------------------------------------
   // COMMENT MODERATION HANDLERS
@@ -953,10 +867,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
         setStats(prev => ({ ...prev, galleryImages: Math.max(0, prev.galleryImages - 1) }));
         await highlightsService.deleteHighlight(id);
         showToast(`Photo "${title}" deleted from gallery.`, 'info');
-      } else if (type === 'sih') {
-        setSihItems(prev => prev.filter(s => s.id !== id));
-        await sihService.deleteSihItem(id);
-        showToast(`SIH record "${title}" deleted.`, 'info');
       } else if (type === 'comment') {
         setComments(prev => prev.filter(c => c.id !== id));
         setStats(prev => ({ ...prev, pendingComments: Math.max(0, prev.pendingComments - 1) }));
@@ -1077,14 +987,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
     );
   }, [highlights, highlightSearch]);
 
-  const filteredSih = useMemo(() => {
-    return sihItems.filter(s =>
-      s.title.toLowerCase().includes(sihSearch.toLowerCase()) ||
-      (s.team_name && s.team_name.toLowerCase().includes(sihSearch.toLowerCase())) ||
-      (s.problem_code && s.problem_code.toLowerCase().includes(sihSearch.toLowerCase()))
-    );
-  }, [sihItems, sihSearch]);
-
   const filteredComments = useMemo(() => {
     return comments.filter(c => {
       if (commentFilter === 'all') return true;
@@ -1107,7 +1009,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
     { id: 'events', label: 'Events', icon: <Calendar className="w-4 h-4" />, count: stats.totalEvents },
     { id: 'announcements', label: 'Announcements', icon: <Bell className="w-4 h-4" />, count: stats.totalAnnouncements },
     { id: 'highlights', label: 'Gallery', icon: <Camera className="w-4 h-4" />, count: stats.galleryImages },
-    { id: 'sih', label: 'SIH Updates', icon: <Lightbulb className="w-4 h-4" /> },
     { id: 'comments', label: 'Comments', icon: <MessageSquare className="w-4 h-4" />, count: stats.pendingComments },
     { id: 'applications', label: 'Join Applications', icon: <Users className="w-4 h-4" />, count: stats.totalApplications },
     { id: 'contacts', label: 'Inquiries', icon: <Mail className="w-4 h-4" />, count: stats.unreadMessages }
@@ -1602,25 +1503,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
                     <div className="text-3xl font-extrabold text-slate-900">{stats.galleryImages}</div>
                     <div className="text-xs text-emerald-600 font-semibold mt-1 flex items-center gap-1">
                       <span>Curate Photos &rarr;</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 4. SIH Cell */}
-                <div
-                  onClick={() => setActiveTab('sih')}
-                  className="p-5 rounded-2xl border border-slate-200 bg-white shadow-xs hover:shadow-md hover:border-amber-400 transition-all cursor-pointer group flex flex-col justify-between"
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500">SIH Cell</span>
-                    <div className="p-2.5 rounded-xl bg-amber-50 text-amber-600 group-hover:scale-110 transition-transform">
-                      <Trophy className="w-5 h-5" />
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-3xl font-extrabold text-slate-900">{sihItems.length}</div>
-                    <div className="text-xs text-amber-600 font-semibold mt-1 flex items-center gap-1">
-                      <span>SIH Challenges &rarr;</span>
                     </div>
                   </div>
                 </div>
@@ -2172,105 +2054,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
             </div>
           )}
 
-          {/* ======================================================= */}
-          {/* TAB: SIH UPDATES */}
-          {/* ======================================================= */}
-          {activeTab === 'sih' && (
-            <div className="bg-white rounded-xl border border-slate-200 shadow-subtle overflow-hidden">
-              <div className="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h3 className="text-base font-bold text-slate-900">SIH Updates &amp; Team Listings</h3>
-                  <p className="text-xs text-slate-500">Post chapter achievements, participating teams, and national guidelines</p>
-                </div>
-                <Button
-                  variant="accent"
-                  size="sm"
-                  leftIcon={<Plus className="w-3.5 h-3.5" />}
-                  onClick={openNewSihModal}
-                >
-                  Add SIH Update
-                </Button>
-              </div>
 
-              {/* Search */}
-              <div className="px-5 py-3 bg-slate-50/70 border-b border-slate-200 flex items-center justify-between text-xs">
-                <div className="relative flex-1 max-w-sm">
-                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
-                  <input
-                    type="text"
-                    value={sihSearch}
-                    onChange={(e) => setSihSearch(e.target.value)}
-                    placeholder="Search teams, problem codes, or titles..."
-                    className="w-full pl-9 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-50 text-slate-500 font-semibold uppercase border-b border-slate-200/80">
-                    <tr>
-                      <th className="px-5 py-3">Title</th>
-                      <th className="px-5 py-3">Category</th>
-                      <th className="px-5 py-3">Team / Problem Code</th>
-                      <th className="px-5 py-3">Status</th>
-                      <th className="px-5 py-3 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 text-slate-700">
-                    {filteredSih.length > 0 ? (
-                      filteredSih.map((item) => (
-                        <tr key={item.id} className="hover:bg-slate-50/60 transition-colors">
-                          <td className="px-5 py-3 font-semibold text-slate-900">
-                            <div>{item.title}</div>
-                            <p className="text-[11px] text-slate-500 line-clamp-1">{item.content}</p>
-                          </td>
-                          <td className="px-5 py-3 text-slate-600 font-medium">{item.category}</td>
-                          <td className="px-5 py-3 text-slate-500">
-                            {item.team_name || item.problem_code ? (
-                              <span>
-                                {item.team_name} {item.problem_code && `(${item.problem_code})`}
-                              </span>
-                            ) : (
-                              <span className="text-slate-400 italic">None</span>
-                            )}
-                          </td>
-                          <td className="px-5 py-3">
-                            <span className="px-2 py-0.5 rounded text-[10px] font-semibold uppercase bg-slate-100 text-slate-700">
-                              {item.status || 'Active'}
-                            </span>
-                          </td>
-                          <td className="px-5 py-3 text-right space-x-2 whitespace-nowrap">
-                            <button
-                              onClick={() => openEditSihModal(item)}
-                              className="p-1.5 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded"
-                              title="Edit SIH Item"
-                            >
-                              <Pencil className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteSih(item.id, item.title)}
-                              className="p-1.5 text-slate-600 hover:text-rose-600 hover:bg-rose-50 rounded"
-                              title="Delete SIH Item"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <EmptyTableState message="No SIH updates found" />
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* ======================================================= */}
-          {/* TAB: COMMENTS MODERATION */}
-          {/* ======================================================= */}
-          {activeTab === 'comments' && (
             <div className="space-y-6">
               <div className="bg-white rounded-xl border border-slate-200 shadow-subtle overflow-hidden">
                 <div className="p-5 border-b border-slate-100 flex items-center justify-between">
@@ -2423,7 +2207,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
                 </div>
               )}
             </div>
-          )}
 
           {/* ======================================================= */}
           {/* TAB: JOIN APPLICATIONS */}
@@ -3124,135 +2907,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
             </form>
           </div>
         </div>
-      )}
-
-      {/* ======================================================= */}
-      {/* MODAL: ADD / EDIT SIH RECORD */}
-      {/* ======================================================= */}
-      {sihModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl shadow-slate-900/15 border border-slate-200/90 my-8 animate-scaleUp">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center shadow-xs">
-                  <Trophy className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-bold text-slate-900 tracking-tight">
-                    {editingSih ? 'Edit SIH Record' : 'Add SIH Update / Team'}
-                  </h3>
-                  <p className="text-xs text-slate-500">Smart India Hackathon Management</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setSihModalOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-xl transition-colors"
-                aria-label="Close dialog"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveSih} className="space-y-4 text-xs">
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Title *</label>
-                <input
-                  type="text"
-                  required
-                  value={sihFormData.title}
-                  onChange={(e) => setSihFormData({ ...sihFormData, title: e.target.value })}
-                  placeholder="e.g. Internal Screening Round Announced for SIH 2026"
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Type / Category</label>
-                  <select
-                    value={sihFormData.category}
-                    onChange={(e) => setSihFormData({ ...sihFormData, category: e.target.value as any })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                  >
-                    <option value="Update">Update</option>
-                    <option value="Team">Team Listing</option>
-                    <option value="Achievement">Achievement</option>
-                    <option value="Resource">Resource</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Status Badge</label>
-                  <input
-                    type="text"
-                    value={sihFormData.status}
-                    onChange={(e) => setSihFormData({ ...sihFormData, status: e.target.value })}
-                    placeholder="Shortlisted / Grand Finale"
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Team Name (Optional)</label>
-                  <input
-                    type="text"
-                    value={sihFormData.team_name}
-                    onChange={(e) => setSihFormData({ ...sihFormData, team_name: e.target.value })}
-                    placeholder="e.g. CodeForge CMRIT"
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-semibold text-slate-700 mb-1">Problem Code (Optional)</label>
-                  <input
-                    type="text"
-                    value={sihFormData.problem_code}
-                    onChange={(e) => setSihFormData({ ...sihFormData, problem_code: e.target.value })}
-                    placeholder="e.g. SIH1601"
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block font-semibold text-slate-700 mb-1">Details &amp; Content *</label>
-                <textarea
-                  rows={4}
-                  required
-                  value={sihFormData.content}
-                  onChange={(e) => setSihFormData({ ...sihFormData, content: e.target.value })}
-                  placeholder="Details of the update, team members, or guidelines..."
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div className="pt-2">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={sihFormData.is_published}
-                    onChange={(e) => setSihFormData({ ...sihFormData, is_published: e.target.checked })}
-                    className="rounded text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="font-semibold text-slate-700">Display on SIH public page</span>
-                </label>
-              </div>
-
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-2">
-                <Button type="button" variant="outline" size="sm" onClick={() => setSihModalOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit" variant="primary" size="sm">
-                  {editingSih ? 'Save Changes' : 'Save SIH Update'}
-                </Button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+)}
 
       {/* ======================================================= */}
       {/* MODAL: LOGOUT CONFIRMATION DIALOG (MATCHES WEBSITE THEME BLUE) */}
@@ -3315,8 +2970,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
             ? 'Delete Announcement?'
             : deleteDialog.type === 'highlight'
             ? 'Delete Gallery Photo?'
-            : deleteDialog.type === 'sih'
-            ? 'Delete SIH Record?'
             : deleteDialog.type === 'comment'
             ? 'Delete Comment?'
             : deleteDialog.type === 'application'
@@ -3342,8 +2995,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
             ? 'Delete Announcement'
             : deleteDialog.type === 'highlight'
             ? 'Delete Photo'
-            : deleteDialog.type === 'sih'
-            ? 'Delete Record'
             : deleteDialog.type === 'comment'
             ? 'Delete Comment'
             : 'Delete'

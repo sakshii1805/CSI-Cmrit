@@ -78,6 +78,7 @@ export type AnnouncementCategory =
   | 'General'
   | 'Hackathon'
   | 'Workshop'
+  | 'Event'
   | 'Registration'
   | 'Opportunity';
 
@@ -112,7 +113,6 @@ export type ChapterHighlightCategory =
   | 'All'
   | 'Workshops'
   | 'Hackathons'
-  | 'SIH'
   | 'Competitions'
   | 'Technical Sessions'
   | 'Community'
@@ -180,26 +180,6 @@ export interface ActivityLogItem {
   target_id?: string | null;
   target_title?: string | null;
   created_at: string;
-}
-
-// --- SIH Items (Teams, Projects, Achievements, Updates) ---
-export type SihItemType = 'team' | 'project' | 'update' | 'achievement' | 'problem_statement' | string;
-
-export interface SihItem {
-  id: string;
-  type?: SihItemType;
-  category?: string;
-  title: string;
-  year?: string;
-  description?: string;
-  content?: string;
-  team_name?: string;
-  problem_code?: string;
-  image_url?: string | null;
-  status?: ContentStatus | string;
-  is_published?: boolean;
-  created_at?: string;
-  updated_at?: string;
 }
 
 // --- Join Us Applications ---
@@ -277,30 +257,4 @@ export interface AdminComment {
   content: string;
   date: string;
   status: 'Pending' | 'Approved' | 'Rejected' | 'pending' | 'approved' | 'rejected';
-}
-
-// --- Static SIH Problem Statements (Reference Hub) ---
-export type SIHCategory = 'Software' | 'Hardware';
-export type SIHComplexity = 'Breakthrough' | 'Moderate' | 'Foundational';
-export type SIHEffort = 'High Effort' | 'Medium Effort' | 'Low Effort';
-
-export interface SIHProblemStatement {
-  id: string;
-  code: string;
-  title: string;
-  organization: string;
-  category: SIHCategory;
-  theme: string;
-  complexity: SIHComplexity;
-  effort: SIHEffort;
-  statusDot: 'green' | 'yellow' | 'blue';
-  deadline: string;
-  daysLeft: number;
-  ideasCount: number;
-  maxIdeas: number;
-  description: string;
-  expectedSolution: string;
-  suggestedStack: string[];
-  teamCompositionGuide: string;
-  evaluatorFocus: string[];
 }

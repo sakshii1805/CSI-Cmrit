@@ -15,7 +15,6 @@ export const GalleryPage: React.FC = () => {
     'Events',
     'Workshops',
     'Hackathons',
-    'SIH',
     'Community',
     'Other',
   ];

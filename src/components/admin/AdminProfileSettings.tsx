@@ -910,7 +910,7 @@ export const AdminProfileSettings: React.FC<AdminProfileSettingsProps> = ({
                     Author Attribution on Circulars
                   </span>
                   <span className="text-[11px] text-slate-400 block mt-0.5">
-                    Attribute chapter announcements and SIH notifications to administrator signature.
+                    Attribute chapter announcements and notifications to administrator signature.
                   </span>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer shrink-0">

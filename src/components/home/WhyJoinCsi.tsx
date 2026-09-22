@@ -21,8 +21,8 @@ export const WhyJoinCsi: React.FC = () => {
     },
     {
       icon: <Trophy className="w-6 h-6 text-amber-600" />,
-      title: 'SIH & Hackathon Incubation',
-      description: 'Exclusive mentorship, team formulation, and pitch deck validation for Smart India Hackathon and national hackathons.',
+      title: 'Hackathon Incubation',
+      description: 'Exclusive mentorship, team formulation, and pitch deck validation for national hackathons.',
       bgClass: 'bg-amber-50/70 border-amber-100',
       iconBg: 'bg-amber-100/80 text-amber-600'
     },

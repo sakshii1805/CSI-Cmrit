@@ -2,7 +2,6 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Filter, Camera } from 'lucide-react';
 import { highlightsService } from '../services/highlightsService';
 import { GalleryCard } from '../components/gallery/GalleryCard';
-import { LightboxModal } from '../components/gallery/LightboxModal';
 import { CommentSection } from '../components/common/CommentSection';
 import { ChapterHighlightCategory, ChapterHighlightItem } from '../types';
 
@@ -10,14 +9,12 @@ export const ChapterHighlights: React.FC = () => {
   const [highlights, setHighlights] = useState<ChapterHighlightItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedCategory, setSelectedCategory] = useState<ChapterHighlightCategory>('All');
-  const [activePhotoIndex, setActivePhotoIndex] = useState<number | null>(null);
 
   const categories: ChapterHighlightCategory[] = [
     'All',
     'Events',
     'Workshops',
     'Hackathons',
-    'SIH',
     'Community'
   ];
 
@@ -47,20 +44,6 @@ export const ChapterHighlights: React.FC = () => {
     if (selectedCategory === 'All') return highlights;
     return highlights.filter((item) => item.category === selectedCategory);
   }, [highlights, selectedCategory]);
-
-  const activePhoto = activePhotoIndex !== null ? filteredPhotos[activePhotoIndex] : null;
-
-  const handleNextPhoto = () => {
-    if (activePhotoIndex !== null && activePhotoIndex < filteredPhotos.length - 1) {
-      setActivePhotoIndex(activePhotoIndex + 1);
-    }
-  };
-
-  const handlePrevPhoto = () => {
-    if (activePhotoIndex !== null && activePhotoIndex > 0) {
-      setActivePhotoIndex(activePhotoIndex - 1);
-    }
-  };
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50">
@@ -131,13 +114,12 @@ export const ChapterHighlights: React.FC = () => {
         ) : filteredPhotos.length > 0 ? (
           /* Highlights Grid */
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredPhotos.map((item, index) => (
-              <GalleryCard
-                key={item.id}
-                item={item}
-                onClick={() => setActivePhotoIndex(index)}
-              />
-            ))}
+             {filteredPhotos.map((item) => (
+               <GalleryCard
+                 key={item.id}
+                 item={item}
+               />
+             ))}
           </div>
         ) : (
           /* Empty State */
@@ -168,18 +150,7 @@ export const ChapterHighlights: React.FC = () => {
           targetId="general-gallery"
           targetTitle="Chapter Gallery & Archives"
         />
-      </section>
-
-      {/* Fullscreen Lightbox Modal */}
-      <LightboxModal
-        isOpen={activePhotoIndex !== null}
-        item={activePhoto}
-        onClose={() => setActivePhotoIndex(null)}
-        onNext={handleNextPhoto}
-        onPrev={handlePrevPhoto}
-        hasNext={activePhotoIndex !== null && activePhotoIndex < filteredPhotos.length - 1}
-        hasPrev={activePhotoIndex !== null && activePhotoIndex > 0}
-      />
-    </div>
-  );
-};
+       </section>
+     </div>
+   );
+ };
