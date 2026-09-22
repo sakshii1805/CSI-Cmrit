@@ -39,7 +39,7 @@ export const Navbar: React.FC = () => {
       <div className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-4 px-4 md:px-10 pointer-events-none">
         <nav
           className={`flex items-center justify-between w-full max-w-7xl pointer-events-auto transition-all duration-500 ease-in-out px-5 py-2.5 rounded-2xl ${isScrolled
-            ? 'bg-slate-950/80 backdrop-blur-xl shadow-lg shadow-black/30 border border-slate-800/60'
+            ? 'bg-slate-950 shadow-lg shadow-black/30'
             : 'bg-transparent'
             }`}
         >

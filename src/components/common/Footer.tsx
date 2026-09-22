@@ -24,7 +24,7 @@ export const Footer: React.FC = () => {
                   <span className="text-sm font-bold text-white tracking-tight leading-tight">
                     Computer Society of India
                   </span>
-                  <span className="text-[10px] font-medium text-slate-400 tracking-widest leading-none uppercase">
+                  <span className="text-[10px] font-medium text-slate-400 tracking-widest leading-none ">
                     CMRIT Student Chapter
                   </span>
                 </div>
