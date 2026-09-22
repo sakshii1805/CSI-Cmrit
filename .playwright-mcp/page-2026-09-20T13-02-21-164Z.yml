@@ -1,0 +1,252 @@
+- generic [ref=f2e3]:
+  - banner [ref=f2e4]:
+    - generic [ref=f2e6]:
+      - link "CSI CMRIT Chapter" [ref=f2e7] [cursor=pointer]:
+        - /url: /
+        - generic [ref=f2e14]:
+          - generic [ref=f2e15]:
+            - generic [ref=f2e16]:
+              - generic [ref=f2e17]: CSI
+              - generic [ref=f2e18]: CMRIT
+            - generic [ref=f2e19]: Chapter
+          - generic [ref=f2e21]:
+            - generic [ref=f2e22]: Computer Society of India
+            - generic [ref=f2e23]: CMRIT Chapter
+      - navigation "Main Navigation" [ref=f2e24]:
+        - link "Home" [ref=f2e25] [cursor=pointer]:
+          - /url: /
+        - link "About" [ref=f2e26] [cursor=pointer]:
+          - /url: /about
+        - link "Events" [ref=f2e27] [cursor=pointer]:
+          - /url: /events
+        - link "Highlights" [ref=f2e28] [cursor=pointer]:
+          - /url: /highlights
+        - link "Announcements" [ref=f2e29] [cursor=pointer]:
+          - /url: /announcements
+        - link "SIH" [ref=f2e30] [cursor=pointer]:
+          - /url: /sih
+        - link "Join Us" [ref=f2e31] [cursor=pointer]:
+          - /url: /join
+        - link "Contact" [ref=f2e32] [cursor=pointer]:
+          - /url: /contact
+      - generic [ref=f2e33]:
+        - link "Search events and announcements" [ref=f2e34] [cursor=pointer]:
+          - /url: /events
+        - link "Admin" [ref=f2e38] [cursor=pointer]:
+          - /url: /admin/login
+  - main [ref=f2e42]:
+    - generic [ref=f2e43]:
+      - generic [ref=f2e46]:
+        - generic [ref=f2e47]: National Flagship Hackathon
+        - heading "Smart India Hackathon" [level=1] [ref=f2e52]
+        - paragraph [ref=f2e53]: Translating engineering principles into deployable public-sector systems.
+        - paragraph [ref=f2e54]: CSI CMRIT serves as the institutional incubator preparing student teams for India's premier nationwide hackathon organized by the Ministry of Education's Innovation Cell (MIC) and AICTE.
+        - generic [ref=f2e55]:
+          - link [ref=f2e56] [cursor=pointer]:
+            - /url: /join
+            - button "Join SIH Working Groups" [ref=f2e57]
+          - link [ref=f2e62] [cursor=pointer]:
+            - /url: /announcements
+            - button "Screening Notices" [ref=f2e63]
+      - generic [ref=f2e67]:
+        - generic [ref=f2e68]:
+          - generic [ref=f2e69]:
+            - paragraph [ref=f2e70]: National Overview
+            - heading "What is Smart India Hackathon?" [level=2] [ref=f2e71]
+          - paragraph [ref=f2e72]: Smart India Hackathon is the Government of India's apex student innovation competition. It challenges young technologists to devise production-ready solutions for complex operational bottlenecks submitted by central ministries, state departments, and premier enterprises.
+          - generic [ref=f2e73]:
+            - generic [ref=f2e74]:
+              - generic [ref=f2e75]:
+                - generic [ref=f2e76]: Track 01
+                - heading "Software Edition" [level=4] [ref=f2e77]
+              - paragraph [ref=f2e78]: A non-stop 36-hour sprint engineering resilient distributed software systems, cloud APIs, native mobile platforms, and AI models.
+            - generic [ref=f2e79]:
+              - generic [ref=f2e80]:
+                - generic [ref=f2e81]: Track 02
+                - heading "Hardware Edition" [level=4] [ref=f2e82]
+              - paragraph [ref=f2e83]: A 5-day continuous sprint fabricating physical prototypes, custom PCB layouts, embedded sensor networks, and robotic assemblies.
+        - generic [ref=f2e85]:
+          - generic [ref=f2e90]:
+            - heading "CSI CMRIT Incubation Cell" [level=3] [ref=f2e91]
+            - paragraph [ref=f2e92]: Institutional Gateway
+          - paragraph [ref=f2e93]: Our chapter provides internal screening committees, mentorship from past national finalists, technical reviews, and fabrication workspace support for CMRIT participants.
+          - generic [ref=f2e94]:
+            - generic [ref=f2e95]: "INFO:"
+            - generic [ref=f2e96]: Internal qualifiers are announced each academic cycle in accordance with the official MIC schedule.
+      - generic [ref=f2e98]:
+        - generic [ref=f2e99]:
+          - paragraph [ref=f2e100]: Incubation Lifecycle
+          - heading "How We Prepare CMRIT Teams" [level=2] [ref=f2e101]
+          - paragraph [ref=f2e102]: From the release of national problem statements to the final presentation before ministry jurors.
+        - generic [ref=f2e103]:
+          - generic [ref=f2e104]:
+            - generic [ref=f2e105]:
+              - generic [ref=f2e106]: PHASE 01
+              - heading "Problem Deconstruction & Feasibility" [level=3] [ref=f2e107]
+              - paragraph [ref=f2e108]: We dissect central ministry and industry problem statements, vet technical requirements, and define system boundaries before any line of code is written.
+            - generic [ref=f2e109]: Track Standard
+          - generic [ref=f2e113]:
+            - generic [ref=f2e114]:
+              - generic [ref=f2e115]: PHASE 02
+              - heading "Internal Screening & Jury Evaluations" [level=3] [ref=f2e116]
+              - paragraph [ref=f2e117]: Institutional qualifying rounds conducted under AICTE & MIC rubric standards, with cross-department faculty evaluating architecture depth.
+            - generic [ref=f2e118]: Track Standard
+          - generic [ref=f2e122]:
+            - generic [ref=f2e123]:
+              - generic [ref=f2e124]: PHASE 03
+              - heading "System Architecture & Pitch Polish" [level=3] [ref=f2e125]
+              - paragraph [ref=f2e126]: End-to-end guidance structuring system dataflow diagrams, API specifications, UX wireframes, and high-impact jury defense decks.
+            - generic [ref=f2e127]: Track Standard
+      - generic [ref=f2e132]:
+        - generic [ref=f2e133]:
+          - paragraph [ref=f2e134]: Problem Domains
+          - heading "Key Focus Areas" [level=2] [ref=f2e135]
+          - paragraph [ref=f2e136]: High-impact engineering verticals frequently targeted by CMRIT teams in SIH rounds.
+        - generic [ref=f2e137]:
+          - generic [ref=f2e138]:
+            - generic [ref=f2e139]:
+              - generic [ref=f2e140]: //THEME_01
+              - heading "Smart Healthcare & Diagnostics" [level=3] [ref=f2e145]
+              - paragraph [ref=f2e146]: Assistive medical devices, automated radiology diagnostics, hospital telemetry, and triage optimization software.
+            - generic [ref=f2e147]:
+              - generic [ref=f2e148]: SIH Innovation Vertical
+              - generic [ref=f2e149]: Standard MIC Track
+          - generic [ref=f2e150]:
+            - generic [ref=f2e151]:
+              - generic [ref=f2e152]: //THEME_02
+              - heading "Agriculture & Rural Innovation" [level=3] [ref=f2e159]
+              - paragraph [ref=f2e160]: Precision crop health telemetry, algorithmic supply-chain routing, and sensor-driven automated irrigation controllers.
+            - generic [ref=f2e161]:
+              - generic [ref=f2e162]: SIH Innovation Vertical
+              - generic [ref=f2e163]: Standard MIC Track
+          - generic [ref=f2e164]:
+            - generic [ref=f2e165]:
+              - generic [ref=f2e166]: //THEME_03
+              - heading "Clean Energy & Smart Infrastructure" [level=3] [ref=f2e172]
+              - paragraph [ref=f2e173]: IoT-enabled micro-grid monitoring, predictive waste logistics telemetry, and civic municipal reporting frameworks.
+            - generic [ref=f2e174]:
+              - generic [ref=f2e175]: SIH Innovation Vertical
+              - generic [ref=f2e176]: Standard MIC Track
+          - generic [ref=f2e177]:
+            - generic [ref=f2e178]:
+              - generic [ref=f2e179]: //THEME_04
+              - heading "Cybersecurity & Public Infrastructure" [level=3] [ref=f2e185]
+              - paragraph [ref=f2e186]: Fault-tolerant distributed ledgers, privacy-preserving zero-knowledge auth, and tamper-evident auditing systems.
+            - generic [ref=f2e187]:
+              - generic [ref=f2e188]: SIH Innovation Vertical
+              - generic [ref=f2e189]: Standard MIC Track
+      - generic [ref=f2e192]:
+        - generic [ref=f2e193]:
+          - generic [ref=f2e194]:
+            - text: Compliance
+            - heading "Team Composition Rules" [level=3] [ref=f2e195]
+          - paragraph [ref=f2e196]: "As per official Smart India Hackathon guidelines, every participating team must satisfy strict statutory formation rules:"
+          - list [ref=f2e197]:
+            - listitem [ref=f2e198]:
+              - generic [ref=f2e199]: "01"
+              - generic [ref=f2e200]:
+                - strong [ref=f2e201]: "Exactly 6 members:"
+                - text: Teams cannot exceed or fall short of the 6-student cohort rule.
+            - listitem [ref=f2e202]:
+              - generic [ref=f2e203]: "02"
+              - generic [ref=f2e204]:
+                - strong [ref=f2e205]: "Mandatory female representation:"
+                - text: At least 1 female engineer must be on the registered team.
+            - listitem [ref=f2e206]:
+              - generic [ref=f2e207]: "03"
+              - generic [ref=f2e208]:
+                - strong [ref=f2e209]: "Active CMRIT enrollment:"
+                - text: All participants must be active undergraduate students of the institution.
+            - listitem [ref=f2e210]:
+              - generic [ref=f2e211]: "04"
+              - generic [ref=f2e212]:
+                - strong [ref=f2e213]: "Interdisciplinary teams:"
+                - text: Combining software, electronics, and mechanical disciplines is recommended.
+        - generic [ref=f2e214]:
+          - generic [ref=f2e215]:
+            - text: Impact
+            - heading "Why Compete in SIH?" [level=3] [ref=f2e216]
+          - paragraph [ref=f2e217]: "Participation provides intense engineering rigor and real-world system delivery validation:"
+          - list [ref=f2e218]:
+            - listitem [ref=f2e219]:
+              - generic [ref=f2e223]:
+                - strong [ref=f2e224]: "Real Ministerial Problem Sets:"
+                - text: Build software and hardware directly targeting live government challenges.
+            - listitem [ref=f2e225]:
+              - generic [ref=f2e229]:
+                - strong [ref=f2e230]: "High-Pressure Delivery:"
+                - text: Experience agile teamwork and non-stop production sprints under strict time constraints.
+            - listitem [ref=f2e231]:
+              - generic [ref=f2e235]:
+                - strong [ref=f2e236]: "National Jury Scrutiny:"
+                - text: Defend technical choices before senior scientists, bureaucrats, and tech executives.
+            - listitem [ref=f2e237]:
+              - generic [ref=f2e241]:
+                - strong [ref=f2e242]: "Career Trajectory:"
+                - text: Winners and finalists gain high-credibility credentials for research fellowships and top engineering jobs.
+      - generic [ref=f2e244]:
+        - generic [ref=f2e245]:
+          - paragraph [ref=f2e246]: Chapter Registry
+          - heading "SIH at CSI CMRIT" [level=2] [ref=f2e247]
+          - paragraph [ref=f2e248]: Teams, qualifying records, and official submissions from our chapter's SIH cohorts.
+        - generic [ref=f2e249]:
+          - generic [ref=f2e254]: "Status: Inactive Cycle"
+          - heading "No Published Teams for Active Period" [level=3] [ref=f2e255]
+          - paragraph [ref=f2e256]: Cohort assignments and qualification rosters will be updated once institutional screening wraps up.
+      - generic [ref=f2e258]:
+        - heading "Form Your Team. Solve for India." [level=2] [ref=f2e259]
+        - paragraph [ref=f2e260]: Connect with peers across computer science, electronics, and information science to begin early problem deconstruction.
+        - link [ref=f2e262] [cursor=pointer]:
+          - /url: /join
+          - button "Join Chapter & Working Groups" [ref=f2e263]
+  - contentinfo [ref=f2e268]:
+    - generic [ref=f2e269]:
+      - generic [ref=f2e270]:
+        - generic [ref=f2e271]:
+          - 'link "CSI CSI CMRIT Computer Society of India Institutional Chapter #CMRIT-HYD" [ref=f2e272] [cursor=pointer]':
+            - /url: /
+            - generic [ref=f2e273]: CSI
+            - generic [ref=f2e274]:
+              - generic [ref=f2e275]:
+                - generic [ref=f2e276]: CSI
+                - generic [ref=f2e277]: CMRIT
+              - generic [ref=f2e278]: Computer Society of India
+              - generic [ref=f2e279]: "Institutional Chapter #CMRIT-HYD"
+          - paragraph [ref=f2e280]: Empowering undergraduate engineering students through technical rigor, national competitions, and hands-on laboratory workshops.
+        - generic [ref=f2e281]:
+          - heading "Directory" [level=4] [ref=f2e282]
+          - generic [ref=f2e283]:
+            - link "Home" [ref=f2e284] [cursor=pointer]:
+              - /url: /
+            - link "Notices" [ref=f2e285] [cursor=pointer]:
+              - /url: /announcements
+            - link "Charter" [ref=f2e286] [cursor=pointer]:
+              - /url: /about
+            - link "SIH Cell" [ref=f2e287] [cursor=pointer]:
+              - /url: /sih
+            - link "Calendar" [ref=f2e288] [cursor=pointer]:
+              - /url: /events
+            - link "Membership" [ref=f2e289] [cursor=pointer]:
+              - /url: /join
+            - link "Archive" [ref=f2e290] [cursor=pointer]:
+              - /url: /highlights
+            - link "Contact" [ref=f2e291] [cursor=pointer]:
+              - /url: /contact
+        - generic [ref=f2e292]:
+          - heading "Channels" [level=4] [ref=f2e293]
+          - generic [ref=f2e294]:
+            - link "Instagram" [ref=f2e295] [cursor=pointer]:
+              - /url: https://instagram.com
+            - link "LinkedIn" [ref=f2e298] [cursor=pointer]:
+              - /url: https://linkedin.com
+            - link "YouTube" [ref=f2e301] [cursor=pointer]:
+              - /url: https://youtube.com
+        - generic [ref=f2e304]:
+          - heading "Liaison Desk" [level=4] [ref=f2e305]
+          - generic [ref=f2e306]:
+            - link "csi@cmritonline.ac.in" [ref=f2e311] [cursor=pointer]:
+              - /url: mailto:csi@cmritonline.ac.in
+            - generic [ref=f2e312]: CMR Institute of TechnologyKandlakoya, Hyderabad – 501401
+      - generic [ref=f2e317]:
+        - paragraph [ref=f2e318]: © 2026 Computer Society of India • CMRIT Chapter. All rights reserved.
+        - paragraph [ref=f2e319]: Engineering for Public Good

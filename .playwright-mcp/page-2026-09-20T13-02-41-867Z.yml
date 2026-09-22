@@ -1,0 +1,25 @@
+- generic [ref=f3e3]:
+  - link "RETURN TO SITE" [ref=f3e5] [cursor=pointer]:
+    - /url: /
+  - generic [ref=f3e9]:
+    - generic [ref=f3e10]:
+      - generic [ref=f3e11]: Computer Society of India • CMRIT
+      - heading "Admin Operations Console" [level=1] [ref=f3e15]
+      - paragraph [ref=f3e16]: Restricted Officer Gateway • Session Auth Required
+    - generic [ref=f3e17]:
+      - generic [ref=f3e18]:
+        - generic [ref=f3e19]: GATEWAY_ACTIVE
+        - generic [ref=f3e22]: "PORT: 5174"
+      - generic [ref=f3e23]: "PREVIEW MODE: Backend auth endpoint in development sprint. Submit opens live dashboard preview."
+      - generic [ref=f3e27]:
+        - generic [ref=f3e28]:
+          - generic [ref=f3e29]:
+            - generic [ref=f3e30]: Officer Identifier / Email
+            - textbox "Officer Identifier / Email" [ref=f3e35]:
+              - /placeholder: admin@cmritonline.ac.in
+          - generic [ref=f3e36]:
+            - generic [ref=f3e37]: Passphrase
+            - textbox "Passphrase" [ref=f3e42]:
+              - /placeholder: ••••••••••••
+          - button "Authenticate & Enter" [ref=f3e44] [cursor=pointer]
+        - generic [ref=f3e49]: Computer Society of India • CMRIT Chapter

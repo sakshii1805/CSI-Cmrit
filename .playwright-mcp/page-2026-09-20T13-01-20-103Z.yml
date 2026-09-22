@@ -1,0 +1,184 @@
+- generic [ref=f1e3]:
+  - banner [ref=f1e4]:
+    - generic [ref=f1e6]:
+      - link "CSI CMRIT Chapter" [ref=f1e7] [cursor=pointer]:
+        - /url: /
+        - generic [ref=f1e14]:
+          - generic [ref=f1e15]:
+            - generic [ref=f1e16]:
+              - generic [ref=f1e17]: CSI
+              - generic [ref=f1e18]: CMRIT
+            - generic [ref=f1e19]: Chapter
+          - generic [ref=f1e21]:
+            - generic [ref=f1e22]: Computer Society of India
+            - generic [ref=f1e23]: CMRIT Chapter
+      - navigation "Main Navigation" [ref=f1e24]:
+        - link "Home" [ref=f1e25] [cursor=pointer]:
+          - /url: /
+        - link "About" [ref=f1e26] [cursor=pointer]:
+          - /url: /about
+        - link "Events" [ref=f1e27] [cursor=pointer]:
+          - /url: /events
+        - link "Highlights" [ref=f1e28] [cursor=pointer]:
+          - /url: /highlights
+        - link "Announcements" [ref=f1e29] [cursor=pointer]:
+          - /url: /announcements
+        - link "SIH" [ref=f1e30] [cursor=pointer]:
+          - /url: /sih
+        - link "Join Us" [ref=f1e31] [cursor=pointer]:
+          - /url: /join
+        - link "Contact" [ref=f1e32] [cursor=pointer]:
+          - /url: /contact
+      - generic [ref=f1e33]:
+        - link "Search events and announcements" [ref=f1e34] [cursor=pointer]:
+          - /url: /events
+        - link "Admin" [ref=f1e38] [cursor=pointer]:
+          - /url: /admin/login
+  - main [ref=f1e42]:
+    - generic [ref=f1e43]:
+      - generic [ref=f1e46]:
+        - generic [ref=f1e47]: INSTITUTIONAL CHARTER
+        - heading "About CSI CMRIT" [level=1] [ref=f1e49]
+        - paragraph [ref=f1e50]: Fostering practical engineering craft, national hackathon incubation, and collaborative peer learning at CMR Institute of Technology, Hyderabad.
+      - generic [ref=f1e53]:
+        - generic [ref=f1e54]:
+          - text: // APEX BODY
+          - heading "Computer Society of India (CSI)" [level=2] [ref=f1e55]
+          - paragraph [ref=f1e56]: The Computer Society of India (CSI) is the premier association of IT professionals and computer scientists across India. Established in 1965, CSI advances theory and practice in computer engineering, facilitating national knowledge exchange, conferences, technical seminars, and student developmental chapters nationwide.
+          - paragraph [ref=f1e57]: Student chapters under CSI bridge the academic syllabus with rapidly evolving industrial frameworks, enabling members to learn directly from active industry practitioners.
+        - generic [ref=f1e58]:
+          - text: // STUDENT CHAPTER
+          - heading "CSI CMRIT Student Chapter" [level=2] [ref=f1e59]
+          - paragraph [ref=f1e60]: The CSI Student Chapter at CMR Institute of Technology, Hyderabad, functions as an active student-led technical council. The chapter brings together students across CSE, IT, AI&ML, and ECE who share a commitment to software development, cloud infrastructure, and competitive problem solving.
+          - paragraph [ref=f1e61]: Through practical workshop series, hackathon incubation squads, and continuous code sprints, the chapter prepares students to build production-grade solutions for real problems.
+      - generic [ref=f1e64]:
+        - generic [ref=f1e65]:
+          - generic [ref=f1e66]:
+            - text: CHAPTER CHARTER
+            - heading "Our Vision & Operational Mission" [level=2] [ref=f1e67]
+          - generic [ref=f1e68]: EXCELLENCE • ETHICS • LEADERSHIP
+        - generic [ref=f1e69]:
+          - generic [ref=f1e70]:
+            - generic [ref=f1e71]: 01. Chapter Vision
+            - heading "Engineering Leaders with Practical Mastery" [level=3] [ref=f1e73]
+            - paragraph [ref=f1e74]: To cultivate a premier, inclusive, and forward-looking collegiate technology community at CMRIT that inspires students to pursue technical excellence, solve real-world challenges with integrity, and evolve into ethical engineering leaders of tomorrow.
+          - generic [ref=f1e75]:
+            - generic [ref=f1e76]: 02. Chapter Mission
+            - heading "Practical Delivery & National Impact" [level=3] [ref=f1e78]
+            - paragraph [ref=f1e79]: To deliver structured hands-on workshops, facilitate competitive coding and hackathons like SIH, nurture collaborative peer research, and bridge students with industry mentors to develop high-impact software and systems.
+      - generic [ref=f1e81]:
+        - generic [ref=f1e82]:
+          - text: // CHAPTER INITIATIVES
+          - heading "Activities & Programs" [level=2] [ref=f1e83]
+          - paragraph [ref=f1e84]: Our calendar is structured to provide holistic, continuous technical exposure throughout the academic year.
+        - generic [ref=f1e85]:
+          - generic [ref=f1e86]:
+            - generic [ref=f1e87]:
+              - generic [ref=f1e88]:
+                - generic [ref=f1e89]: TRACK 01
+                - generic [ref=f1e90]: "Cadence: Bi-Monthly"
+              - generic [ref=f1e91]:
+                - heading "Technical Bootcamps" [level=4] [ref=f1e92]
+                - paragraph [ref=f1e93]: Intensive multi-day practical bootcamps on full-stack architecture, DevOps automation, cloud containers, and database systems.
+            - generic [ref=f1e94]:
+              - generic [ref=f1e95]: Key Deliverables
+              - list [ref=f1e96]:
+                - listitem [ref=f1e97]:
+                  - generic [ref=f1e99]: Production container deployment
+                - listitem [ref=f1e100]:
+                  - generic [ref=f1e102]: API microservices architecture
+          - generic [ref=f1e103]:
+            - generic [ref=f1e104]:
+              - generic [ref=f1e105]:
+                - generic [ref=f1e106]: TRACK 02
+                - generic [ref=f1e107]: "Cadence: Seasonal Sprints"
+              - generic [ref=f1e108]:
+                - heading "Hackathon Incubators" [level=4] [ref=f1e109]
+                - paragraph [ref=f1e110]: Providing structured mentorship, prototype validation, and design review sessions for national hackathons like Smart India Hackathon.
+            - generic [ref=f1e111]:
+              - generic [ref=f1e112]: Key Deliverables
+              - list [ref=f1e113]:
+                - listitem [ref=f1e114]:
+                  - generic [ref=f1e116]: Ministry statement feasibility check
+                - listitem [ref=f1e117]:
+                  - generic [ref=f1e119]: Working prototype jury defense
+          - generic [ref=f1e120]:
+            - generic [ref=f1e121]:
+              - generic [ref=f1e122]:
+                - generic [ref=f1e123]: TRACK 03
+                - generic [ref=f1e124]: "Cadence: Weekly Sessions"
+              - generic [ref=f1e125]:
+                - heading "Peer Study Circles" [level=4] [ref=f1e126]
+                - paragraph [ref=f1e127]: Weekly collaborative problem-solving circles focused on data structures, algorithmic design, and system architecture fundamentals.
+            - generic [ref=f1e128]:
+              - generic [ref=f1e129]: Key Deliverables
+              - list [ref=f1e130]:
+                - listitem [ref=f1e131]:
+                  - generic [ref=f1e133]: Competitive coding contest reviews
+                - listitem [ref=f1e134]:
+                  - generic [ref=f1e136]: Open-source PR contributions
+      - generic [ref=f1e139]:
+        - generic [ref=f1e141]:
+          - img "CSI CMRIT student community collaborative culture" [ref=f1e142]
+          - generic [ref=f1e143]:
+            - generic [ref=f1e144]: "[ Student Cohort • Chapter Lab 4 ]"
+            - generic [ref=f1e145]: CSI CMRIT CHAPTER
+        - generic [ref=f1e146]:
+          - text: // STUDENT CULTURE
+          - heading "An Inclusive, Student-Driven Community" [level=2] [ref=f1e147]
+          - paragraph [ref=f1e148]: At the heart of CSI CMRIT is a vibrant culture of peer knowledge sharing. Seniors mentor juniors, multidisciplinary teams combine hardware and software proficiencies, and all members are encouraged to experiment without the fear of failure.
+          - paragraph [ref=f1e149]: Whether you are writing your first lines of code or building distributed microservices, our community provides the constructive environment, feedback, and encouragement you need to grow.
+          - link [ref=f1e151] [cursor=pointer]:
+            - /url: /join
+            - button "Join Our Community" [ref=f1e152]
+  - contentinfo [ref=f1e157]:
+    - generic [ref=f1e158]:
+      - generic [ref=f1e159]:
+        - generic [ref=f1e160]:
+          - 'link "CSI CSI CMRIT Computer Society of India Institutional Chapter #CMRIT-HYD" [ref=f1e161] [cursor=pointer]':
+            - /url: /
+            - generic [ref=f1e162]: CSI
+            - generic [ref=f1e163]:
+              - generic [ref=f1e164]:
+                - generic [ref=f1e165]: CSI
+                - generic [ref=f1e166]: CMRIT
+              - generic [ref=f1e167]: Computer Society of India
+              - generic [ref=f1e168]: "Institutional Chapter #CMRIT-HYD"
+          - paragraph [ref=f1e169]: Empowering undergraduate engineering students through technical rigor, national competitions, and hands-on laboratory workshops.
+        - generic [ref=f1e170]:
+          - heading "Directory" [level=4] [ref=f1e171]
+          - generic [ref=f1e172]:
+            - link "Home" [ref=f1e173] [cursor=pointer]:
+              - /url: /
+            - link "Notices" [ref=f1e174] [cursor=pointer]:
+              - /url: /announcements
+            - link "Charter" [ref=f1e175] [cursor=pointer]:
+              - /url: /about
+            - link "SIH Cell" [ref=f1e176] [cursor=pointer]:
+              - /url: /sih
+            - link "Calendar" [ref=f1e177] [cursor=pointer]:
+              - /url: /events
+            - link "Membership" [ref=f1e178] [cursor=pointer]:
+              - /url: /join
+            - link "Archive" [ref=f1e179] [cursor=pointer]:
+              - /url: /highlights
+            - link "Contact" [ref=f1e180] [cursor=pointer]:
+              - /url: /contact
+        - generic [ref=f1e181]:
+          - heading "Channels" [level=4] [ref=f1e182]
+          - generic [ref=f1e183]:
+            - link "Instagram" [ref=f1e184] [cursor=pointer]:
+              - /url: https://instagram.com
+            - link "LinkedIn" [ref=f1e187] [cursor=pointer]:
+              - /url: https://linkedin.com
+            - link "YouTube" [ref=f1e190] [cursor=pointer]:
+              - /url: https://youtube.com
+        - generic [ref=f1e193]:
+          - heading "Liaison Desk" [level=4] [ref=f1e194]
+          - generic [ref=f1e195]:
+            - link "csi@cmritonline.ac.in" [ref=f1e200] [cursor=pointer]:
+              - /url: mailto:csi@cmritonline.ac.in
+            - generic [ref=f1e201]: CMR Institute of TechnologyKandlakoya, Hyderabad – 501401
+      - generic [ref=f1e206]:
+        - paragraph [ref=f1e207]: © 2026 Computer Society of India • CMRIT Chapter. All rights reserved.
+        - paragraph [ref=f1e208]: Engineering for Public Good

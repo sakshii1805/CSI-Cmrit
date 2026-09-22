@@ -1,0 +1,240 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e6]:
+      - link "CSI CMRIT Chapter" [ref=e7] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e14]:
+          - generic [ref=e15]:
+            - generic [ref=e16]:
+              - generic [ref=e17]: CSI
+              - generic [ref=e18]: CMRIT
+            - generic [ref=e19]: Chapter
+          - generic [ref=e21]:
+            - generic [ref=e22]: Computer Society of India
+            - generic [ref=e23]: CMRIT Chapter
+      - navigation "Main Navigation" [ref=e24]:
+        - link "Home" [ref=e25] [cursor=pointer]:
+          - /url: /
+        - link "About" [ref=e26] [cursor=pointer]:
+          - /url: /about
+        - link "Events" [ref=e27] [cursor=pointer]:
+          - /url: /events
+        - link "Highlights" [ref=e28] [cursor=pointer]:
+          - /url: /highlights
+        - link "Announcements" [ref=e29] [cursor=pointer]:
+          - /url: /announcements
+        - link "SIH" [ref=e30] [cursor=pointer]:
+          - /url: /sih
+        - link "Join Us" [ref=e31] [cursor=pointer]:
+          - /url: /join
+        - link "Contact" [ref=e32] [cursor=pointer]:
+          - /url: /contact
+      - generic [ref=e33]:
+        - link "Search events and announcements" [ref=e34] [cursor=pointer]:
+          - /url: /events
+        - link "Admin" [ref=e38] [cursor=pointer]:
+          - /url: /admin/login
+  - main [ref=e42]:
+    - generic [ref=e43]:
+      - generic [ref=e44]:
+        - generic:
+          - img "CMR Institute of Technology Campus Building"
+        - generic [ref=e46]:
+          - generic [ref=e47]: CSI STUDENT CHAPTER • CMRIT HYDERABAD
+          - heading "Learn. Build. Innovate." [level=1] [ref=e50]
+          - paragraph [ref=e51]: The premier computing society at CMRIT. We run hands-on engineering bootcamps, mentor Smart India Hackathon teams, and connect students with industry engineers.
+          - generic [ref=e52]:
+            - link "Explore Events" [ref=e53] [cursor=pointer]:
+              - /url: /events
+            - link "Join CSI Chapter" [ref=e57] [cursor=pointer]:
+              - /url: /join
+      - generic [ref=e61]:
+        - generic [ref=e62]:
+          - generic [ref=e63]:
+            - text: // ABOUT THE CHAPTER
+            - heading "Bridging academic theory with real engineering." [level=2] [ref=e64]
+          - paragraph [ref=e65]: CSI CMRIT is the student chapter of the Computer Society of India at CMR Institute of Technology, Hyderabad. We run a peer-driven technical community where students build real projects, compete nationally, and prepare for modern software engineering careers.
+          - link "Read our chapter charter" [ref=e67] [cursor=pointer]:
+            - /url: /about
+        - generic [ref=e72]:
+          - generic [ref=e73]:
+            - generic [ref=e74]: Chapter Programs & Focus Areas
+            - generic [ref=e75]: 06 ACTIVE TRACKS
+          - generic [ref=e76]:
+            - generic [ref=e77]:
+              - generic [ref=e78]:
+                - heading "Technical Bootcamps" [level=3] [ref=e83]
+                - paragraph [ref=e84]: Hands-on labs on full-stack web, cloud infrastructure, and AI engineering.
+              - generic [ref=e85]:
+                - heading "Competitive Coding" [level=3] [ref=e94]
+                - paragraph [ref=e95]: Weekly algorithm circles and contest preparation for regional rounds.
+              - generic [ref=e96]:
+                - heading "Hackathon Incubation" [level=3] [ref=e101]
+                - paragraph [ref=e102]: Dedicated mentorship from ideation to prototype for Smart India Hackathon.
+            - generic [ref=e103]:
+              - generic [ref=e104]:
+                - heading "Industry Tech Talks" [level=3] [ref=e111]
+                - paragraph [ref=e112]: Direct sessions with working software engineers and engineering leads.
+              - generic [ref=e113]:
+                - heading "Open Source Building" [level=3] [ref=e120]
+                - paragraph [ref=e121]: Student squads building collaborative software solutions and tooling.
+              - generic [ref=e122]:
+                - heading "Peer Mentorship Network" [level=3] [ref=e130]
+                - paragraph [ref=e131]: Seniors guiding juniors through coursework, projects, and placement prep.
+      - generic [ref=e133]:
+        - generic [ref=e134]:
+          - generic [ref=e135]:
+            - text: // CHAPTER VERTICALS
+            - heading "Explore Chapter Domains" [level=2] [ref=e136]
+          - paragraph [ref=e137]: Direct navigation across workshop series, contest calendars, and national hackathon initiatives.
+        - generic [ref=e138]:
+          - link "01 Technology DevOps, Web & AI" [ref=e139] [cursor=pointer]:
+            - /url: /events?category=Workshops
+            - generic [ref=e140]: "01"
+            - generic [ref=e145]:
+              - generic [ref=e146]: Technology
+              - generic [ref=e147]: DevOps, Web & AI
+          - link "02 Events Calendar & Schedules" [ref=e149] [cursor=pointer]:
+            - /url: /events
+            - generic [ref=e150]: "02"
+            - generic [ref=e155]:
+              - generic [ref=e156]: Events
+              - generic [ref=e157]: Calendar & Schedules
+          - link "03 Workshops Practical Lab Sessions" [ref=e159] [cursor=pointer]:
+            - /url: /events?category=Workshops
+            - generic [ref=e160]: "03"
+            - generic [ref=e166]:
+              - generic [ref=e167]: Workshops
+              - generic [ref=e168]: Practical Lab Sessions
+          - link "04 Competitions Coding Contests" [ref=e170] [cursor=pointer]:
+            - /url: /events?category=Competitions
+            - generic [ref=e171]: "04"
+            - generic [ref=e180]:
+              - generic [ref=e181]: Competitions
+              - generic [ref=e182]: Coding Contests
+          - link "05 SIH Flagship National Hackathon" [ref=e184] [cursor=pointer]:
+            - /url: /sih
+            - generic [ref=e185]: "05"
+            - generic [ref=e190]:
+              - generic [ref=e191]: SIH Flagship
+              - generic [ref=e192]: National Hackathon
+          - link "06 Community Photo Archive" [ref=e194] [cursor=pointer]:
+            - /url: /highlights
+            - generic [ref=e195]: "06"
+            - generic [ref=e203]:
+              - generic [ref=e204]: Community
+              - generic [ref=e205]: Photo Archive
+          - link "07 Innovation Project Incubation" [ref=e207] [cursor=pointer]:
+            - /url: /sih
+            - generic [ref=e208]: "07"
+            - generic [ref=e216]:
+              - generic [ref=e217]: Innovation
+              - generic [ref=e218]: Project Incubation
+      - generic [ref=e221]:
+        - generic [ref=e222]:
+          - generic [ref=e223]:
+            - text: // CALENDAR
+            - heading "Upcoming Events & Workshops" [level=2] [ref=e224]
+          - link "View All Events" [ref=e225] [cursor=pointer]:
+            - /url: /events
+        - generic [ref=e229]:
+          - heading "No active event registrations right now" [level=3] [ref=e235]
+          - paragraph [ref=e236]: Next semester workshop schedules and hackathon registrations are being finalized. Check announcements below.
+          - link "Read recent notices" [ref=e237] [cursor=pointer]:
+            - /url: /announcements
+      - generic [ref=e243]:
+        - generic [ref=e244]:
+          - generic [ref=e245]:
+            - heading "Notice Board" [level=2] [ref=e250]
+            - link "All Notices" [ref=e251] [cursor=pointer]:
+              - /url: /announcements
+          - generic [ref=e255]:
+            - paragraph [ref=e262]: Notice board is clear
+            - paragraph [ref=e263]: Official chapter announcements and registrations will appear here.
+        - generic [ref=e264]:
+          - generic [ref=e265]:
+            - heading "Chapter Highlights" [level=2] [ref=e270]
+            - link "Visual Archive" [ref=e271] [cursor=pointer]:
+              - /url: /highlights
+          - generic [ref=e275]:
+            - paragraph [ref=e280]: Visual archive in progress
+            - paragraph [ref=e281]: Photographs from upcoming workshops and competitions will be archived here.
+      - generic [ref=e284]:
+        - generic [ref=e285]:
+          - generic [ref=e286]:
+            - generic [ref=e287]: FLAGSHIP NATIONAL HACKATHON
+            - heading "Smart India Hackathon (SIH)" [level=3] [ref=e288]
+            - paragraph [ref=e289]: CSI CMRIT acts as an active incubator for student teams participating in India's largest national engineering competition. We guide teams through problem statement deconstruction, system architecture design, and internal college screening rounds.
+            - paragraph [ref=e291]: "Mentorship focus: Full-Stack Web • Embedded IoT • Healthcare • Agriculture"
+          - link "Explore SIH Support Track" [ref=e293] [cursor=pointer]:
+            - /url: /sih
+        - generic [ref=e297]:
+          - generic [ref=e298]:
+            - generic [ref=e299]:
+              - heading "Join CSI CMRIT" [level=3] [ref=e305]
+              - paragraph [ref=e306]: Open to all undergraduate engineering students of CMRIT across departments.
+              - list [ref=e307]:
+                - listitem [ref=e308]:
+                  - generic [ref=e311]: Priority registration for hands-on bootcamps
+                - listitem [ref=e312]:
+                  - generic [ref=e315]: SIH team formation and mentorship support
+                - listitem [ref=e316]:
+                  - generic [ref=e319]: Collaborative peer study and project circles
+                - listitem [ref=e320]:
+                  - generic [ref=e323]: Official CSI national chapter affiliation
+            - link "Submit Application" [ref=e325] [cursor=pointer]:
+              - /url: /join
+          - generic [ref=e329]:
+            - img "CSI CMRIT Student Cohort" [ref=e330]
+            - generic [ref=e331]: Student Cohort • Campus Life
+  - contentinfo [ref=e333]:
+    - generic [ref=e334]:
+      - generic [ref=e335]:
+        - generic [ref=e336]:
+          - 'link "CSI CSI CMRIT Computer Society of India Institutional Chapter #CMRIT-HYD" [ref=e337] [cursor=pointer]':
+            - /url: /
+            - generic [ref=e338]: CSI
+            - generic [ref=e339]:
+              - generic [ref=e340]:
+                - generic [ref=e341]: CSI
+                - generic [ref=e342]: CMRIT
+              - generic [ref=e343]: Computer Society of India
+              - generic [ref=e344]: "Institutional Chapter #CMRIT-HYD"
+          - paragraph [ref=e345]: Empowering undergraduate engineering students through technical rigor, national competitions, and hands-on laboratory workshops.
+        - generic [ref=e346]:
+          - heading "Directory" [level=4] [ref=e347]
+          - generic [ref=e348]:
+            - link "Home" [ref=e349] [cursor=pointer]:
+              - /url: /
+            - link "Notices" [ref=e350] [cursor=pointer]:
+              - /url: /announcements
+            - link "Charter" [ref=e351] [cursor=pointer]:
+              - /url: /about
+            - link "SIH Cell" [ref=e352] [cursor=pointer]:
+              - /url: /sih
+            - link "Calendar" [ref=e353] [cursor=pointer]:
+              - /url: /events
+            - link "Membership" [ref=e354] [cursor=pointer]:
+              - /url: /join
+            - link "Archive" [ref=e355] [cursor=pointer]:
+              - /url: /highlights
+            - link "Contact" [ref=e356] [cursor=pointer]:
+              - /url: /contact
+        - generic [ref=e357]:
+          - heading "Channels" [level=4] [ref=e358]
+          - generic [ref=e359]:
+            - link "Instagram" [ref=e360] [cursor=pointer]:
+              - /url: https://instagram.com
+            - link "LinkedIn" [ref=e363] [cursor=pointer]:
+              - /url: https://linkedin.com
+            - link "YouTube" [ref=e366] [cursor=pointer]:
+              - /url: https://youtube.com
+        - generic [ref=e369]:
+          - heading "Liaison Desk" [level=4] [ref=e370]
+          - generic [ref=e371]:
+            - link "csi@cmritonline.ac.in" [ref=e376] [cursor=pointer]:
+              - /url: mailto:csi@cmritonline.ac.in
+            - generic [ref=e377]: CMR Institute of TechnologyKandlakoya, Hyderabad – 501401
+      - generic [ref=e382]:
+        - paragraph [ref=e383]: © 2026 Computer Society of India • CMRIT Chapter. All rights reserved.
+        - paragraph [ref=e384]: Engineering for Public Good
