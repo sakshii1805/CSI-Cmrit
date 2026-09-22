@@ -1,259 +1,359 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Target, Compass, Award, Users, BookOpen, Laptop, CheckCircle2, ArrowRight } from 'lucide-react';
+import {
+  ArrowRight,
+  Award,
+  Building2,
+  CheckCircle2,
+  Compass,
+  ExternalLink,
+  Globe2,
+  GraduationCap,
+  Mail,
+  MapPin,
+  Target,
+  Users,
+} from 'lucide-react';
 import { Button } from '../components/common/Button';
+import { facultyCoordinator, teamLeads } from '../data/aboutTeam';
+
+const csiIndiaStats = [
+  { value: '1965', label: 'Founded' },
+  { value: '72+', label: 'Chapters' },
+  { value: '488+', label: 'Student Branches' },
+  { value: '1L+', label: 'Members' },
+];
+
+const PortraitPlaceholder: React.FC<{
+  initials: string;
+  className?: string;
+}> = ({ initials, className = '' }) => (
+  <div
+    className={`flex items-center justify-center bg-gradient-to-br from-slate-800 via-slate-900 to-blue-950 text-white ${className}`}
+    aria-hidden
+  >
+    <span className="font-extrabold tracking-wide text-white/90">{initials}</span>
+  </div>
+);
 
 export const About: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen">
-      {/* Hero Section */}
       <section className="bg-slate-950 text-white py-16 sm:py-20 border-b border-slate-800 relative overflow-hidden">
-        <div 
+        <div
           className="absolute inset-0 opacity-5 pointer-events-none"
           style={{
-            backgroundImage: `radial-gradient(#38bdf8 1px, transparent 1px)`,
-            backgroundSize: '28px 28px'
+            backgroundImage: 'radial-gradient(#38bdf8 1px, transparent 1px)',
+            backgroundSize: '28px 28px',
           }}
         />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="max-w-3xl">
             <span className="text-xs font-bold text-blue-400 uppercase tracking-widest bg-slate-900 border border-slate-800 px-3 py-1 rounded-md">
-              About Chapter
+              About
             </span>
             <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white mt-4 mb-4">
-              About CSI CMRIT
+              CSI India &amp; CSI CMRIT
             </h1>
             <p className="text-base sm:text-lg text-slate-300 leading-relaxed">
-              Fostering a culture of technological innovation, peer mentorship, and practical engineering at CMR Institute of Technology, Hyderabad.
+              The national body for computing professionals, and the student chapter that brings that mission to CMR Institute of Technology.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Section 1: About CSI & About Chapter */}
-      <section className="py-16 bg-white border-b border-slate-200/80">
+      <section className="py-16 sm:py-20 bg-white border-b border-slate-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+            <div className="lg:col-span-7 space-y-6">
               <div>
                 <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">
-                  National Apex Body
+                  National Body
                 </span>
                 <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
-                  Computer Society of India (CSI)
+                  Computer Society of India
                 </h2>
               </div>
               <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-                The Computer Society of India (CSI) is the premier association of IT professionals and computer scientists across India. Dedicated to advancing theory and practice in computer science and information technology, CSI facilitates national knowledge exchange, conferences, technical seminars, and student developmental programs across academic institutions.
+                Computer Society of India (CSI) is the first and largest body of computer professionals in India. It was started on 6 March 1965 by a small group of practitioners and has grown into the national association representing the computing community.
               </p>
               <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-                Student chapters under CSI bridge the classroom syllabus with rapidly evolving industrial frameworks, allowing student members to engage directly with working practitioners and research initiatives.
+                CSI is the only member in India of the International Federation for Information Processing (IFIP). It recognises innovation and indigenous work in ICT through awards, conferences, student contests, and certification programmes run from its Educational Directorate.
               </p>
+              <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
+                With chapters across the country and hundreds of student branches, CSI exists to spread knowledge and open professional opportunities to as many students and practitioners as possible.
+              </p>
+              <a
+                href="https://csiindia.org/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700"
+              >
+                Visit csiindia.org
+                <ExternalLink className="w-4 h-4" />
+              </a>
             </div>
 
-            <div className="space-y-6 lg:border-l lg:border-slate-200 lg:pl-12">
-              <div>
-                <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">
-                  Institutional Chapter
-                </span>
-                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
-                  CSI CMRIT Chapter
-                </h2>
-              </div>
-              <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-                The CSI Student Chapter at CMR Institute of Technology, Hyderabad, operates as a student-led technical council. The chapter brings together students across various engineering disciplines who share an enthusiasm for software development, cloud infrastructure, artificial intelligence, cybersecurity, and open-source collaboration.
-              </p>
-              <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-                Through interactive project teams, technical workshops, competitive hackathons, and ideation clinics, the chapter prepares students to build tangible solutions for real problems.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Section 2: Vision & Mission */}
-      <section className="py-16 bg-slate-50 border-b border-slate-200/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Vision */}
-            <div className="bg-white rounded-2xl p-8 border border-slate-200/80 shadow-subtle flex flex-col justify-between">
-              <div className="space-y-4">
-                <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
-                  <Compass className="w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-bold text-slate-900 tracking-tight">Our Vision</h3>
-                <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-                  To cultivate a premier, inclusive, and forward-looking collegiate technology community at CMRIT that inspires students to pursue technical excellence, solve real-world challenges with integrity, and evolve into ethical engineering leaders of tomorrow.
+            <div className="lg:col-span-5">
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 shadow-subtle text-center">
+                <img
+                  src="/images/logo.png"
+                  alt="Computer Society of India logo"
+                  className="w-40 h-40 sm:w-44 sm:h-44 object-contain mx-auto"
+                />
+                <p className="mt-4 text-sm font-bold text-slate-900">Computer Society of India</p>
+                <p className="mt-1 text-xs font-semibold uppercase tracking-widest text-blue-600">
+                  Only IFIP member from India
                 </p>
               </div>
-
-              <div className="pt-6 mt-6 border-t border-slate-100 flex items-center gap-2 text-xs font-semibold text-blue-600 uppercase tracking-wider">
-                <CheckCircle2 className="w-4 h-4 text-blue-500" />
-                <span>Excellence • Ethics • Leadership</span>
-              </div>
             </div>
+          </div>
 
-            {/* Mission */}
-            <div className="bg-white rounded-2xl p-8 border border-slate-200/80 shadow-subtle flex flex-col justify-between">
-              <div className="space-y-4">
-                <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
-                  <Target className="w-6 h-6" />
-                </div>
-                <h3 className="text-xl font-bold text-slate-900 tracking-tight">Our Mission</h3>
-                <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-                  To deliver structured hands-on workshops, facilitate competitive coding and hackathons like SIH, nurture collaborative peer research, and bridge students with industry mentors to develop high-impact software and systems.
+          <div className="mt-12 grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {csiIndiaStats.map((stat) => (
+              <div
+                key={stat.label}
+                className="rounded-xl border border-slate-200 bg-white px-5 py-6 text-center shadow-subtle"
+              >
+                <p className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">{stat.value}</p>
+                <p className="mt-1 text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  {stat.label}
                 </p>
               </div>
-
-              <div className="pt-6 mt-6 border-t border-slate-100 flex items-center gap-2 text-xs font-semibold text-emerald-600 uppercase tracking-wider">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                <span>Mentorship • Innovation • Collaboration</span>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Section 3: What We Do & Activities */}
-      <section className="py-16 bg-white border-b border-slate-200/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-2xl mb-12">
-            <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">
-              Initiatives & Operations
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
-              Activities & Programs
-            </h2>
-            <p className="text-sm sm:text-base text-slate-600 mt-2">
-              Our calendar is structured to provide holistic, continuous technical exposure throughout the academic year.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-6 rounded-xl border border-slate-200 bg-slate-50/50 space-y-3">
-              <Laptop className="w-8 h-8 text-blue-600" />
-              <h4 className="text-base font-bold text-slate-900">Technical Bootcamps</h4>
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                Intensive multi-day practical bootcamps on full-stack architecture, DevOps automation, cloud containers, and database systems.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-xl border border-slate-200 bg-slate-50/50 space-y-3">
-              <Award className="w-8 h-8 text-indigo-600" />
-              <h4 className="text-base font-bold text-slate-900">Hackathon Incubators</h4>
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                Providing structured mentorship, prototype validation, and design review sessions for national hackathons like Smart India Hackathon.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-xl border border-slate-200 bg-slate-50/50 space-y-3">
-              <Users className="w-8 h-8 text-emerald-600" />
-              <h4 className="text-base font-bold text-slate-900">Peer Study Circles</h4>
-              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                Weekly collaborative problem-solving circles focused on data structures, algorithmic design, and system architecture fundamentals.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Section 4: Student Community & Culture */}
-      <section className="py-16 bg-slate-50 border-b border-slate-200/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-            <div className="lg:col-span-6">
-              <img
-                src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80"
-                alt="CSI CMRIT student community collaborative culture"
-                className="rounded-2xl border border-slate-200 shadow-card w-full h-80 sm:h-96 object-cover"
-              />
-            </div>
-
-            <div className="lg:col-span-6 space-y-4">
-              <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">
-                Our Culture
-              </span>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                An Inclusive, Student-Driven Community
-              </h2>
-              <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-                At the heart of CSI CMRIT is a vibrant culture of peer-to-peer knowledge sharing. Seniors mentor juniors, multidisciplinary teams combine hardware and software proficiencies, and all members are encouraged to experiment without the fear of failure.
-              </p>
-              <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
-                Whether you are writing your first lines of code or building distributed microservices, our community provides the constructive environment, feedback, and encouragement you need to grow.
-              </p>
-
-              <div className="pt-2">
-                <Link to="/join">
-                  <Button variant="accent" rightIcon={<ArrowRight className="w-4 h-4" />}>
-                    Join Our Community
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Section 5: CMRIT Campus & Chapter Hub Showcase */}
-      <section className="py-16 bg-white border-b border-slate-200/80">
+      <section className="py-16 sm:py-20 bg-slate-50 border-b border-slate-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mb-10">
-            <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">
-              Institutional Environment
+            <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">
+              Student Chapter
             </span>
-            <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 tracking-tight mt-1">
-              Our Campus & Innovation Hub
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
+              CSI CMRIT Chapter
             </h2>
-            <p className="text-sm sm:text-base text-slate-600 mt-2">
-              Based at the prestigious CMR Institute of Technology, our chapter benefits from advanced computing laboratories, incubation facilities, and a sprawling green academic ecosystem.
+            <p className="text-sm sm:text-base text-slate-600 leading-relaxed mt-3">
+              The CSI Student Branch at CMR Institute of Technology is a student-led chapter of CSI. It runs events, competitions, and workshops so students can go beyond the syllabus and practise computer science with peers and mentors.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            {/* Campus Front Photo Card */}
-            <div className="group rounded-2xl border border-slate-200 overflow-hidden bg-white shadow-subtle hover:shadow-card transition-all">
-              <div className="relative aspect-[16/10] overflow-hidden bg-slate-950">
-                <img
-                  src="/images/cmrit_campus_front.png"
-                  alt="CMR Institute of Technology Main Campus Façade"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute top-3 left-3">
-                  <span className="text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-md bg-blue-600 text-white shadow-xs">
-                    Main Campus
-                  </span>
-                </div>
-              </div>
-              <div className="p-5">
-                <h3 className="text-base font-bold text-slate-900">C.M.R. Institute of Technology Main Building</h3>
-                <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                  The grand central campus building housing collegiate computing centers, lecture theaters, and the CSI chapter operations desk.
-                </p>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-subtle">
+              <Globe2 className="w-8 h-8 text-blue-600 mb-4" />
+              <h3 className="text-base font-bold text-slate-900">National affiliation</h3>
+              <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+                Members belong to CSI as well as the campus chapter, with access to national contests, seminars, and student programmes.
+              </p>
             </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-subtle">
+              <Users className="w-8 h-8 text-indigo-600 mb-4" />
+              <h3 className="text-base font-bold text-slate-900">Student-led work</h3>
+              <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+                Core team leads plan workshops, hackathons, talks, and community projects with faculty guidance.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-subtle">
+              <Award className="w-8 h-8 text-emerald-600 mb-4" />
+              <h3 className="text-base font-bold text-slate-900">Build and compete</h3>
+              <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+                Hands-on sessions, coding contests, and SIH-style problem solving are the chapter&apos;s year-round focus.
+              </p>
+            </div>
+          </div>
 
-            {/* Campus Wing Photo Card */}
-            <div className="group rounded-2xl border border-slate-200 overflow-hidden bg-white shadow-subtle hover:shadow-card transition-all">
-              <div className="relative aspect-[16/10] overflow-hidden bg-slate-950">
-                <img
-                  src="/images/cmrit_campus_wing.png"
-                  alt="CMRIT Innovation & Laboratories Wing"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute top-3 left-3">
-                  <span className="text-[10px] font-bold tracking-wider uppercase px-2.5 py-1 rounded-md bg-emerald-600 text-white shadow-xs">
-                    Labs & Innovation
-                  </span>
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white rounded-2xl p-8 border border-slate-200/80 shadow-subtle flex flex-col">
+              <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
+                <Compass className="w-6 h-6" />
               </div>
-              <div className="p-5">
-                <h3 className="text-base font-bold text-slate-900">Innovation & Engineering Wings</h3>
-                <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                  Modern laboratories, maker spaces, and student collaboration hubs where 24-hour hackathons and hands-on workshops are conducted.
-                </p>
+              <h3 className="text-xl font-bold text-slate-900 tracking-tight mt-4"> OurVision</h3>
+              <p className="text-sm sm:text-base text-slate-600 leading-relaxed mt-3 flex-1">
+                A strong, inclusive technology community at CMRIT where students pursue excellence, solve real problems with integrity, and grow into ethical engineering leaders.
+              </p>
+              <div className="pt-6 mt-6 border-t border-slate-100 flex items-center gap-2 text-xs font-semibold text-blue-600 uppercase tracking-wider">
+                <CheckCircle2 className="w-4 h-4 text-blue-500" />
+                <span>Excellence · Ethics · Leadership</span>
               </div>
             </div>
+            <div className="bg-white rounded-2xl p-8 border border-slate-200/80 shadow-subtle flex flex-col">
+              <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+                <Target className="w-6 h-6" />
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 tracking-tight mt-4"> Our Mission</h3>
+              <p className="text-sm sm:text-base text-slate-600 leading-relaxed mt-3 flex-1">
+                Run structured workshops, coding and hackathon tracks such as SIH, peer learning, and industry mentorship so students can ship useful software and systems.
+              </p>
+              <div className="pt-6 mt-6 border-t border-slate-100 flex items-center gap-2 text-xs font-semibold text-emerald-600 uppercase tracking-wider">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                <span>Mentorship · Innovation · Collaboration</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 sm:py-20 bg-white border-b border-slate-200/80">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-2xl mb-10">
+            <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">
+              Faculty
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
+              Faculty Coordinator
+            </h2>
+            <p className="text-sm sm:text-base text-slate-600 mt-2">
+              Academic leadership and mentorship for the CSI CMRIT Student Chapter.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-slate-50/60 overflow-hidden shadow-subtle">
+            <div className="grid grid-cols-1 md:grid-cols-12">
+              <div className="md:col-span-4 lg:col-span-3">
+                {facultyCoordinator.photo ? (
+                  <img
+                    src={facultyCoordinator.photo}
+                    alt={facultyCoordinator.name}
+                    className="w-full h-72 md:h-full object-cover object-top"
+                  />
+                ) : (
+                  <PortraitPlaceholder
+                    initials={facultyCoordinator.initials}
+                    className="w-full h-72 md:h-full text-5xl"
+                  />
+                )}
+              </div>
+              <div className="md:col-span-8 lg:col-span-9 p-6 sm:p-8 lg:p-10 space-y-5">
+                <div>
+                  <span className="inline-flex items-center rounded-md bg-blue-50 border border-blue-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-blue-700">
+                    {facultyCoordinator.role}
+                  </span>
+                  <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-3">
+                    {facultyCoordinator.name}
+                  </h3>
+                </div>
+                <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="flex items-start gap-3">
+                    <GraduationCap className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
+                    <div>
+                      <dt className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Department</dt>
+                      <dd className="text-sm font-semibold text-slate-800 mt-0.5">{facultyCoordinator.department}</dd>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Building2 className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
+                    <div>
+                      <dt className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Institution</dt>
+                      <dd className="text-sm font-semibold text-slate-800 mt-0.5">{facultyCoordinator.institution}</dd>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 sm:col-span-2">
+                    <MapPin className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
+                    <div>
+                      <dt className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Chapter</dt>
+                      <dd className="text-sm font-semibold text-slate-800 mt-0.5">
+                        CSI Student Chapter, CMRIT
+                      </dd>
+                    </div>
+                  </div>
+                </dl>
+                <ul className="space-y-2">
+                  {facultyCoordinator.details.map((line) => (
+                    <li key={line} className="flex items-start gap-2 text-sm text-slate-600 leading-relaxed">
+                      <CheckCircle2 className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
+                      <span>{line}</span>
+                    </li>
+                  ))}
+                </ul>
+                {facultyCoordinator.email ? (
+                  <a
+                    href={`mailto:${facultyCoordinator.email}`}
+                    className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700"
+                  >
+                    <Mail className="w-4 h-4" />
+                    {facultyCoordinator.email}
+                  </a>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 sm:py-20 bg-slate-50 border-b border-slate-200/80">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
+            <div className="max-w-2xl">
+              <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">
+                Core Team 2026-27
+              </span>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
+                Team Leads
+              </h2>
+              <p className="text-sm sm:text-base text-slate-600 mt-2">
+                Student officers who lead, plan, and run CSI CMRIT through the year.
+              </p>
+            </div>
+            <a
+              href="https://www.instagram.com/p/DdEekdBlCnq/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-500 hover:text-blue-600"
+            >
+              Instagram announcement
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+            {teamLeads.map((member) => (
+              <article
+                key={member.role}
+                className="group rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-subtle hover:shadow-card transition-shadow"
+              >
+                {member.photo ? (
+                  <img
+                    src={member.photo}
+                    alt={`${member.name}, ${member.role}`}
+                    className="w-full aspect-[3/4] object-cover object-top"
+                  />
+                ) : (
+                  <PortraitPlaceholder
+                    initials={member.initials}
+                    className="w-full aspect-[3/4] text-3xl sm:text-4xl"
+                  />
+                )}
+                <div className="p-4">
+                  {member.name ? (
+                    <>
+                      <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">{member.name}</h3>
+                      <p className="text-xs sm:text-sm text-slate-500 mt-0.5">{member.role}</p>
+                    </>
+                  ) : (
+                    <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">{member.role}</h3>
+                  )}
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="rounded-2xl bg-slate-950 text-white px-6 py-10 sm:px-10 sm:py-12 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div className="max-w-xl">
+              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Join CSI CMRIT</h2>
+              <p className="text-sm sm:text-base text-slate-300 mt-2 leading-relaxed">
+                Workshops, contests, and a campus community around computing. Apply to become a student member.
+              </p>
+            </div>
+            <Link to="/join">
+              <Button variant="accent" size="lg" rightIcon={<ArrowRight className="w-4 h-4" />}>
+                Become a member
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
