@@ -1,4 +1,5 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
+import { requireAdmin } from '../lib/authGuard';
 import { ChapterHighlightItem } from '../types';
 import { mockGallery } from '../data/gallery';
 
@@ -143,10 +144,15 @@ export const highlightsService = {
    * Admin: Create single or multiple highlights
    */
   async createHighlight(item: any): Promise<{ data?: ChapterHighlightItem; error?: string }> {
+    try {
+      await requireAdmin();
+    } catch (authErr: any) {
+      return { error: authErr.message || 'Unauthorized' };
+    }
     const newItem: ChapterHighlightItem = {
       id: item.id || `hl-${Date.now()}`,
-      title: item.title || 'Untitled Photo',
-      category: item.category || 'Workshop',
+      title: item.title || 'Chapter Highlight',
+      category: item.category || 'Events',
       event_date: item.date || item.event_date || new Date().toISOString().split('T')[0],
       date: item.date || item.event_date || new Date().toISOString().split('T')[0],
       caption: item.caption || item.description || item.title || '',
@@ -193,6 +199,11 @@ export const highlightsService = {
    * Admin: Update highlight
    */
   async updateHighlight(id: string, updates: any): Promise<{ data?: ChapterHighlightItem; error?: string }> {
+    try {
+      await requireAdmin();
+    } catch (authErr: any) {
+      return { error: authErr.message || 'Unauthorized' };
+    }
     const current = getStoredHighlights();
     const updated = current.map(h => {
       if (h.id === id) {
@@ -255,6 +266,11 @@ export const highlightsService = {
    * Admin: Delete highlight permanently
    */
   async deleteHighlight(id: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      await requireAdmin();
+    } catch (authErr: any) {
+      return { success: false, error: authErr.message || 'Unauthorized' };
+    }
     saveDeletedHighlightId(id);
     const current = getStoredHighlights();
     saveStoredHighlights(current.filter(h => h.id !== id));

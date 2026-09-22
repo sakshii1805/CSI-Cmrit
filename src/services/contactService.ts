@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabaseClient';
+import { requireAdmin } from '../lib/authGuard';
 import { ContactMessage } from '../types';
 
 export const contactService = {
@@ -36,6 +37,7 @@ export const contactService = {
    */
   async adminListMessages(): Promise<{ data: ContactMessage[]; error?: string }> {
     try {
+      await requireAdmin();
       const { data, error } = await supabase
         .from('contact_messages')
         .select('*')
@@ -54,6 +56,7 @@ export const contactService = {
    */
   async markMessageRead(id: string, isRead: boolean = true): Promise<{ success: boolean; error?: string }> {
     try {
+      await requireAdmin();
       const { error } = await supabase
         .from('contact_messages')
         .update({ is_read: isRead })
@@ -72,6 +75,7 @@ export const contactService = {
    */
   async deleteMessage(id: string): Promise<{ success: boolean; error?: string }> {
     try {
+      await requireAdmin();
       const { error } = await supabase
         .from('contact_messages')
         .delete()

@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Mail, MapPin, Phone, Send, CheckCircle2, User, MessageSquare, ExternalLink } from 'lucide-react';
+import { Mail, MapPin, Phone, Send, CheckCircle2, User, MessageSquare, ExternalLink, Shield } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { Modal } from '../components/common/Modal';
 import { contactService } from '../services/contactService';
+import { useAuth } from '../context/AuthContext';
 
 export const Contact: React.FC = () => {
+  const { isAdmin } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -78,16 +80,31 @@ export const Contact: React.FC = () => {
           }}
         />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="max-w-3xl">
-            <span className="text-xs font-bold text-blue-400 uppercase tracking-widest bg-slate-900 border border-slate-800 px-3 py-1 rounded-md">
-              Communications Desk
-            </span>
-            <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white mt-3 mb-3">
-              Get in Touch
-            </h1>
-            <p className="text-base sm:text-lg text-slate-300 leading-relaxed font-normal">
-              Have questions regarding workshops, event registrations, student chapter membership, or hackathon team mentoring? Reach out to our student coordinator council.
-            </p>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="max-w-3xl">
+              <span className="text-xs font-bold text-blue-400 uppercase tracking-widest bg-slate-900 border border-slate-800 px-3 py-1 rounded-md">
+                Communications Desk
+              </span>
+              <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white mt-3 mb-3">
+                Get in Touch
+              </h1>
+              <p className="text-base sm:text-lg text-slate-300 leading-relaxed font-normal">
+                Have questions regarding workshops, event registrations, student chapter membership, or hackathon team mentoring? Reach out to our student coordinator council.
+              </p>
+            </div>
+
+            {isAdmin && (
+              <div className="shrink-0">
+                <button
+                  type="button"
+                  onClick={() => window.dispatchEvent(new CustomEvent('csi_open_submissions_drawer', { detail: { tab: 'contacts' } }))}
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-full text-xs sm:text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-600/30 hover:scale-105 active:scale-95"
+                >
+                  <Mail className="w-4 h-4" />
+                  <span>Review Contact Inquiries</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </section>

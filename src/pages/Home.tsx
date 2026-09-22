@@ -11,7 +11,13 @@ import {
   BellOff,
   MapPin,
   Clock,
-  Sparkles
+  Sparkles,
+  Plus,
+  Pencil,
+  Trash2,
+  Shield,
+  CheckCircle2,
+  AlertCircle
 } from 'lucide-react';
 import { HeroSection } from '../components/home/HeroSection';
 import { HomeAboutRow } from '../components/home/HomeAboutRow';
@@ -23,11 +29,25 @@ import { EventItem, AnnouncementItem, ChapterHighlightItem } from '../types';
 import { mockEvents } from '../data/events';
 import { mockAnnouncements } from '../data/announcements';
 import { mockGallery } from '../data/gallery';
+import { useAuth } from '../context/AuthContext';
+import { useToast } from '../components/common/Toast';
+import { EventModal } from '../components/admin/in-place/EventModal';
+import { AnnouncementModal } from '../components/admin/in-place/AnnouncementModal';
+import { ConfirmDialog } from '../components/common/ConfirmDialog';
 
 export const Home: React.FC = () => {
+  const { isAdmin } = useAuth();
+  const { showToast } = useToast();
+
   const [events, setEvents] = useState<EventItem[]>(mockEvents);
   const [announcements, setAnnouncements] = useState<AnnouncementItem[]>(mockAnnouncements);
   const [highlights, setHighlights] = useState<ChapterHighlightItem[]>(mockGallery as any);
+
+  // In-place admin modal state
+  const [eventModalOpen, setEventModalOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<EventItem | null>(null);
+  const [announcementModalOpen, setAnnouncementModalOpen] = useState(false);
+  const [deletingEvent, setDeletingEvent] = useState<EventItem | null>(null);
 
   const loadHomeContent = async () => {
     try {
@@ -55,6 +75,19 @@ export const Home: React.FC = () => {
     window.addEventListener('csi_content_updated', handleUpdate);
     return () => window.removeEventListener('csi_content_updated', handleUpdate);
   }, []);
+
+  const handleDeleteEventConfirm = async () => {
+    if (!deletingEvent) return;
+    try {
+      const res = await eventsService.deleteEvent(deletingEvent.id);
+      if (!res.success) throw new Error(res.error);
+      showToast('Event removed successfully.', 'info');
+      setDeletingEvent(null);
+      loadHomeContent();
+    } catch (err: any) {
+      showToast(err?.message || 'Failed to delete event', 'error');
+    }
+  };
 
   const upcomingEvents = events.slice(0, 4);
   const featuredEvent = upcomingEvents.length > 0 ? upcomingEvents[0] : null;
@@ -85,20 +118,64 @@ export const Home: React.FC = () => {
               </h2>
             </div>
 
-            <Link
-              to="/events"
-              className="group inline-flex items-center gap-2.5 px-6 py-2.5 rounded-full text-xs sm:text-sm font-semibold text-white bg-slate-900 hover:bg-blue-600 shadow-md shadow-slate-900/10 hover:shadow-blue-600/25 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 shrink-0"
-            >
-              <span>Explore All Events</span>
-              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform duration-300" />
-            </Link>
+            <div className="flex items-center gap-3">
+              {isAdmin && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingEvent(null);
+                    setEventModalOpen(true);
+                  }}
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-md transition-all"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Create Event</span>
+                </button>
+              )}
+
+              <Link
+                to="/events"
+                className="group inline-flex items-center gap-2.5 px-6 py-2.5 rounded-full text-xs sm:text-sm font-semibold text-white bg-slate-900 hover:bg-blue-600 shadow-md shadow-slate-900/10 hover:shadow-blue-600/25 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 shrink-0"
+              >
+                <span>Explore All Events</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform duration-300" />
+              </Link>
+            </div>
           </div>
 
           {upcomingEvents.length === 1 ? (
             /* Single Featured Event Showcase (AVISHKAAR) */
-            <div className="max-w-5xl mx-auto bg-white rounded-3xl border border-slate-200/90 shadow-xl overflow-hidden hover:border-blue-300 transition-all duration-300 group">
-              <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch">
+            <div className="max-w-5xl mx-auto bg-white rounded-3xl border border-slate-200/90 shadow-xl overflow-hidden hover:border-blue-300 transition-all duration-300 group relative">
+              {/* Admin Overlay Controls */}
+              {isAdmin && (
+                <div className="bg-slate-900/90 border-b border-slate-800 text-white px-6 py-2.5 flex items-center justify-between">
+                  <span className="text-xs font-semibold text-blue-400 flex items-center gap-1.5">
+                    <Shield className="w-3.5 h-3.5" />
+                    <span>Featured Event Controls</span>
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingEvent(upcomingEvents[0]);
+                        setEventModalOpen(true);
+                      }}
+                      className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition-colors"
+                    >
+                      <Pencil className="w-3 h-3" /> Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDeletingEvent(upcomingEvents[0])}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs font-semibold transition-colors"
+                    >
+                      <Trash2 className="w-3 h-3" /> Delete
+                    </button>
+                  </div>
+                </div>
+              )}
 
+              <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch">
                 {/* Poster Preview (5 cols) */}
                 <div className="lg:col-span-5 relative bg-slate-950 overflow-hidden flex items-center justify-center p-4 sm:p-6">
                   <div className="relative w-full aspect-[3/4] max-w-sm rounded-2xl overflow-hidden shadow-2xl border border-white/10 group-hover:scale-[1.02] transition-transform duration-500">
@@ -147,22 +224,19 @@ export const Home: React.FC = () => {
                       <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80">
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Total Prizes</span>
                         <span className="text-sm font-black text-slate-900 mt-0.5 block">₹35,000 Pool</span>
-
                       </div>
 
                       <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80">
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Prelims</span>
                         <span className="text-sm font-black text-slate-900 mt-0.5 block">26 Sept 2026</span>
-
                       </div>
 
                       <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 col-span-2 sm:col-span-1">
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Team Size</span>
                         <span className="text-sm font-black text-slate-900 mt-0.5 block">6 Members</span>
-
-
                       </div>
                     </div>
+
                     {/* Coordinators & Registration Info */}
                     <div className="pt-2 text-xs text-slate-500 space-y-1">
                       <p>
@@ -197,8 +271,35 @@ export const Home: React.FC = () => {
             <div className="space-y-8">
               {/* Featured Event Showcase */}
               <div className="max-w-5xl mx-auto bg-white rounded-3xl border border-slate-200/90 shadow-xl overflow-hidden hover:border-blue-300 transition-all duration-300 group">
+                {isAdmin && (
+                  <div className="bg-slate-900 text-white px-6 py-2.5 flex items-center justify-between">
+                    <span className="text-xs font-semibold text-blue-400 flex items-center gap-1.5">
+                      <Shield className="w-3.5 h-3.5" />
+                      <span>Featured Event Controls</span>
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setEditingEvent(upcomingEvents[0]);
+                          setEventModalOpen(true);
+                        }}
+                        className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs"
+                      >
+                        <Pencil className="w-3 h-3" /> Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeletingEvent(upcomingEvents[0])}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 text-xs font-semibold"
+                      >
+                        <Trash2 className="w-3 h-3" /> Delete
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 lg:grid-cols-12 items-stretch">
-                  {/* Poster Preview */}
                   <div className="lg:col-span-5 relative bg-slate-950 overflow-hidden flex items-center justify-center p-4 sm:p-6">
                     <div className="relative w-full aspect-[3/4] max-w-sm rounded-2xl overflow-hidden shadow-2xl border border-white/10 group-hover:scale-[1.02] transition-transform duration-500">
                       <img
@@ -215,7 +316,6 @@ export const Home: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Event Details */}
                   <div className="lg:col-span-7 p-6 sm:p-8 lg:p-10 flex flex-col justify-between space-y-6">
                     <div className="space-y-4">
                       <div className="flex items-center gap-2.5 flex-wrap">
@@ -234,7 +334,7 @@ export const Home: React.FC = () => {
                         </p>
                       </div>
                       <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                        {upcomingEvents[0].shortDescription || "CMRIT's SIH pattern hackathon with 20 pre-selected problem statements, ₹35,000 cash prizes, and mentorship for CMRIT students."}
+                        {upcomingEvents[0].shortDescription}
                       </p>
                     </div>
                     <div className="pt-4 border-t border-slate-100">
@@ -256,8 +356,37 @@ export const Home: React.FC = () => {
                   {otherEvents.map((evt) => (
                     <div
                       key={evt.id}
-                      className="group bg-white rounded-3xl border border-slate-200/90 hover:border-blue-300 overflow-hidden shadow-subtle hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col"
+                      className="group bg-white rounded-3xl border border-slate-200/90 hover:border-blue-300 overflow-hidden shadow-subtle hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col relative"
                     >
+                      {/* Admin Card Action Overlay */}
+                      {isAdmin && (
+                        <div className="absolute top-2 right-2 z-20 flex items-center gap-1.5 bg-slate-900/90 backdrop-blur-md p-1.5 rounded-xl border border-slate-700 shadow-md">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setEditingEvent(evt);
+                              setEventModalOpen(true);
+                            }}
+                            className="p-1 rounded-lg text-blue-400 hover:text-white hover:bg-slate-800 transition-colors"
+                            title="Edit Event"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setDeletingEvent(evt);
+                            }}
+                            className="p-1 rounded-lg text-rose-400 hover:text-rose-200 hover:bg-slate-800 transition-colors"
+                            title="Delete Event"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )}
+
                       {/* Card Media */}
                       <div className="relative aspect-[16/10] w-full overflow-hidden bg-slate-900">
                         <img
@@ -267,13 +396,9 @@ export const Home: React.FC = () => {
                           loading="lazy"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent pointer-events-none" />
-                        <div className="absolute top-3 inset-x-3 flex items-center justify-between">
+                        <div className="absolute top-3 inset-x-3 flex items-center justify-between pointer-events-none">
                           <span className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-blue-600 text-white shadow-md">
                             {evt.category}
-                          </span>
-                          <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-950/80 backdrop-blur-md text-[10px] font-bold text-emerald-400 border border-emerald-400/20 shadow-md">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                            <span>Registration Open</span>
                           </span>
                         </div>
                         <div className="absolute bottom-3 left-3 flex items-center gap-1.5 text-xs text-white font-medium drop-shadow-md">
@@ -326,24 +451,67 @@ export const Home: React.FC = () => {
               <p className="text-xs sm:text-sm text-slate-500 max-w-sm mx-auto leading-relaxed">
                 Stay tuned! New workshops, competitions and hackathons are announced regularly.
               </p>
-              <Link
-                to="/events"
-                className="inline-flex items-center gap-2 mt-5 px-5 py-2.5 rounded-full text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm"
-              >
-                <span>View Past Events</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
+              {isAdmin ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingEvent(null);
+                    setEventModalOpen(true);
+                  }}
+                  className="inline-flex items-center gap-2 mt-5 px-5 py-2.5 rounded-full text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Create First Event</span>
+                </button>
+              ) : (
+                <Link
+                  to="/events"
+                  className="inline-flex items-center gap-2 mt-5 px-5 py-2.5 rounded-full text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm"
+                >
+                  <span>View Past Events</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              )}
             </div>
           )}
         </div>
       </section>
 
-
-
-
-
       {/* 6. Why Join CSI CMRIT Section */}
       <WhyJoinCsi />
+
+      {/* In-Place Event Modal for Home page */}
+      <EventModal
+        isOpen={eventModalOpen}
+        eventToEdit={editingEvent}
+        onClose={() => {
+          setEventModalOpen(false);
+          setEditingEvent(null);
+        }}
+        onSuccess={() => {
+          loadHomeContent();
+        }}
+      />
+
+      {/* In-Place Announcement Modal for Home page */}
+      <AnnouncementModal
+        isOpen={announcementModalOpen}
+        onClose={() => setAnnouncementModalOpen(false)}
+        onSuccess={() => {
+          loadHomeContent();
+        }}
+      />
+
+      {/* Confirmation Dialog for Deleting Event */}
+      <ConfirmDialog
+        isOpen={!!deletingEvent}
+        title="Delete Event"
+        message={`Are you sure you want to delete "${deletingEvent?.title}"? This action cannot be undone.`}
+        confirmLabel="Delete Event"
+        variant="danger"
+        onConfirm={handleDeleteEventConfirm}
+        onClose={() => setDeletingEvent(null)}
+      />
     </div>
   );
 };

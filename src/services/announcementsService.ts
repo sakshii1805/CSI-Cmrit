@@ -1,4 +1,5 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
+import { requireAdmin } from '../lib/authGuard';
 import { AnnouncementItem, ContentStatus } from '../types';
 import { mockAnnouncements } from '../data/announcements';
 
@@ -196,6 +197,11 @@ export const announcementsService = {
    * Admin: Create new announcement
    */
   async createAnnouncement(announcement: any): Promise<{ data?: AnnouncementItem; error?: string }> {
+    try {
+      await requireAdmin();
+    } catch (authErr: any) {
+      return { error: authErr.message || 'Unauthorized' };
+    }
     const title = announcement.title || 'Untitled Announcement';
     const slug = announcement.slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || ('ann-' + Date.now());
     const isPublished = announcement.is_published !== false && announcement.status !== 'draft';
@@ -260,6 +266,11 @@ export const announcementsService = {
    * Admin: Update announcement
    */
   async updateAnnouncement(id: string, updates: any): Promise<{ data?: AnnouncementItem; error?: string }> {
+    try {
+      await requireAdmin();
+    } catch (authErr: any) {
+      return { error: authErr.message || 'Unauthorized' };
+    }
     const current = getStoredAnnouncements();
     const updated = current.map(a => {
       if (a.id === id || a.slug === id) {
@@ -298,14 +309,19 @@ export const announcementsService = {
   /**
    * Admin: Toggle publish
    */
-  async toggleAnnouncementPublish(id: string, currentStatus: 'draft' | 'published'): Promise<{ success: boolean; error?: string }> {
-    const newStatus = currentStatus === 'published' ? 'draft' : 'published';
+  async toggleAnnouncementPublish(id: string, currentStatus: ContentStatus): Promise<{ success: boolean; error?: string }> {
+    try {
+      await requireAdmin();
+    } catch (authErr: any) {
+      return { success: false, error: authErr.message || 'Unauthorized' };
+    }
+    const newStatus: ContentStatus = currentStatus === 'published' ? 'draft' : 'published';
     const current = getStoredAnnouncements();
-    const updated: AnnouncementItem[] = current.map(a => {
+    const updated = current.map(a => {
       if (a.id === id || a.slug === id) {
         return {
           ...a,
-          status: newStatus as any,
+          status: newStatus,
           is_published: newStatus === 'published',
           published_at: newStatus === 'published' ? (a.published_at || new Date().toISOString()) : a.published_at
         };
@@ -316,13 +332,10 @@ export const announcementsService = {
 
     if (isSupabaseConfigured) {
       try {
-        await supabase
-          .from('announcements')
-          .update({
-            status: newStatus,
-            published_at: newStatus === 'published' ? new Date().toISOString() : null
-          })
-          .or(`id.eq.${id},slug.eq.${id}`);
+        await supabase.from('announcements').update({
+          status: newStatus,
+          published_at: newStatus === 'published' ? new Date().toISOString() : null
+        }).or(`id.eq.${id},slug.eq.${id}`);
       } catch (err) {
         console.warn('Supabase toggleAnnouncementPublish error:', err);
       }
@@ -335,6 +348,11 @@ export const announcementsService = {
    * Admin: Delete announcement permanently
    */
   async deleteAnnouncement(id: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      await requireAdmin();
+    } catch (authErr: any) {
+      return { success: false, error: authErr.message || 'Unauthorized' };
+    }
     saveDeletedAnnouncementId(id);
     const current = getStoredAnnouncements();
     saveStoredAnnouncements(current.filter(a => a.id !== id && a.slug !== id));

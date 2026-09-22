@@ -12,13 +12,16 @@ import {
   ShieldCheck,
   Laptop,
   Users2,
+  Users,
   Code
 } from 'lucide-react';
 import { Button } from '../components/common/Button';
 import { Modal } from '../components/common/Modal';
 import { joinService } from '../services/joinService';
+import { useAuth } from '../context/AuthContext';
 
 export const JoinUs: React.FC = () => {
+  const { isAdmin } = useAuth();
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -135,16 +138,31 @@ export const JoinUs: React.FC = () => {
           }}
         />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="max-w-3xl">
-            <span className="text-xs font-bold text-blue-400 uppercase tracking-widest bg-slate-900 border border-slate-800 px-3 py-1 rounded-md">
-              Membership Drive 2026
-            </span>
-            <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white mt-3 mb-3">
-              Join CSI CMRIT
-            </h1>
-            <p className="text-base sm:text-lg text-slate-300 leading-relaxed font-normal">
-              Become part of a forward-thinking student engineering network. Elevate your technical proficiencies, contribute to hackathons, and build lifelong professional connections.
-            </p>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="max-w-3xl">
+              <span className="text-xs font-bold text-blue-400 uppercase tracking-widest bg-slate-900 border border-slate-800 px-3 py-1 rounded-md">
+                Membership Drive 2026
+              </span>
+              <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white mt-3 mb-3">
+                Join CSI CMRIT
+              </h1>
+              <p className="text-base sm:text-lg text-slate-300 leading-relaxed font-normal">
+                Become part of a forward-thinking student engineering network. Elevate your technical proficiencies, contribute to hackathons, and build lifelong professional connections.
+              </p>
+            </div>
+
+            {isAdmin && (
+              <div className="shrink-0">
+                <button
+                  type="button"
+                  onClick={() => window.dispatchEvent(new CustomEvent('csi_open_submissions_drawer', { detail: { tab: 'applications' } }))}
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-full text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/30 hover:scale-105 active:scale-95"
+                >
+                  <Users className="w-4 h-4" />
+                  <span>Review Join Applications</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </section>

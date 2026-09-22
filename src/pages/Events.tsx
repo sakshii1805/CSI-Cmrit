@@ -1,11 +1,17 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Search, Filter, X, AlertCircle, CalendarX2 } from 'lucide-react';
+import { Search, Filter, X, AlertCircle, CalendarX2, Plus, Shield } from 'lucide-react';
 import { eventsService } from '../services/eventsService';
 import { EventCard } from '../components/events/EventCard';
 import { EventCategory, EventItem } from '../types';
+import { useAuth } from '../context/AuthContext';
+import { useToast } from '../components/common/Toast';
+import { EventModal } from '../components/admin/in-place/EventModal';
+import { ConfirmDialog } from '../components/common/ConfirmDialog';
 
 export const Events: React.FC = () => {
+  const { isAdmin } = useAuth();
+  const { showToast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const initialCategory = (searchParams.get('category') as EventCategory) || 'All';
 
@@ -13,6 +19,11 @@ export const Events: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<EventCategory>(initialCategory);
+
+  // In-place modal state
+  const [eventModalOpen, setEventModalOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<EventItem | null>(null);
+  const [deletingEvent, setDeletingEvent] = useState<EventItem | null>(null);
 
   const categories: EventCategory[] = [
     'All',
@@ -26,10 +37,12 @@ export const Events: React.FC = () => {
   const fetchEvents = async () => {
     try {
       setIsLoading(true);
-      const res = await eventsService.getPublishedEvents();
+      const res = isAdmin
+        ? await eventsService.adminListEvents()
+        : await eventsService.getPublishedEvents();
       setEvents(res.data);
     } catch (err) {
-      console.error('Failed to fetch published events:', err);
+      console.error('Failed to fetch events:', err);
     } finally {
       setIsLoading(false);
     }
@@ -43,7 +56,7 @@ export const Events: React.FC = () => {
     };
     window.addEventListener('csi_content_updated', handleUpdate);
     return () => window.removeEventListener('csi_content_updated', handleUpdate);
-  }, []);
+  }, [isAdmin]);
 
   const handleCategorySelect = (cat: EventCategory) => {
     setSelectedCategory(cat);
@@ -62,9 +75,32 @@ export const Events: React.FC = () => {
     setSearchParams(searchParams);
   };
 
-  const filteredEvents = useMemo(() => {
-    const now = new Date().toISOString().split('T')[0];
+  const handleTogglePublish = async (event: EventItem) => {
+    try {
+      const currentStatus = (event.status === 'published' || event.is_published !== false) ? 'published' : 'draft';
+      const res = await eventsService.toggleEventPublish(event.id, currentStatus);
+      if (!res.success) throw new Error(res.error);
+      showToast(`Event status updated to ${currentStatus === 'published' ? 'draft' : 'published'}`, 'success');
+      fetchEvents();
+    } catch (err: any) {
+      showToast(err?.message || 'Failed to toggle publish status', 'error');
+    }
+  };
 
+  const handleDeleteConfirm = async () => {
+    if (!deletingEvent) return;
+    try {
+      const res = await eventsService.deleteEvent(deletingEvent.id);
+      if (!res.success) throw new Error(res.error);
+      showToast('Event deleted successfully.', 'info');
+      setDeletingEvent(null);
+      fetchEvents();
+    } catch (err: any) {
+      showToast(err?.message || 'Failed to delete event', 'error');
+    }
+  };
+
+  const filteredEvents = useMemo(() => {
     return events
       .filter((event) => {
         // Category filter (support singular & plural)
@@ -106,16 +142,35 @@ export const Events: React.FC = () => {
           }}
         />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="max-w-3xl">
-            <span className="text-xs font-bold text-blue-400 uppercase tracking-widest bg-slate-900 border border-slate-800 px-3 py-1 rounded-md">
-              Chapter Initiatives
-            </span>
-            <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white mt-3 mb-3">
-              Events &amp; Workshops
-            </h1>
-            <p className="text-base sm:text-lg text-slate-300 leading-relaxed font-normal">
-              Hands-on tech bootcamps, developer sprints, hackathons, and technical symposiums hosted by the CSI CMRIT Chapter.
-            </p>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="max-w-3xl">
+              <span className="text-xs font-bold text-blue-400 uppercase tracking-widest bg-slate-900 border border-slate-800 px-3 py-1 rounded-md">
+                Chapter Initiatives
+              </span>
+              <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white mt-3 mb-3">
+                Events &amp; Workshops
+              </h1>
+              <p className="text-base sm:text-lg text-slate-300 leading-relaxed font-normal">
+                Hands-on tech bootcamps, developer sprints, hackathons, and technical symposiums hosted by the CSI CMRIT Chapter.
+              </p>
+            </div>
+
+            {/* Admin In-Place Create Button */}
+            {isAdmin && (
+              <div className="shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingEvent(null);
+                    setEventModalOpen(true);
+                  }}
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-full text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-500 transition-all shadow-lg shadow-blue-600/30 hover:scale-105 active:scale-95"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>+ Add New Event</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -174,6 +229,7 @@ export const Events: React.FC = () => {
               <>
                 Showing <span className="font-semibold text-slate-800">{filteredEvents.length}</span> {filteredEvents.length === 1 ? 'event' : 'events'}
                 {selectedCategory !== 'All' && <span> in <strong className="text-blue-600">{selectedCategory}</strong></span>}
+                {isAdmin && <span className="ml-2 text-blue-600 font-semibold">(Admin View: Published + Drafts)</span>}
               </>
             )}
           </div>
@@ -181,56 +237,91 @@ export const Events: React.FC = () => {
           {(searchQuery || selectedCategory !== 'All') && (
             <button
               onClick={handleClearFilters}
-              className="text-xs text-blue-600 hover:text-blue-800 font-semibold underline"
+              className="text-blue-600 hover:text-blue-800 hover:underline flex items-center gap-1"
             >
-              Reset Filters
+              <X className="w-3.5 h-3.5" />
+              <span>Clear filters</span>
             </button>
           )}
         </div>
 
-        {/* Loading Spinner */}
+        {/* Events Grid */}
         {isLoading ? (
-          <div className="py-20 text-center flex flex-col items-center justify-center">
-            <div className="w-10 h-10 border-3 border-blue-600 border-t-transparent rounded-full animate-spin mb-3" />
-            <p className="text-xs font-mono text-slate-500">Loading published chapter events...</p>
-          </div>
-        ) : filteredEvents.length > 0 ? (
-          /* Events Grid */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredEvents.map((evt) => (
-              <EventCard key={evt.id} event={evt} />
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="h-96 rounded-xl bg-slate-200/60 animate-pulse border border-slate-200" />
             ))}
           </div>
-        ) : events.length === 0 ? (
-          /* Primary empty state: No events have been published yet */
-          <div className="bg-white rounded-2xl border border-slate-200 border-dashed p-16 text-center max-w-lg mx-auto shadow-subtle my-8">
-            <div className="w-16 h-16 rounded-2xl bg-slate-100 text-slate-300 flex items-center justify-center mx-auto mb-5">
-              <CalendarX2 className="w-8 h-8" />
-            </div>
-            <h3 className="text-base font-bold text-slate-900 mb-2">No upcoming events</h3>
-            <p className="text-sm text-slate-500 leading-relaxed max-w-xs mx-auto">
-              Events and activities will appear here when they are announced by chapter administrators.
-            </p>
+        ) : filteredEvents.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredEvents.map((event) => (
+              <EventCard
+                key={event.id}
+                event={event}
+                onEdit={(e) => {
+                  setEditingEvent(e);
+                  setEventModalOpen(true);
+                }}
+                onDelete={(e) => setDeletingEvent(e)}
+                onTogglePublish={handleTogglePublish}
+              />
+            ))}
           </div>
         ) : (
-          /* Filter/search empty state: Events exist but none match the current filters */
           <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center max-w-lg mx-auto shadow-subtle my-8">
-            <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-4">
-              <AlertCircle className="w-6 h-6" />
+            <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center mx-auto mb-4 text-slate-400">
+              <CalendarX2 className="w-6 h-6" />
             </div>
-            <h3 className="text-base font-bold text-slate-900 mb-1">No Events Found</h3>
-            <p className="text-xs sm:text-sm text-slate-500 mb-5">
-              We couldn&apos;t find any events matching your current filters or search terms.
+            <h3 className="text-base font-bold text-slate-900 mb-1">No matching events found</h3>
+            <p className="text-xs text-slate-500 mb-6 leading-relaxed">
+              We couldn't find any events matching your selected filter or search terms.
             </p>
-            <button
-              onClick={handleClearFilters}
-              className="px-4 py-2 rounded-lg bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition-colors"
-            >
-              Clear All Filters
-            </button>
+            {isAdmin ? (
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingEvent(null);
+                  setEventModalOpen(true);
+                }}
+                className="px-5 py-2.5 rounded-xl bg-blue-600 text-white text-xs font-semibold hover:bg-blue-700 transition-colors shadow-sm"
+              >
+                + Add Event Now
+              </button>
+            ) : (
+              <button
+                onClick={handleClearFilters}
+                className="px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 transition-colors"
+              >
+                Clear all filters
+              </button>
+            )}
           </div>
         )}
       </section>
+
+      {/* In-Place Event Modal */}
+      <EventModal
+        isOpen={eventModalOpen}
+        eventToEdit={editingEvent}
+        onClose={() => {
+          setEventModalOpen(false);
+          setEditingEvent(null);
+        }}
+        onSuccess={() => {
+          fetchEvents();
+        }}
+      />
+
+      {/* Confirmation Dialog for Deleting Event */}
+      <ConfirmDialog
+        isOpen={!!deletingEvent}
+        title="Delete Event"
+        message={`Are you sure you want to delete "${deletingEvent?.title}"? This action cannot be undone.`}
+        confirmLabel="Delete Event"
+        variant="danger"
+        onConfirm={handleDeleteConfirm}
+        onClose={() => setDeletingEvent(null)}
+      />
     </div>
   );
 };

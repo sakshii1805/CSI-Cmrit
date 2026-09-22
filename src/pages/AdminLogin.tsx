@@ -20,10 +20,10 @@ export const AdminLogin: React.FC = () => {
   const [shake, setShake] = useState(false);
   const [justFilled, setJustFilled] = useState(false);
 
-  // If already logged in and confirmed admin, redirect directly
+  // If already logged in and confirmed admin, redirect directly to home in admin mode
   useEffect(() => {
     if (!authLoading && isAuthenticated && isAdmin) {
-      navigate('/admin/dashboard', { replace: true });
+      navigate('/', { replace: true });
     }
   }, [authLoading, isAuthenticated, isAdmin, navigate]);
 
@@ -64,8 +64,8 @@ export const AdminLogin: React.FC = () => {
         return;
       }
 
-      showToast('Welcome back, Student Admin!', 'success');
-      navigate('/admin/dashboard');
+      showToast('Welcome back, Student Admin! Admin Mode is now active.', 'success');
+      navigate('/');
     } catch (err: any) {
       const msg = err?.message || 'Authentication failed. Please check your credentials.';
       setErrorMessage(msg);
@@ -265,7 +265,7 @@ export const AdminLogin: React.FC = () => {
                   ) : (
                     <>
                       <Shield className="w-4 h-4" />
-                      <span>Sign In to Dashboard</span>
+                      <span>Enter Admin Mode</span>
                     </>
                   )}
                 </Button>

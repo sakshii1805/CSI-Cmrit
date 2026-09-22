@@ -1,10 +1,13 @@
-import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation, Outlet } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate, Outlet } from 'react-router-dom';
 import { Navbar } from './components/common/Navbar';
 import { Footer } from './components/common/Footer';
 import { ToastProvider } from './components/common/Toast';
-import { AuthProvider } from './context/AuthContext';
-import { ProtectedRoute } from './components/common/ProtectedRoute';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { EventModal } from './components/admin/in-place/EventModal';
+import { AnnouncementModal } from './components/admin/in-place/AnnouncementModal';
+import { GalleryModal } from './components/admin/in-place/GalleryModal';
+import { AdminSubmissionsDrawer } from './components/admin/in-place/AdminSubmissionsDrawer';
 
 // Pages
 import { Home } from './pages/Home';
@@ -19,7 +22,6 @@ import { AnnouncementDetails } from './pages/AnnouncementDetails';
 import { JoinUs } from './pages/JoinUs';
 import { Contact } from './pages/Contact';
 import { AdminLogin } from './pages/AdminLogin';
-import { AdminDashboard } from './pages/AdminDashboard';
 
 // Scroll to top on route navigation
 const ScrollToTop = () => {
@@ -36,15 +38,81 @@ const ScrollToTop = () => {
   return null;
 };
 
-// Public Layout with Sticky Navbar and Comprehensive Footer
+// Public Layout with Sticky Navbar, Comprehensive Footer, and Integrated Admin Mode Bar
 const PublicLayout: React.FC = () => {
+  const { isAdmin } = useAuth();
+  const [submissionsDrawerOpen, setSubmissionsDrawerOpen] = useState(false);
+  const [submissionsDrawerTab, setSubmissionsDrawerTab] = useState<'applications' | 'contacts' | 'profile'>('applications');
+  const [eventModalOpen, setEventModalOpen] = useState(false);
+  const [announcementModalOpen, setAnnouncementModalOpen] = useState(false);
+  const [galleryModalOpen, setGalleryModalOpen] = useState(false);
+
+  useEffect(() => {
+    const handleOpenSubmissions = (e: any) => {
+      setSubmissionsDrawerTab(e?.detail?.tab || 'applications');
+      setSubmissionsDrawerOpen(true);
+    };
+    const handleOpenEventModal = () => setEventModalOpen(true);
+    const handleOpenAnnouncementModal = () => setAnnouncementModalOpen(true);
+    const handleOpenGalleryModal = () => setGalleryModalOpen(true);
+
+    window.addEventListener('csi_open_submissions_drawer', handleOpenSubmissions);
+    window.addEventListener('csi_open_event_modal', handleOpenEventModal);
+    window.addEventListener('csi_open_announcement_modal', handleOpenAnnouncementModal);
+    window.addEventListener('csi_open_gallery_modal', handleOpenGalleryModal);
+
+    return () => {
+      window.removeEventListener('csi_open_submissions_drawer', handleOpenSubmissions);
+      window.removeEventListener('csi_open_event_modal', handleOpenEventModal);
+      window.removeEventListener('csi_open_announcement_modal', handleOpenAnnouncementModal);
+      window.removeEventListener('csi_open_gallery_modal', handleOpenGalleryModal);
+    };
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
+
       <main className="flex-1">
         <Outlet />
       </main>
+
       <Footer />
+
+      {/* In-Place Administrative Modals (Available across all pages when triggered) */}
+      {isAdmin && (
+        <>
+          <EventModal
+            isOpen={eventModalOpen}
+            onClose={() => setEventModalOpen(false)}
+            onSuccess={() => {
+              window.dispatchEvent(new CustomEvent('csi_content_updated', { detail: { type: 'event' } }));
+            }}
+          />
+
+          <AnnouncementModal
+            isOpen={announcementModalOpen}
+            onClose={() => setAnnouncementModalOpen(false)}
+            onSuccess={() => {
+              window.dispatchEvent(new CustomEvent('csi_content_updated', { detail: { type: 'announcement' } }));
+            }}
+          />
+
+          <GalleryModal
+            isOpen={galleryModalOpen}
+            onClose={() => setGalleryModalOpen(false)}
+            onSuccess={() => {
+              window.dispatchEvent(new CustomEvent('csi_content_updated', { detail: { type: 'gallery' } }));
+            }}
+          />
+
+          <AdminSubmissionsDrawer
+            isOpen={submissionsDrawerOpen}
+            defaultTab={submissionsDrawerTab}
+            onClose={() => setSubmissionsDrawerOpen(false)}
+          />
+        </>
+      )}
     </div>
   );
 };
@@ -77,7 +145,7 @@ export const App: React.FC = () => {
         <Router>
           <ScrollToTop />
           <Routes>
-            {/* Public Pages Layout */}
+            {/* Integrated Website Layout with In-Place Admin Mode */}
             <Route element={<PublicLayout />}>
               <Route path="/" element={<Home />} />
               <Route path="/about" element={<About />} />
@@ -90,51 +158,19 @@ export const App: React.FC = () => {
               <Route path="/announcements/:id" element={<AnnouncementDetails />} />
               <Route path="/join" element={<JoinUs />} />
               <Route path="/contact" element={<Contact />} />
+
+              {/* Seamless redirection: Any /admin path redirects to the integrated main site */}
+              <Route path="/admin" element={<Navigate to="/" replace />} />
+              <Route path="/admin/dashboard" element={<Navigate to="/" replace />} />
+              <Route path="/admin/profile" element={<Navigate to="/" replace />} />
+              <Route path="/admin/settings" element={<Navigate to="/" replace />} />
+              <Route path="/admin/security" element={<Navigate to="/" replace />} />
+
               <Route path="*" element={<NotFound />} />
             </Route>
 
-            {/* Admin Section (Standalone Layout — no public Navbar/Footer) */}
+            {/* Standalone Admin Sign In page */}
             <Route path="/admin/login" element={<AdminLogin />} />
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute>
-                  <AdminDashboard defaultTab="dashboard" />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/dashboard"
-              element={
-                <ProtectedRoute>
-                  <AdminDashboard defaultTab="dashboard" />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/profile"
-              element={
-                <ProtectedRoute>
-                  <AdminDashboard defaultTab="profile" />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/settings"
-              element={
-                <ProtectedRoute>
-                  <AdminDashboard defaultTab="settings" />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/admin/security"
-              element={
-                <ProtectedRoute>
-                  <AdminDashboard defaultTab="security" />
-                </ProtectedRoute>
-              }
-            />
           </Routes>
         </Router>
       </AuthProvider>

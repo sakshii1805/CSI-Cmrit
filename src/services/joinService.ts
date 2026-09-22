@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabaseClient';
+import { requireAdmin } from '../lib/authGuard';
 import { JoinApplication } from '../types';
 
 export const joinService = {
@@ -41,6 +42,7 @@ export const joinService = {
    */
   async adminListApplications(): Promise<{ data: JoinApplication[]; error?: string }> {
     try {
+      await requireAdmin();
       const { data, error } = await supabase
         .from('join_applications')
         .select('*')
@@ -67,6 +69,7 @@ export const joinService = {
    */
   async updateApplicationStatus(id: string, status: 'pending' | 'approved' | 'rejected'): Promise<{ success: boolean; error?: string }> {
     try {
+      await requireAdmin();
       const { error } = await supabase
         .from('join_applications')
         .update({ status })
@@ -85,6 +88,7 @@ export const joinService = {
    */
   async deleteApplication(id: string): Promise<{ success: boolean; error?: string }> {
     try {
+      await requireAdmin();
       const { error } = await supabase
         .from('join_applications')
         .delete()

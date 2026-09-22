@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import {
   Calendar,
   Clock,
@@ -9,7 +9,12 @@ import {
   Share2,
   Ticket,
   Building,
-  ExternalLink
+  ExternalLink,
+  Pencil,
+  Trash2,
+  Shield,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { eventsService } from '../services/eventsService';
 import { EventItem } from '../types';
@@ -18,34 +23,77 @@ import { Button } from '../components/common/Button';
 import { RegisterModal } from '../components/events/RegisterModal';
 import { CommentSection } from '../components/common/CommentSection';
 import { useToast } from '../components/common/Toast';
+import { useAuth } from '../context/AuthContext';
+import { EventModal } from '../components/admin/in-place/EventModal';
+import { ConfirmDialog } from '../components/common/ConfirmDialog';
 
 export const EventDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { showToast } = useToast();
+  const { isAdmin } = useAuth();
+
   const [event, setEvent] = useState<EventItem | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [registerModalOpen, setRegisterModalOpen] = useState(false);
 
-  useEffect(() => {
-    const fetchEvent = async () => {
-      if (!id) return;
-      try {
-        setIsLoading(true);
-        const res = await eventsService.getEventBySlug(id);
-        setEvent(res.data);
-      } catch (err) {
-        console.error('Error fetching event details:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  // In-place edit and delete state
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
+  const fetchEvent = async () => {
+    if (!id) return;
+    try {
+      setIsLoading(true);
+      const res = await eventsService.getEventBySlug(id);
+      setEvent(res.data);
+    } catch (err) {
+      console.error('Error fetching event details:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     fetchEvent();
+
+    const handleUpdate = () => {
+      fetchEvent();
+    };
+    window.addEventListener('csi_content_updated', handleUpdate);
+    return () => window.removeEventListener('csi_content_updated', handleUpdate);
   }, [id]);
 
   const handleShare = () => {
     navigator.clipboard?.writeText(window.location.href);
     showToast('Event link copied to clipboard!', 'info');
+  };
+
+  const handleTogglePublish = async () => {
+    if (!event) return;
+    try {
+      const currentStatus = (event.status === 'published' || event.is_published !== false) ? 'published' : 'draft';
+      const res = await eventsService.toggleEventPublish(event.id, currentStatus);
+      if (!res.success) throw new Error(res.error);
+      const nextStatus = currentStatus === 'published' ? 'draft' : 'published';
+      showToast(`Event status updated to ${nextStatus}`, 'success');
+      setEvent({ ...event, status: nextStatus, is_published: nextStatus === 'published' });
+    } catch (err: any) {
+      showToast(err?.message || 'Failed to toggle status', 'error');
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!event) return;
+    try {
+      const res = await eventsService.deleteEvent(event.id);
+      if (!res.success) throw new Error(res.error);
+      showToast('Event deleted successfully.', 'info');
+      setDeleteDialogOpen(false);
+      navigate('/events');
+    } catch (err: any) {
+      showToast(err?.message || 'Failed to delete event', 'error');
+    }
   };
 
   if (isLoading) {
@@ -78,14 +126,14 @@ export const EventDetails: React.FC = () => {
     );
   }
 
-  const isUpcoming = event.status === 'published';
+  const isPublished = event.status === 'published' || event.is_published !== false;
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 pb-20">
       {/* Top Breadcrumb Header */}
-      <section className="bg-slate-950 text-white py-8 border-b border-slate-800">
+      <section className="bg-slate-950 text-white py-6 sm:py-8 border-b border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-4">
             <Link
               to="/events"
               className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
@@ -94,13 +142,51 @@ export const EventDetails: React.FC = () => {
               <span>Back to all events</span>
             </Link>
 
-            <button
-              onClick={handleShare}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 hover:text-white hover:bg-slate-800 text-xs font-medium border border-slate-800 transition-colors"
-            >
-              <Share2 className="w-3.5 h-3.5" />
-              <span>Share Event</span>
-            </button>
+            <div className="flex items-center gap-2">
+              {/* In-Place Admin Controls */}
+              {isAdmin && (
+                <div className="flex items-center gap-2 pr-3 border-r border-slate-800">
+                  <button
+                    type="button"
+                    onClick={handleTogglePublish}
+                    className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                      isPublished
+                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30'
+                        : 'bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30'
+                    }`}
+                  >
+                    {isPublished ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                    <span>{isPublished ? 'Published' : 'Draft'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setEditModalOpen(true)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-xs"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                    <span>Edit Event</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setDeleteDialogOpen(true)}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-semibold transition-all"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete</span>
+                  </button>
+                </div>
+              )}
+
+              <button
+                onClick={handleShare}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 hover:text-white hover:bg-slate-800 text-xs font-medium border border-slate-800 transition-colors"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+                <span>Share</span>
+              </button>
+            </div>
           </div>
         </div>
       </section>
@@ -114,8 +200,8 @@ export const EventDetails: React.FC = () => {
             <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-subtle space-y-4">
               <div className="flex items-center gap-2 flex-wrap">
                 <Badge variant="blue">{event.category}</Badge>
-                <Badge variant={isUpcoming ? 'emerald' : 'slate'}>
-                  {isUpcoming ? 'Published' : 'Concluded'}
+                <Badge variant={isPublished ? 'emerald' : 'slate'}>
+                  {isPublished ? 'Published' : 'Draft'}
                 </Badge>
                 {event.organizer && (
                   <span className="text-xs text-slate-400 font-medium">
@@ -163,7 +249,7 @@ export const EventDetails: React.FC = () => {
               )}
             </div>
 
-            {/* Public Comment Section */}
+            {/* Public Comment Section with In-Place Admin Moderation */}
             <CommentSection
               targetType="event"
               targetId={event.id}
@@ -271,13 +357,38 @@ export const EventDetails: React.FC = () => {
         </div>
       </div>
 
-
       {/* Registration Modal Dialog */}
       <RegisterModal
         isOpen={registerModalOpen}
         onClose={() => setRegisterModalOpen(false)}
         event={event}
       />
+
+      {/* In-Place Event Edit Modal */}
+      {isAdmin && (
+        <EventModal
+          isOpen={editModalOpen}
+          eventToEdit={event}
+          onClose={() => setEditModalOpen(false)}
+          onSuccess={(updated) => {
+            setEvent(updated);
+            fetchEvent();
+          }}
+        />
+      )}
+
+      {/* Confirm Delete Dialog */}
+      {isAdmin && (
+        <ConfirmDialog
+          isOpen={deleteDialogOpen}
+          title="Delete Event"
+          message={`Are you sure you want to delete "${event.title}"? This will permanently remove the event.`}
+          confirmLabel="Delete Event"
+          variant="danger"
+          onConfirm={handleDeleteConfirm}
+          onClose={() => setDeleteDialogOpen(false)}
+        />
+      )}
     </div>
   );
 };

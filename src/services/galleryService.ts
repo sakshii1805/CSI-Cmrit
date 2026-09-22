@@ -1,4 +1,5 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
+import { requireAdmin } from '../lib/authGuard';
 import { GalleryPost, GalleryImage } from '../types';
 import { highlightsService } from './highlightsService';
 
@@ -143,6 +144,7 @@ export const galleryService = {
     images: { image_url: string; caption?: string }[]
   ): Promise<{ data?: GalleryPost; error?: string }> {
     try {
+      await requireAdmin();
       // Also create highlight for unified experience
       await highlightsService.createHighlight({
         title: post.title,
@@ -211,10 +213,15 @@ export const galleryService = {
    * Admin: Delete gallery post
    */
   async deleteGalleryPost(id: string): Promise<{ success: boolean; error?: string }> {
-    await highlightsService.deleteHighlight(id);
-    if (isSupabaseConfigured) {
-      await supabase.from('gallery_posts').delete().eq('id', id);
+    try {
+      await requireAdmin();
+      await highlightsService.deleteHighlight(id);
+      if (isSupabaseConfigured) {
+        await supabase.from('gallery_posts').delete().eq('id', id);
+      }
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message || 'Unauthorized' };
     }
-    return { success: true };
   }
 };

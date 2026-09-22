@@ -1,4 +1,5 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
+import { requireAdmin } from '../lib/authGuard';
 import { CommentItem, PublicComment, BlockedEmail, CommentTargetType } from '../types';
 
 const COMMENTS_STORAGE_KEY = 'csi_comments_data';
@@ -193,6 +194,7 @@ export const commentsService = {
    */
   async updateCommentStatus(id: string, status: 'approved' | 'rejected' | 'pending'): Promise<{ success: boolean; error?: string }> {
     try {
+      await requireAdmin();
       const current = getStoredComments();
       const updated = current.map(c => c.id === id ? { ...c, status } : c);
       saveStoredComments(updated);
@@ -215,6 +217,7 @@ export const commentsService = {
    */
   async deleteComment(id: string): Promise<{ success: boolean; error?: string }> {
     try {
+      await requireAdmin();
       saveDeletedCommentId(id);
       const current = getStoredComments();
       saveStoredComments(current.filter(c => c.id !== id));
@@ -237,6 +240,7 @@ export const commentsService = {
    */
   async blockEmail(email: string, reason?: string): Promise<{ success: boolean; error?: string }> {
     try {
+      await requireAdmin();
       const cleanEmail = email.trim().toLowerCase();
       const currentBlocked = getStoredBlockedEmails();
       if (!currentBlocked.some(b => b.email.toLowerCase() === cleanEmail)) {
@@ -307,6 +311,7 @@ export const commentsService = {
    */
   async unblockEmail(id: string): Promise<{ success: boolean; error?: string }> {
     try {
+      await requireAdmin();
       const current = getStoredBlockedEmails();
       saveStoredBlockedEmails(current.filter(b => b.id !== id));
 

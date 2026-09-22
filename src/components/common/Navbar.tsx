@@ -1,11 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
-import { Menu, X, Shield } from 'lucide-react';
+import { Menu, X, Shield, LogOut, UserCog } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { EditProfileModal } from '../admin/in-place/EditProfileModal';
 
 export const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const profileDropdownRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
+
+  const { isAdmin, signOut, profile } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -17,12 +24,34 @@ export const Navbar: React.FC = () => {
 
   useEffect(() => {
     setMobileMenuOpen(false);
+    setProfileDropdownOpen(false);
   }, [location.pathname]);
 
   useEffect(() => {
     document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [mobileMenuOpen]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(e.target as Node)) {
+        setProfileDropdownOpen(false);
+      }
+    };
+    if (profileDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [profileDropdownOpen]);
+
+  const getInitials = (name?: string) => {
+    if (!name) return 'AD';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
 
   const navLinks = [
     { name: 'Home', path: '/' },
@@ -122,7 +151,7 @@ export const Navbar: React.FC = () => {
             ))}
           </div>
 
-          {/* Right: CTA + Admin + Mobile toggle */}
+          {/* Right: CTA + Admin Profile / Login + Mobile toggle */}
           <div className="flex items-center gap-3">
             {/* Join Us CTA */}
             <Link
@@ -132,15 +161,99 @@ export const Navbar: React.FC = () => {
               Join Us
             </Link>
 
-            {/* Admin (desktop) */}
-            <Link
-              to="/admin/login"
-              className="hidden lg:inline-flex items-center gap-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all whitespace-nowrap border border-slate-600 text-slate-300 px-3 py-1.5 hover:border-slate-400 hover:text-white"
-              aria-label="Admin Portal"
-            >
+            {/* Admin Circular Profile or Login */}
+            {isAdmin ? (
+              <div className="relative" ref={profileDropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setProfileDropdownOpen((prev) => !prev)}
+                  className="relative flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-full ring-2 ring-blue-500/50 hover:ring-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all bg-gradient-to-tr from-blue-700 via-indigo-600 to-sky-500 text-white shadow-md cursor-pointer overflow-hidden"
+                  aria-label="Admin Profile Menu"
+                  aria-expanded={profileDropdownOpen}
+                  title={profile?.full_name || 'Admin Profile'}
+                >
+                  {profile?.avatar_url ? (
+                    <img
+                      src={profile.avatar_url}
+                      alt={profile.full_name || 'Admin'}
+                      className="w-full h-full object-cover rounded-full"
+                    />
+                  ) : (
+                    <span className="text-[11px] font-bold tracking-wider uppercase select-none">
+                      {getInitials(profile?.full_name)}
+                    </span>
+                  )}
+                  {/* Active status indicator dot */}
+                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 border-2 border-slate-950 rounded-full" />
+                </button>
 
-              Login
-            </Link>
+                {/* Dropdown Menu */}
+                {profileDropdownOpen && (
+                  <div className="absolute right-0 mt-2.5 w-64 rounded-2xl bg-slate-900 border border-slate-700/80 shadow-2xl py-2 z-50 text-slate-100 animate-in fade-in zoom-in-95 duration-150">
+                    <div className="px-4 py-3 border-b border-slate-800">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full ring-2 ring-blue-500/30 overflow-hidden bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xs shrink-0">
+                          {profile?.avatar_url ? (
+                            <img
+                              src={profile.avatar_url}
+                              alt={profile.full_name || 'Admin'}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <span>{getInitials(profile?.full_name)}</span>
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-semibold text-white truncate">
+                            {profile?.full_name || 'Student Admin'}
+                          </p>
+                          <p className="text-[10px] text-slate-400 truncate">
+                            {profile?.email || 'admin@cmritonline.ac.in'}
+                          </p>
+                          <span className="inline-block mt-0.5 text-[9px] font-semibold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">
+                            {profile?.designation || 'Administrator'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="p-1.5 space-y-0.5">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setProfileDropdownOpen(false);
+                          setIsEditProfileOpen(true);
+                        }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-slate-200 hover:text-white hover:bg-slate-800/80 rounded-xl transition-colors text-left cursor-pointer"
+                      >
+                        <UserCog className="w-4 h-4 text-blue-400" />
+                        <span>Edit Profile</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          setProfileDropdownOpen(false);
+                          await signOut();
+                        }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-rose-300 hover:text-rose-200 hover:bg-rose-500/10 rounded-xl transition-colors text-left cursor-pointer"
+                      >
+                        <LogOut className="w-4 h-4 text-rose-400" />
+                        <span>Logout</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                to="/admin/login"
+                className="hidden lg:inline-flex items-center gap-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all whitespace-nowrap border border-slate-600 text-slate-300 px-3 py-1.5 hover:border-slate-400 hover:text-white"
+                aria-label="Admin Portal"
+              >
+                Login
+              </Link>
+            )}
 
             {/* Mobile hamburger */}
             <button
@@ -184,16 +297,66 @@ export const Navbar: React.FC = () => {
             >
               Join Us
             </Link>
-            <Link
-              to="/admin/login"
-              className="flex items-center justify-center gap-2 rounded-full text-[11px] font-bold uppercase tracking-wider border border-slate-700 text-slate-300 py-3 hover:border-slate-500 hover:text-white transition-all"
-            >
-              <Shield className="w-3.5 h-3.5" />
-              Admin Portal
-            </Link>
+
+            {isAdmin ? (
+              <div className="flex flex-col gap-2 pt-2 border-t border-slate-800/80">
+                <div className="flex items-center gap-3 px-3 py-2.5 bg-slate-900/60 rounded-xl border border-slate-800">
+                  <div className="w-10 h-10 rounded-full ring-2 ring-blue-500/30 overflow-hidden bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xs shrink-0">
+                    {profile?.avatar_url ? (
+                      <img src={profile.avatar_url} alt="Admin" className="w-full h-full object-cover" />
+                    ) : (
+                      <span>{getInitials(profile?.full_name)}</span>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold text-white truncate">{profile?.full_name || 'Student Admin'}</p>
+                    <p className="text-[10px] text-slate-400 truncate">{profile?.email || 'admin@cmritonline.ac.in'}</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      setIsEditProfileOpen(true);
+                    }}
+                    className="flex items-center justify-center gap-1.5 rounded-xl text-xs font-semibold bg-slate-800 text-slate-200 py-2.5 hover:bg-slate-700 transition-all cursor-pointer"
+                  >
+                    <UserCog className="w-3.5 h-3.5 text-blue-400" />
+                    Edit Profile
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      setMobileMenuOpen(false);
+                      await signOut();
+                    }}
+                    className="flex items-center justify-center gap-1.5 rounded-xl text-xs font-semibold bg-rose-600/20 border border-rose-500/30 text-rose-300 py-2.5 hover:bg-rose-600/30 transition-all cursor-pointer"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    Logout
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <Link
+                to="/admin/login"
+                className="flex items-center justify-center gap-2 rounded-full text-[11px] font-bold uppercase tracking-wider border border-slate-700 text-slate-300 py-3 hover:border-slate-500 hover:text-white transition-all"
+              >
+                <Shield className="w-3.5 h-3.5" />
+                Admin Portal
+              </Link>
+            )}
           </div>
         </div>
       )}
+
+      {/* Edit Profile Modal */}
+      <EditProfileModal
+        isOpen={isEditProfileOpen}
+        onClose={() => setIsEditProfileOpen(false)}
+      />
     </>
   );
 };
+

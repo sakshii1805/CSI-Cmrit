@@ -1,4 +1,5 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
+import { requireAdmin } from '../lib/authGuard';
 import { EventItem } from '../types';
 import { mockEvents } from '../data/events';
 
@@ -229,6 +230,11 @@ export const eventsService = {
    * Admin: Create new event
    */
   async createEvent(event: any): Promise<{ data?: EventItem; error?: string }> {
+    try {
+      await requireAdmin();
+    } catch (authErr: any) {
+      return { error: authErr.message || 'Unauthorized' };
+    }
     const title = event.title || 'Untitled Event';
     const slug = event.slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || ('event-' + Date.now());
     const isPublished = event.is_published !== false && event.status !== 'draft';
@@ -300,6 +306,11 @@ export const eventsService = {
    * Admin: Update an event
    */
   async updateEvent(id: string, updates: any): Promise<{ data?: EventItem; error?: string }> {
+    try {
+      await requireAdmin();
+    } catch (authErr: any) {
+      return { error: authErr.message || 'Unauthorized' };
+    }
     const current = getStoredEvents();
     const updated = current.map(e => {
       if (e.id === id || e.slug === id) {
@@ -341,6 +352,11 @@ export const eventsService = {
    * Admin: Toggle publish
    */
   async toggleEventPublish(id: string, currentStatus: 'draft' | 'published'): Promise<{ success: boolean; error?: string }> {
+    try {
+      await requireAdmin();
+    } catch (authErr: any) {
+      return { success: false, error: authErr.message || 'Unauthorized' };
+    }
     const newStatus = currentStatus === 'published' ? 'draft' : 'published';
     const current = getStoredEvents();
     const updated: EventItem[] = current.map(e => {
@@ -370,6 +386,11 @@ export const eventsService = {
    * Admin: Delete event permanently
    */
   async deleteEvent(id: string): Promise<{ success: boolean; error?: string }> {
+    try {
+      await requireAdmin();
+    } catch (authErr: any) {
+      return { success: false, error: authErr.message || 'Unauthorized' };
+    }
     saveDeletedEventId(id);
     const current = getStoredEvents();
     saveStoredEvents(current.filter(e => e.id !== id && e.slug !== id));
