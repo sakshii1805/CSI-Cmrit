@@ -30,6 +30,13 @@ const saveDeletedEventId = (id: string) => {
 const getStoredEvents = (): EventItem[] => {
   try {
     const deleted = getDeletedEventIds();
+    if (deleted.has('avishkaar-2026')) {
+      deleted.delete('avishkaar-2026');
+      try {
+        localStorage.setItem(DELETED_EVENTS_KEY, JSON.stringify(Array.from(deleted)));
+      } catch { }
+    }
+
     const raw = localStorage.getItem(STORAGE_KEY);
     let parsed: EventItem[] = raw ? JSON.parse(raw) : [];
 
@@ -37,10 +44,20 @@ const getStoredEvents = (): EventItem[] => {
     const forbiddenIds = new Set(['evt-01', 'evt-02', 'evt-03', 'mock-evt-1', 'mock-evt-2']);
     parsed = parsed.filter(e => !forbiddenIds.has(e.id) && !deleted.has(e.id));
 
-    // Ensure baseline Hackathon event (avishkaar-2026) is present ONLY if admin hasn't deleted it
-    const hasAvishkaar = parsed.some(e => e.id === 'avishkaar-2026' || e.slug === 'avishkaar-2026');
-    if (!hasAvishkaar && !deleted.has('avishkaar-2026') && mockEvents.length > 0) {
-      parsed.push(mockEvents[0]);
+    // Ensure baseline Hackathon event (avishkaar-2026) is always present with complete info
+    const avishkaarIndex = parsed.findIndex(e => e.id === 'avishkaar-2026' || e.slug === 'avishkaar-2026');
+    if (avishkaarIndex >= 0) {
+      parsed[avishkaarIndex] = {
+        ...mockEvents[0],
+        ...parsed[avishkaarIndex],
+        title: mockEvents[0].title,
+        shortDescription: mockEvents[0].shortDescription || parsed[avishkaarIndex].shortDescription,
+        image: mockEvents[0].image,
+        is_published: true,
+        status: 'published'
+      };
+    } else if (mockEvents.length > 0) {
+      parsed.unshift(mockEvents[0]);
     }
 
     try {
@@ -49,8 +66,7 @@ const getStoredEvents = (): EventItem[] => {
 
     return parsed;
   } catch {
-    const deleted = getDeletedEventIds();
-    return mockEvents.filter(m => !deleted.has(m.id));
+    return mockEvents;
   }
 };
 
@@ -88,6 +104,9 @@ export const eventsService = {
   async getPublishedEvents(): Promise<{ data: EventItem[]; error?: string }> {
     try {
       const deleted = getDeletedEventIds();
+      if (deleted.has('avishkaar-2026')) {
+        deleted.delete('avishkaar-2026');
+      }
       if (isSupabaseConfigured) {
         const { data, error } = await supabase
           .from('events')
@@ -100,15 +119,16 @@ export const eventsService = {
           const local = getStoredEvents().filter(e => e.is_published !== false && e.status !== 'draft');
           const remoteIds = new Set(mapped.map(m => m.id));
           const localOnly = local.filter(l => !remoteIds.has(l.id));
-          return { data: [...localOnly, ...mapped] };
+          const combined = [...localOnly, ...mapped];
+          return { data: combined.length > 0 ? combined : mockEvents };
         }
       }
 
       const local = getStoredEvents().filter(e => e.is_published !== false && e.status !== 'draft');
-      return { data: local };
+      return { data: local.length > 0 ? local : mockEvents };
     } catch (err: unknown) {
       const local = getStoredEvents().filter(e => e.is_published !== false && e.status !== 'draft');
-      return { data: local };
+      return { data: local.length > 0 ? local : mockEvents };
     }
   },
 

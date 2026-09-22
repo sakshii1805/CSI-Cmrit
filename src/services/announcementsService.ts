@@ -37,9 +37,24 @@ const getStoredAnnouncements = (): AnnouncementItem[] => {
     const forbiddenIds = new Set(['ann-02', 'ann-03', 'ann-04', 'ann-05', 'mock-ann-1', 'mock-ann-2', 'mock-ann-3']);
     parsed = parsed.filter(p => !forbiddenIds.has(p.id) && !deleted.has(p.id) && !p.title.includes('Membership Drive') && !p.title.includes('Call for Core Student Coordinators'));
 
-    // Ensure baseline announcements are present ONLY if admin hasn't deleted them
-    if (!parsed.some(p => p.id === 'ann-avishkar-2026') && !deleted.has('ann-avishkar-2026') && mockAnnouncements.length > 0) {
-      parsed.push(mockAnnouncements[0]);
+    // Ensure baseline announcements are present & updated
+    for (const item of mockAnnouncements) {
+      if (deleted.has(item.id)) {
+        deleted.delete(item.id);
+      }
+      const existingIdx = parsed.findIndex(p => p.id === item.id);
+      if (existingIdx >= 0) {
+        parsed[existingIdx] = {
+          ...item,
+          ...parsed[existingIdx],
+          category: item.category,
+          title: item.title,
+          is_published: true,
+          status: 'published'
+        };
+      } else {
+        parsed.push(item);
+      }
     }
 
     try {
@@ -98,10 +113,10 @@ export const announcementsService = {
       }
 
       const local = getStoredAnnouncements().filter(a => a.is_published !== false && a.status !== 'draft');
-      return { data: local };
+      return { data: local.length > 0 ? local : mockAnnouncements };
     } catch (err: unknown) {
       const local = getStoredAnnouncements().filter(a => a.is_published !== false && a.status !== 'draft');
-      return { data: local };
+      return { data: local.length > 0 ? local : mockAnnouncements };
     }
   },
 

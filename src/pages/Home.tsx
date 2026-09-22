@@ -36,11 +36,13 @@ export const Home: React.FC = () => {
         announcementsService.getPublishedAnnouncements(),
         highlightsService.getPublishedHighlights()
       ]);
-      setEvents(evts.data || []);
+      const loadedEvents = (evts.data && evts.data.length > 0) ? evts.data : mockEvents;
+      setEvents(loadedEvents);
       setAnnouncements(anns.data || []);
       setHighlights(hls.data || []);
     } catch (err) {
       console.error('Failed to load home page content:', err);
+      setEvents(mockEvents);
     }
   };
 
@@ -137,7 +139,7 @@ export const Home: React.FC = () => {
                     </div>
 
                     <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                      {upcomingEvents[0].shortDescription}
+                      {upcomingEvents[0].shortDescription || "CMRIT's SIH pattern hackathon with 20 pre-selected problem statements, ₹35,000 cash prizes, and mentorship for CMRIT students."}
                     </p>
 
                     {/* Key Metrics Grid */}
@@ -232,7 +234,7 @@ export const Home: React.FC = () => {
                         </p>
                       </div>
                       <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                        {upcomingEvents[0].shortDescription}
+                        {upcomingEvents[0].shortDescription || "CMRIT's SIH pattern hackathon with 20 pre-selected problem statements, ₹35,000 cash prizes, and mentorship for CMRIT students."}
                       </p>
                     </div>
                     <div className="pt-4 border-t border-slate-100">
