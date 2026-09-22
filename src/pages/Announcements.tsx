@@ -61,7 +61,7 @@ export const Announcements: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen bg-slate-50">
       {/* Top Banner */}
-      <section className="bg-slate-950 text-white py-14 sm:py-18 border-b border-slate-800 relative overflow-hidden">
+      <section className="bg-slate-950 text-white py-16 sm:py-20 border-b border-slate-800 relative overflow-hidden">
         <div
           className="absolute inset-0 opacity-5 pointer-events-none"
           style={{
@@ -74,7 +74,7 @@ export const Announcements: React.FC = () => {
             <span className="text-xs font-bold text-blue-400 uppercase tracking-widest bg-slate-900 border border-slate-800 px-3 py-1 rounded-md">
               Notice Board
             </span>
-            <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white mt-3 mb-3">
+            <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white mt-4 mb-4">
               Announcements
             </h1>
             <p className="text-base sm:text-lg text-slate-300 leading-relaxed font-normal">
@@ -87,7 +87,7 @@ export const Announcements: React.FC = () => {
       {/* Main Content */}
       <section className="py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex-1">
         {/* Search & Filter bar */}
-        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-subtle mb-8 space-y-4">
+<div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-subtle mb-8 space-y-4">
           <div className="flex flex-col sm:flex-row gap-3 items-center justify-between">
             <div className="relative w-full sm:max-w-md">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
@@ -109,35 +109,24 @@ export const Announcements: React.FC = () => {
               )}
             </div>
 
-            <div className="text-xs text-slate-500 font-medium">
-              {loading ? (
-                'Loading notices...'
-              ) : announcements.length === 0 ? (
-                'No announcements published yet'
-              ) : (
-                <><strong className="text-slate-800">{filteredAnnouncements.length}</strong> items</>
-              )}
-            </div>
-          </div>
-
-          {/* Category Filter Pills */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none pt-2 border-t border-slate-100">
-            <span className="text-xs font-semibold text-slate-400 mr-1 shrink-0 flex items-center gap-1">
-              <Filter className="w-3.5 h-3.5" />
-              Category:
-            </span>
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`text-xs px-3.5 py-1.5 rounded-full font-medium whitespace-nowrap transition-all ${selectedCategory === cat
-                  ? 'bg-blue-600 text-white shadow-xs font-semibold'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200/60'
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+              <span className="text-xs font-semibold text-slate-400 mr-1 shrink-0 flex items-center gap-1">
+                <Filter className="w-3.5 h-3.5" />
+                Category:
+              </span>
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`text-xs px-3.5 py-1.5 rounded-full font-medium whitespace-nowrap transition-all ${selectedCategory === cat
+                    ? 'bg-blue-600 text-white shadow-xs font-semibold'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200/60'
                   }`}
-              >
-                {cat}
-              </button>
-            ))}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 

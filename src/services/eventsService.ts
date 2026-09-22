@@ -78,7 +78,8 @@ const mapEvent = (e: any): EventItem => ({
   image_url: e.image_url || e.image || '',
   is_published: e.status ? e.status === 'published' : (e.is_published !== false),
   status: e.status || (e.is_published !== false ? 'published' : 'draft'),
-  registrationOpen: e.registrationOpen ?? (e.status === 'published' || e.is_published !== false)
+  registrationOpen: e.registrationOpen ?? (e.status === 'published' || e.is_published !== false),
+  shortDescription: e.shortDescription || e.description?.slice(0, 180) + (e.description && e.description.length > 180 ? '...' : '')
 });
 
 export const eventsService = {

@@ -13,6 +13,7 @@ export const mockEvents: EventItem[] = [
     mode: 'In-person',
 
     description: 'AVISHKAAR 2026 is the flagship annual technical festival and hackathon organized by the Computer Society of India (CSI) CMRIT Student Chapter. Geared towards "Ideas, Code, Impact" and "Think, Build, Solve", teams of 6 CMRIT students will tackle 20 pre-selected problem statements across technology and real-world innovation.',
+    shortDescription: 'Flagship annual technical festival and hackathon with 20 pre-selected problem statements, ₹35,000 prize pool, and industry mentorship from top tech companies.',
     highlights: [
       'Top 3 Cash Prizes: 1st Prize ₹20,000, 1st Runner-Up ₹10,000, 2nd Runner-Up ₹5,000 (Total ₹35,000 pool)',
       '20 Pre-selected Problem Statements across technology and innovation domains',
