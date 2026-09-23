@@ -17,7 +17,8 @@ import {
   Trash2,
   Shield,
   CheckCircle2,
-  AlertCircle
+  AlertCircle,
+  Pin
 } from 'lucide-react';
 import { HeroSection } from '../components/home/HeroSection';
 import { HomeAboutRow } from '../components/home/HomeAboutRow';
@@ -89,6 +90,17 @@ export const Home: React.FC = () => {
     }
   };
 
+  const handleTogglePinEvent = async (event: EventItem) => {
+    try {
+      const res = await eventsService.togglePinEvent(event.id);
+      if (!res.success) throw new Error(res.error);
+      showToast(res.is_pinned ? 'Event pinned to top!' : 'Event unpinned', 'success');
+      loadHomeContent();
+    } catch (err: any) {
+      showToast(err?.message || 'Failed to toggle pin', 'error');
+    }
+  };
+
   const upcomingEvents = events.slice(0, 4);
   const featuredEvent = upcomingEvents.length > 0 ? upcomingEvents[0] : null;
   const otherEvents = upcomingEvents.slice(1);
@@ -156,6 +168,19 @@ export const Home: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
+                      onClick={() => handleTogglePinEvent(upcomingEvents[0])}
+                      className={`inline-flex items-center gap-1 px-3 py-1 rounded-lg font-bold text-xs transition-colors ${
+                        upcomingEvents[0].is_pinned
+                          ? 'bg-amber-500 text-white'
+                          : 'bg-slate-800 hover:bg-amber-600 text-amber-300'
+                      }`}
+                      title={upcomingEvents[0].is_pinned ? 'Unpin Event' : 'Pin Event to Top (Admin)'}
+                    >
+                      <Pin className={`w-3 h-3 ${upcomingEvents[0].is_pinned ? 'fill-white' : ''}`} />
+                      <span>{upcomingEvents[0].is_pinned ? 'Pinned' : 'Pin'}</span>
+                    </button>
+                    <button
+                      type="button"
                       onClick={() => {
                         setEditingEvent(upcomingEvents[0]);
                         setEventModalOpen(true);
@@ -198,6 +223,12 @@ export const Home: React.FC = () => {
                   <div className="space-y-4">
                     {/* Badges */}
                     <div className="flex items-center gap-2.5 flex-wrap">
+                      {upcomingEvents[0].is_pinned && (
+                        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-500 text-white text-[10px] font-bold shadow-xs">
+                          <Pin className="w-2.5 h-2.5 fill-white" />
+                          Pinned Event
+                        </span>
+                      )}
                       <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold">
                         Registration Open
                       </span>
@@ -365,6 +396,21 @@ export const Home: React.FC = () => {
                             type="button"
                             onClick={(e) => {
                               e.preventDefault();
+                              handleTogglePinEvent(evt);
+                            }}
+                            className={`p-1 rounded-lg transition-colors ${
+                              evt.is_pinned
+                                ? 'text-amber-400 bg-amber-500/20'
+                                : 'text-slate-400 hover:text-amber-400 hover:bg-slate-800'
+                            }`}
+                            title={evt.is_pinned ? 'Unpin Event' : 'Pin Event to Top'}
+                          >
+                            <Pin className={`w-3.5 h-3.5 ${evt.is_pinned ? 'fill-amber-400' : ''}`} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
                               setEditingEvent(evt);
                               setEventModalOpen(true);
                             }}
@@ -397,9 +443,17 @@ export const Home: React.FC = () => {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent pointer-events-none" />
                         <div className="absolute top-3 inset-x-3 flex items-center justify-between pointer-events-none">
-                          <span className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-blue-600 text-white shadow-md">
-                            {evt.category}
-                          </span>
+                          <div className="flex items-center gap-1.5">
+                            {evt.is_pinned && (
+                              <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500 text-white shadow-md">
+                                <Pin className="w-2.5 h-2.5 fill-white" />
+                                Pinned
+                              </span>
+                            )}
+                            <span className="text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-blue-600 text-white shadow-md">
+                              {evt.category}
+                            </span>
+                          </div>
                         </div>
                         <div className="absolute bottom-3 left-3 flex items-center gap-1.5 text-xs text-white font-medium drop-shadow-md">
                           <Calendar className="w-3.5 h-3.5 text-blue-400 shrink-0" />
