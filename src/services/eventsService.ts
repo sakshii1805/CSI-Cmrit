@@ -95,9 +95,18 @@ const mapEvent = (e: any): EventItem => ({
   image_url: e.image_url || e.image || '',
   is_published: e.status ? e.status === 'published' : (e.is_published !== false),
   status: e.status || (e.is_published !== false ? 'published' : 'draft'),
+  is_pinned: Boolean(e.is_pinned),
   registrationOpen: e.registrationOpen ?? (e.status === 'published' || e.is_published !== false),
   shortDescription: e.shortDescription || e.description?.slice(0, 180) + (e.description && e.description.length > 180 ? '...' : '')
 });
+
+const sortEvents = (a: EventItem, b: EventItem) => {
+  if (a.is_pinned && !b.is_pinned) return -1;
+  if (!a.is_pinned && b.is_pinned) return 1;
+  const timeA = new Date(a.event_date || a.date || a.created_at || 0).getTime();
+  const timeB = new Date(b.event_date || b.date || b.created_at || 0).getTime();
+  return timeB - timeA;
+};
 
 export const eventsService = {
   /**
@@ -121,16 +130,16 @@ export const eventsService = {
           const local = getStoredEvents().filter(e => e.is_published !== false && e.status !== 'draft');
           const remoteIds = new Set(mapped.map(m => m.id));
           const localOnly = local.filter(l => !remoteIds.has(l.id));
-          const combined = [...localOnly, ...mapped];
-          return { data: combined.length > 0 ? combined : mockEvents };
+          const combined = [...localOnly, ...mapped].sort(sortEvents);
+          return { data: combined.length > 0 ? combined : (mockEvents as EventItem[]).sort(sortEvents) };
         }
       }
 
-      const local = getStoredEvents().filter(e => e.is_published !== false && e.status !== 'draft');
-      return { data: local.length > 0 ? local : mockEvents };
+      const local = getStoredEvents().filter(e => e.is_published !== false && e.status !== 'draft').sort(sortEvents);
+      return { data: local.length > 0 ? local : (mockEvents as EventItem[]).sort(sortEvents) };
     } catch (err: unknown) {
-      const local = getStoredEvents().filter(e => e.is_published !== false && e.status !== 'draft');
-      return { data: local.length > 0 ? local : mockEvents };
+      const local = getStoredEvents().filter(e => e.is_published !== false && e.status !== 'draft').sort(sortEvents);
+      return { data: local.length > 0 ? local : (mockEvents as EventItem[]).sort(sortEvents) };
     }
   },
 
@@ -380,6 +389,40 @@ export const eventsService = {
     }
 
     return { success: true };
+  },
+
+  /**
+   * Admin: Toggle Pin to Top (Authority for Admins only)
+   */
+  async togglePinEvent(id: string): Promise<{ success: boolean; is_pinned: boolean; error?: string }> {
+    try {
+      await requireAdmin();
+    } catch (authErr: any) {
+      return { success: false, is_pinned: false, error: authErr.message || 'Unauthorized: Only admins can pin events' };
+    }
+    const current = getStoredEvents();
+    let nextPinned = true;
+    const updated: EventItem[] = current.map(e => {
+      if (e.id === id || e.slug === id) {
+        nextPinned = !e.is_pinned;
+        return {
+          ...e,
+          is_pinned: nextPinned
+        };
+      }
+      return e;
+    });
+    saveStoredEvents(updated);
+
+    if (isSupabaseConfigured) {
+      try {
+        await supabase.from('events').update({ is_pinned: nextPinned } as any).or(`id.eq.${id},slug.eq.${id}`);
+      } catch (err) {
+        console.warn('Supabase togglePinEvent error:', err);
+      }
+    }
+
+    return { success: true, is_pinned: nextPinned };
   },
 
   /**

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, MapPin, ArrowRight, Clock, Pencil, Trash2, Shield, Eye, EyeOff } from 'lucide-react';
+import { Calendar, MapPin, ArrowRight, Clock, Pencil, Trash2, Shield, Eye, EyeOff, Pin } from 'lucide-react';
 import { EventItem } from '../../types';
 import { Badge } from '../common/Badge';
 import { useAuth } from '../../context/AuthContext';
@@ -10,13 +10,15 @@ interface EventCardProps {
   onEdit?: (event: EventItem) => void;
   onDelete?: (event: EventItem) => void;
   onTogglePublish?: (event: EventItem) => void;
+  onTogglePin?: (event: EventItem) => void;
 }
 
 export const EventCard: React.FC<EventCardProps> = ({
   event,
   onEdit,
   onDelete,
-  onTogglePublish
+  onTogglePublish,
+  onTogglePin
 }) => {
   const { isAdmin } = useAuth();
   const isPublished = event.status === 'published' || event.is_published !== false;
@@ -34,7 +36,13 @@ export const EventCard: React.FC<EventCardProps> = ({
   } as const;
 
   return (
-    <div className="group bg-white rounded-xl border border-slate-200/90 overflow-hidden shadow-subtle hover:shadow-card-hover transition-all duration-300 flex flex-col h-full relative">
+    <div
+      className={`group bg-white rounded-xl overflow-hidden transition-all duration-300 flex flex-col h-full relative ${
+        event.is_pinned
+          ? 'border-2 border-amber-300 ring-2 ring-amber-400/20 shadow-lg shadow-amber-500/10'
+          : 'border border-slate-200/90 shadow-subtle hover:shadow-card-hover'
+      }`}
+    >
       {/* Image container */}
       <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100">
         <img
@@ -46,7 +54,14 @@ export const EventCard: React.FC<EventCardProps> = ({
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent opacity-60 pointer-events-none" />
 
         {/* Category & Status badges */}
-        <div className="absolute top-3 left-3 flex items-center gap-2 flex-wrap pointer-events-none">
+        <div className="absolute top-3 left-3 flex items-center gap-1.5 flex-wrap pointer-events-none">
+          {event.is_pinned && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500 text-white shadow-xs">
+              <Pin className="w-2.5 h-2.5 fill-white" />
+              Pinned
+            </span>
+          )}
+
           <Badge variant={(categoryColorMap as Record<string, any>)[event.category] || 'blue'}>
             {event.category}
           </Badge>
@@ -67,6 +82,23 @@ export const EventCard: React.FC<EventCardProps> = ({
         {/* In-Place Admin Quick Actions (pinned top-right of image) */}
         {isAdmin && (
           <div className="absolute top-2.5 right-2.5 flex items-center gap-1 bg-slate-950/80 backdrop-blur-md p-1 rounded-lg border border-slate-700 shadow-md">
+            {onTogglePin && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onTogglePin(event);
+                }}
+                className={`p-1 rounded transition-colors ${
+                  event.is_pinned
+                    ? 'text-amber-400 bg-amber-500/20'
+                    : 'text-slate-300 hover:text-amber-400 hover:bg-slate-800'
+                }`}
+                title={event.is_pinned ? 'Unpin event' : 'Pin event to top (Admin)'}
+              >
+                <Pin className={`w-3.5 h-3.5 ${event.is_pinned ? 'fill-amber-400' : ''}`} />
+              </button>
+            )}
             {onTogglePublish && (
               <button
                 type="button"

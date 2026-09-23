@@ -78,7 +78,7 @@ export const GalleryDetail: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen bg-slate-50">
       {/* Header */}
-      <section className="bg-slate-950 text-white py-10 sm:py-14 border-b border-slate-800 relative overflow-hidden">
+      <section className="bg-slate-950 text-white pt-24 sm:pt-28 pb-10 sm:pb-14 border-b border-slate-800 relative overflow-hidden">
         <div
           className="absolute inset-0 opacity-5 pointer-events-none"
           style={{
@@ -132,17 +132,24 @@ export const GalleryDetail: React.FC = () => {
               <button
                 key={img.id}
                 onClick={() => openLightbox(idx)}
-                className="group relative aspect-[4/3] rounded-xl overflow-hidden bg-slate-200 shadow-subtle hover:shadow-lg transition-all duration-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-600"
+                className="group relative aspect-[4/3] sm:aspect-[16/10] rounded-2xl overflow-hidden bg-slate-950 shadow-subtle hover:shadow-xl transition-all duration-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-600 flex items-center justify-center border border-slate-200/80"
               >
+                {/* Soft ambient blur backdrop */}
+                <img
+                  src={img.image_url}
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute inset-0 w-full h-full object-cover blur-xl opacity-25 scale-110 pointer-events-none"
+                />
                 <img
                   src={img.image_url}
                   alt={img.caption || `Photo ${idx + 1}`}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="relative max-h-full max-w-full object-contain z-10 transition-transform duration-500 group-hover:scale-105"
                   loading="lazy"
                 />
-                <div className="absolute inset-0 bg-slate-950/0 group-hover:bg-slate-950/20 transition-colors" />
+                <div className="absolute inset-0 bg-slate-950/0 group-hover:bg-slate-950/20 transition-colors z-20" />
                 {img.caption && (
-                  <div className="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-slate-950/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute bottom-0 inset-x-0 p-3 bg-gradient-to-t from-slate-950/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity z-20">
                     <p className="text-[11px] text-white font-medium line-clamp-2">{img.caption}</p>
                   </div>
                 )}

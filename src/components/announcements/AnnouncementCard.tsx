@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, ArrowRight, Bell, Pencil, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Calendar, ArrowRight, Bell, Pencil, Trash2, Eye, EyeOff, Pin } from 'lucide-react';
 import { AnnouncementItem } from '../../types';
 import { Badge } from '../common/Badge';
 import { useAuth } from '../../context/AuthContext';
@@ -10,13 +10,15 @@ interface AnnouncementCardProps {
   onEdit?: (announcement: AnnouncementItem) => void;
   onDelete?: (announcement: AnnouncementItem) => void;
   onTogglePublish?: (announcement: AnnouncementItem) => void;
+  onTogglePin?: (announcement: AnnouncementItem) => void;
 }
 
 export const AnnouncementCard: React.FC<AnnouncementCardProps> = ({
   announcement,
   onEdit,
   onDelete,
-  onTogglePublish
+  onTogglePublish,
+  onTogglePin
 }) => {
   const { isAdmin } = useAuth();
   const isPublished = announcement.status === 'published' || announcement.is_published !== false;
@@ -31,10 +33,23 @@ export const AnnouncementCard: React.FC<AnnouncementCardProps> = ({
   } as const;
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200/90 p-5 shadow-subtle hover:shadow-card-hover transition-all duration-300 flex flex-col group h-full relative">
+    <div
+      className={`bg-white rounded-xl p-5 transition-all duration-300 flex flex-col group h-full relative ${
+        announcement.is_pinned
+          ? 'border-2 border-amber-300 ring-2 ring-amber-400/20 shadow-lg shadow-amber-500/10'
+          : 'border border-slate-200/90 shadow-subtle hover:shadow-card-hover'
+      }`}
+    >
       {/* Top row: Category & Date + Admin Actions */}
       <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-1.5 flex-wrap">
+          {announcement.is_pinned && (
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 border border-amber-300 px-2 py-0.5 rounded shadow-xs">
+              <Pin className="w-3 h-3 fill-amber-500 text-amber-600" />
+              Pinned
+            </span>
+          )}
+
           <Badge variant={(categoryVariantMap as Record<string, any>)[announcement.category] || 'slate'}>
             {announcement.category}
           </Badge>
@@ -60,9 +75,26 @@ export const AnnouncementCard: React.FC<AnnouncementCardProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Admin Controls */}
+          {/* Admin Controls (Only visible and accessible to Admins) */}
           {isAdmin && (
             <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
+              {onTogglePin && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onTogglePin(announcement);
+                  }}
+                  className={`p-1 rounded transition-colors ${
+                    announcement.is_pinned
+                      ? 'text-amber-600 bg-amber-100'
+                      : 'text-slate-400 hover:text-amber-600 hover:bg-slate-200'
+                  }`}
+                  title={announcement.is_pinned ? 'Unpin notice' : 'Pin notice to top (Admin)'}
+                >
+                  <Pin className={`w-3.5 h-3.5 ${announcement.is_pinned ? 'fill-amber-600' : ''}`} />
+                </button>
+              )}
               {onTogglePublish && (
                 <button
                   type="button"

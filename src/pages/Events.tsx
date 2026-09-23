@@ -100,6 +100,17 @@ export const Events: React.FC = () => {
     }
   };
 
+  const handleTogglePin = async (event: EventItem) => {
+    try {
+      const res = await eventsService.togglePinEvent(event.id);
+      if (!res.success) throw new Error(res.error);
+      showToast(res.is_pinned ? 'Event pinned to top!' : 'Event unpinned', 'success');
+      fetchEvents();
+    } catch (err: any) {
+      showToast(err?.message || 'Failed to toggle pin', 'error');
+    }
+  };
+
   const filteredEvents = useMemo(() => {
     return events
       .filter((event) => {
@@ -124,6 +135,8 @@ export const Events: React.FC = () => {
         return true;
       })
       .sort((a, b) => {
+        if (a.is_pinned && !b.is_pinned) return -1;
+        if (!a.is_pinned && b.is_pinned) return 1;
         const timeA = new Date(a.event_date || a.date || 0).getTime();
         const timeB = new Date(b.event_date || b.date || 0).getTime();
         return timeB - timeA;
@@ -133,7 +146,7 @@ export const Events: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen bg-slate-50">
       {/* Header Banner */}
-      <section className="bg-slate-950 text-white py-14 sm:py-20 border-b border-slate-800 relative overflow-hidden">
+      <section className="bg-slate-950 text-white pt-24 sm:pt-28 pb-12 sm:pb-16 border-b border-slate-800 relative overflow-hidden">
         <div
           className="absolute inset-0 opacity-5 pointer-events-none"
           style={{
@@ -264,6 +277,7 @@ export const Events: React.FC = () => {
                 }}
                 onDelete={(e) => setDeletingEvent(e)}
                 onTogglePublish={handleTogglePublish}
+                onTogglePin={isAdmin ? handleTogglePin : undefined}
               />
             ))}
           </div>

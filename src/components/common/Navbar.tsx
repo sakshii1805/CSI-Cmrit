@@ -62,15 +62,20 @@ export const Navbar: React.FC = () => {
     { name: 'Contact', path: '/contact' },
   ];
 
+  const isHomePage = location.pathname === '/';
+
   return (
     <>
       {/* Floating navbar wrapper */}
-      <div className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-4 px-4 md:px-10 pointer-events-none">
+      <div className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-3 sm:pt-4 px-3 sm:px-4 md:px-8 pointer-events-none">
         <nav
-          className={`flex items-center justify-between w-full max-w-7xl pointer-events-auto transition-all duration-500 ease-in-out px-5 py-2.5 rounded-2xl ${isScrolled
-            ? 'bg-slate-950 shadow-lg shadow-black/30'
-            : 'bg-transparent'
-            }`}
+          className={`flex items-center justify-between w-full max-w-7xl pointer-events-auto transition-all duration-300 ease-in-out px-4 sm:px-5 py-2 sm:py-2.5 rounded-2xl border ${
+            isScrolled
+              ? 'bg-slate-950/95 backdrop-blur-md border-slate-800/80 shadow-xl shadow-black/40'
+              : isHomePage
+                ? 'bg-transparent border-transparent'
+                : 'bg-slate-950/90 backdrop-blur-md border-slate-800/80 shadow-lg shadow-black/30'
+          }`}
         >
           {/* Left: Logo + college info (visible at top, collapses on scroll) */}
           <Link

@@ -62,6 +62,7 @@ export interface EventItem {
   registrationOpen?: boolean;
   is_featured?: boolean;
   is_published?: boolean;
+  is_pinned?: boolean;
   expectations?: string[];
   galleryImages?: string[];
   speaker?: {
@@ -106,6 +107,7 @@ export interface AnnouncementItem {
   tags?: string[];
   isUrgent?: boolean;
   is_published?: boolean;
+  is_pinned?: boolean;
 }
 
 // --- Chapter Highlights / Gallery ---
@@ -138,6 +140,7 @@ export interface ChapterHighlightItem {
   description?: string;
   location?: string;
   is_published?: boolean;
+  is_pinned?: boolean;
 }
 
 export type GalleryItem = ChapterHighlightItem;
@@ -153,6 +156,7 @@ export interface GalleryPost {
   event_date?: string | null;
   tags?: string[];
   status: ContentStatus;
+  is_pinned?: boolean;
   created_by?: string | null;
   created_at: string;
   updated_at?: string;

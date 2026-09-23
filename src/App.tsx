@@ -120,7 +120,7 @@ const PublicLayout: React.FC = () => {
 // 404 Not Found Page
 const NotFound: React.FC = () => {
   return (
-    <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-center">
+    <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-center pt-28">
       <div className="w-16 h-16 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-2xl mb-4 border border-blue-100">
         404
       </div>

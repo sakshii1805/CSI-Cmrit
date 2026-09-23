@@ -118,11 +118,11 @@ export const AnnouncementDetails: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 pb-20">
       {/* Top Breadcrumbs & Admin Actions */}
-      <div className="bg-white border-b border-slate-200/80 py-4">
+      <section className="bg-slate-950 text-white pt-24 sm:pt-28 pb-6 sm:pb-8 border-b border-slate-800 relative">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between flex-wrap gap-3">
           <button
             onClick={() => navigate('/announcements')}
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-blue-600 transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Back to Announcements</span>
@@ -131,14 +131,14 @@ export const AnnouncementDetails: React.FC = () => {
           <div className="flex items-center gap-2">
             {/* In-Place Admin Controls */}
             {isAdmin && (
-              <div className="flex items-center gap-2 pr-3 border-r border-slate-200">
+              <div className="flex items-center gap-2 pr-3 border-r border-slate-800">
                 <button
                   type="button"
                   onClick={handleTogglePublish}
-                  className={`inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                     isPublished
-                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100'
-                      : 'bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100'
+                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30'
+                      : 'bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30'
                   }`}
                 >
                   {isPublished ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
@@ -148,7 +148,7 @@ export const AnnouncementDetails: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setModalOpen(true)}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-xs"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-xs"
                 >
                   <Pencil className="w-3.5 h-3.5" />
                   <span>Edit Notice</span>
@@ -157,7 +157,7 @@ export const AnnouncementDetails: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setDeleteDialogOpen(true)}
-                  className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-semibold transition-all"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-semibold transition-all"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                   <span>Delete</span>
@@ -167,14 +167,14 @@ export const AnnouncementDetails: React.FC = () => {
 
             <button
               onClick={handleShare}
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 border border-slate-200 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 hover:text-white hover:bg-slate-800 text-xs font-medium border border-slate-800 transition-colors"
             >
               <Share2 className="w-3.5 h-3.5" />
               <span>Share</span>
             </button>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Main Container */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 w-full space-y-10">

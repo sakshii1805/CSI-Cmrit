@@ -28,6 +28,14 @@ const saveDeletedHighlightId = (id: string) => {
   } catch { }
 };
 
+const sortByLatest = (a: ChapterHighlightItem, b: ChapterHighlightItem) => {
+  if (a.is_pinned && !b.is_pinned) return -1;
+  if (!a.is_pinned && b.is_pinned) return 1;
+  const timeA = new Date(a.created_at || a.event_date || a.date || 0).getTime();
+  const timeB = new Date(b.created_at || b.event_date || b.date || 0).getTime();
+  return timeB - timeA;
+};
+
 const getStoredHighlights = (): ChapterHighlightItem[] => {
   try {
     const deleted = getDeletedHighlightIds();
@@ -42,10 +50,10 @@ const getStoredHighlights = (): ChapterHighlightItem[] => {
         filtered.push(m as any);
       }
     }
-    return filtered;
+    return filtered.sort(sortByLatest);
   } catch {
     const deleted = getDeletedHighlightIds();
-    return (mockGallery as any[]).filter(m => !deleted.has(m.id));
+    return (mockGallery as any[]).filter(m => !deleted.has(m.id)).sort(sortByLatest);
   }
 };
 
@@ -70,7 +78,8 @@ const mapHighlight = (h: any): ChapterHighlightItem => ({
   description: h.caption || h.description || h.title,
   caption: h.caption || h.description || h.title,
   is_published: h.status ? h.status === 'published' : (h.is_published !== false),
-  status: h.status || (h.is_published !== false ? 'published' : 'draft')
+  status: h.status || (h.is_published !== false ? 'published' : 'draft'),
+  is_pinned: Boolean(h.is_pinned)
 });
 
 export const highlightsService = {
@@ -260,6 +269,40 @@ export const highlightsService = {
   async toggleHighlightPublish(id: string, currentStatus: 'draft' | 'published'): Promise<{ success: boolean; error?: string }> {
     const newStatus = currentStatus === 'published' ? 'draft' : 'published';
     return this.updateHighlightStatus(id, newStatus);
+  },
+
+  /**
+   * Admin: Toggle Pin to Top (Authority for Admins only)
+   */
+  async togglePinHighlight(id: string): Promise<{ success: boolean; is_pinned: boolean; error?: string }> {
+    try {
+      await requireAdmin();
+    } catch (authErr: any) {
+      return { success: false, is_pinned: false, error: authErr.message || 'Unauthorized: Only admins can pin highlights' };
+    }
+    const current = getStoredHighlights();
+    let nextPinned = true;
+    const updated = current.map(h => {
+      if (h.id === id) {
+        nextPinned = !h.is_pinned;
+        return {
+          ...h,
+          is_pinned: nextPinned
+        };
+      }
+      return h;
+    });
+    saveStoredHighlights(updated);
+
+    if (isSupabaseConfigured) {
+      try {
+        await supabase.from('highlights').update({ is_pinned: nextPinned } as any).eq('id', id);
+      } catch (err) {
+        console.warn('Supabase highlight togglePin error:', err);
+      }
+    }
+
+    return { success: true, is_pinned: nextPinned };
   },
 
   /**

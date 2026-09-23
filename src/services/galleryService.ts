@@ -3,6 +3,14 @@ import { requireAdmin } from '../lib/authGuard';
 import { GalleryPost, GalleryImage } from '../types';
 import { highlightsService } from './highlightsService';
 
+const sortGalleryPosts = (a: GalleryPost, b: GalleryPost) => {
+  if (a.is_pinned && !b.is_pinned) return -1;
+  if (!a.is_pinned && b.is_pinned) return 1;
+  const timeA = new Date(a.created_at || a.event_date || 0).getTime();
+  const timeB = new Date(b.created_at || b.event_date || 0).getTime();
+  return timeB - timeA;
+};
+
 export const galleryService = {
   /**
    * Public: Fetch all published gallery posts ordered by created_at desc
@@ -19,9 +27,11 @@ export const galleryService = {
         if (!error && data && data.length > 0) {
           const mapped = (data || []).map((p: any) => ({
             ...p,
+            is_pinned: Boolean(p.is_pinned),
             image_count: p.gallery_images?.length || 0,
             gallery_images: undefined,
           })) as GalleryPost[];
+          mapped.sort(sortGalleryPosts);
           return { data: mapped };
         }
       }
@@ -36,6 +46,7 @@ export const galleryService = {
         cover_image: h.imageUrl || h.image_url || '',
         event_date: h.event_date || h.date,
         description: h.description || h.caption,
+        is_pinned: Boolean(h.is_pinned),
         image_count: 1,
         images: [{
           id: `img-${h.id}`,
@@ -49,6 +60,9 @@ export const galleryService = {
         created_at: h.created_at || new Date().toISOString(),
         updated_at: h.updated_at || h.created_at || new Date().toISOString()
       }));
+
+      // Sort with pinned items first, then latest stack order
+      mappedFromHighlights.sort(sortGalleryPosts);
 
       return { data: mappedFromHighlights };
     } catch (err: unknown) {
@@ -223,5 +237,28 @@ export const galleryService = {
     } catch (err: any) {
       return { success: false, error: err.message || 'Unauthorized' };
     }
+  },
+
+  /**
+   * Admin: Toggle Pin to Top (Authority for Admins only)
+   */
+  async togglePinGalleryPost(id: string): Promise<{ success: boolean; is_pinned: boolean; error?: string }> {
+    try {
+      await requireAdmin();
+    } catch (authErr: any) {
+      return { success: false, is_pinned: false, error: authErr.message || 'Unauthorized: Only admins can pin posts' };
+    }
+
+    const res = await highlightsService.togglePinHighlight(id);
+
+    if (isSupabaseConfigured) {
+      try {
+        await supabase.from('gallery_posts').update({ is_pinned: res.is_pinned } as any).or(`id.eq.${id},slug.eq.${id}`);
+      } catch (err) {
+        console.warn('Supabase togglePinGalleryPost error:', err);
+      }
+    }
+
+    return res;
   }
 };

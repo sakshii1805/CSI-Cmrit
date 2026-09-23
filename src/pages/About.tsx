@@ -42,7 +42,7 @@ export const About: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <section className="bg-slate-950 text-white py-16 sm:py-20 border-b border-slate-800 relative overflow-hidden">
+      <section className="bg-slate-950 text-white pt-24 sm:pt-28 pb-14 sm:pb-16 border-b border-slate-800 relative overflow-hidden">
         <div
           className="absolute inset-0 opacity-5 pointer-events-none"
           style={{

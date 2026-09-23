@@ -87,8 +87,17 @@ const mapAnnouncement = (a: any): AnnouncementItem => ({
   tags: a.tags && a.tags.length > 0 ? a.tags : [a.category || 'General'],
   priority: a.priority || (a.isUrgent ? 'high' : 'medium'),
   is_published: a.status ? a.status === 'published' : (a.is_published !== false),
-  status: a.status || (a.is_published !== false ? 'published' : 'draft')
+  status: a.status || (a.is_published !== false ? 'published' : 'draft'),
+  is_pinned: Boolean(a.is_pinned)
 });
+
+const sortAnnouncements = (a: AnnouncementItem, b: AnnouncementItem) => {
+  if (a.is_pinned && !b.is_pinned) return -1;
+  if (!a.is_pinned && b.is_pinned) return 1;
+  const timeA = new Date(a.published_at || a.created_at || a.date || 0).getTime();
+  const timeB = new Date(b.published_at || b.created_at || b.date || 0).getTime();
+  return timeB - timeA;
+};
 
 export const announcementsService = {
   /**
@@ -109,15 +118,16 @@ export const announcementsService = {
           const local = getStoredAnnouncements().filter(a => a.is_published !== false && a.status !== 'draft');
           const remoteIds = new Set(mapped.map(m => m.id));
           const localOnly = local.filter(l => !remoteIds.has(l.id));
-          return { data: [...localOnly, ...mapped] };
+          const combined = [...localOnly, ...mapped].sort(sortAnnouncements);
+          return { data: combined };
         }
       }
 
-      const local = getStoredAnnouncements().filter(a => a.is_published !== false && a.status !== 'draft');
-      return { data: local.length > 0 ? local : mockAnnouncements };
+      const local = getStoredAnnouncements().filter(a => a.is_published !== false && a.status !== 'draft').sort(sortAnnouncements);
+      return { data: local.length > 0 ? local : (mockAnnouncements as AnnouncementItem[]).sort(sortAnnouncements) };
     } catch (err: unknown) {
-      const local = getStoredAnnouncements().filter(a => a.is_published !== false && a.status !== 'draft');
-      return { data: local.length > 0 ? local : mockAnnouncements };
+      const local = getStoredAnnouncements().filter(a => a.is_published !== false && a.status !== 'draft').sort(sortAnnouncements);
+      return { data: local.length > 0 ? local : (mockAnnouncements as AnnouncementItem[]).sort(sortAnnouncements) };
     }
   },
 
@@ -342,6 +352,40 @@ export const announcementsService = {
     }
 
     return { success: true };
+  },
+
+  /**
+   * Admin: Toggle Pin to Top (Authority for Admins only)
+   */
+  async togglePinAnnouncement(id: string): Promise<{ success: boolean; is_pinned: boolean; error?: string }> {
+    try {
+      await requireAdmin();
+    } catch (authErr: any) {
+      return { success: false, is_pinned: false, error: authErr.message || 'Unauthorized: Only admins can pin announcements' };
+    }
+    const current = getStoredAnnouncements();
+    let nextPinned = true;
+    const updated = current.map(a => {
+      if (a.id === id || a.slug === id) {
+        nextPinned = !a.is_pinned;
+        return {
+          ...a,
+          is_pinned: nextPinned
+        };
+      }
+      return a;
+    });
+    saveStoredAnnouncements(updated);
+
+    if (isSupabaseConfigured) {
+      try {
+        await supabase.from('announcements').update({ is_pinned: nextPinned } as any).or(`id.eq.${id},slug.eq.${id}`);
+      } catch (err) {
+        console.warn('Supabase togglePinAnnouncement error:', err);
+      }
+    }
+
+    return { success: true, is_pinned: nextPinned };
   },
 
   /**

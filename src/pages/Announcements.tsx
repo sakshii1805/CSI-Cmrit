@@ -82,26 +82,45 @@ export const Announcements: React.FC = () => {
     }
   };
 
+  const handleTogglePin = async (ann: AnnouncementItem) => {
+    try {
+      const res = await announcementsService.togglePinAnnouncement(ann.id);
+      if (!res.success) throw new Error(res.error);
+      showToast(res.is_pinned ? 'Notice pinned to top!' : 'Notice unpinned', 'success');
+      loadAnnouncements();
+    } catch (err: any) {
+      showToast(err?.message || 'Failed to toggle pin', 'error');
+    }
+  };
+
   const filteredAnnouncements = useMemo(() => {
-    return announcements.filter((ann) => {
-      if (selectedCategory !== 'All' && ann.category !== selectedCategory) {
-        return false;
-      }
-      if (searchQuery.trim() !== '') {
-        const q = searchQuery.toLowerCase();
-        const matchesTitle = ann.title.toLowerCase().includes(q);
-        const matchesSummary = (ann.summary || '').toLowerCase().includes(q);
-        const matchesTags = (ann.tags || []).some((t) => t.toLowerCase().includes(q));
-        return matchesTitle || matchesSummary || matchesTags;
-      }
-      return true;
-    });
+    return announcements
+      .filter((ann) => {
+        if (selectedCategory !== 'All' && ann.category !== selectedCategory) {
+          return false;
+        }
+        if (searchQuery.trim() !== '') {
+          const q = searchQuery.toLowerCase();
+          const matchesTitle = ann.title.toLowerCase().includes(q);
+          const matchesSummary = (ann.summary || '').toLowerCase().includes(q);
+          const matchesTags = (ann.tags || []).some((t) => t.toLowerCase().includes(q));
+          return matchesTitle || matchesSummary || matchesTags;
+        }
+        return true;
+      })
+      .sort((a, b) => {
+        if (a.is_pinned && !b.is_pinned) return -1;
+        if (!a.is_pinned && b.is_pinned) return 1;
+        const timeA = new Date(a.published_at || a.created_at || a.date || 0).getTime();
+        const timeB = new Date(b.published_at || b.created_at || b.date || 0).getTime();
+        return timeB - timeA;
+      });
   }, [announcements, searchQuery, selectedCategory]);
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50">
       {/* Top Banner */}
-      <section className="bg-slate-950 text-white py-16 sm:py-20 border-b border-slate-800 relative overflow-hidden">
+      <section className="bg-slate-950 text-white pt-24 sm:pt-28 pb-14 sm:pb-16 border-b border-slate-800 relative overflow-hidden">
         <div
           className="absolute inset-0 opacity-5 pointer-events-none"
           style={{
@@ -233,6 +252,7 @@ export const Announcements: React.FC = () => {
                 }}
                 onDelete={(a) => setDeletingAnnouncement(a)}
                 onTogglePublish={handleTogglePublish}
+                onTogglePin={isAdmin ? handleTogglePin : undefined}
               />
             ))}
           </div>
