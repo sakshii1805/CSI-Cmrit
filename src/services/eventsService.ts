@@ -51,6 +51,9 @@ const getStoredEvents = (): EventItem[] => {
       parsed[avishkaarIndex] = {
         ...mockEvents[0],
         ...parsed[avishkaarIndex],
+        galleryImages: (parsed[avishkaarIndex].galleryImages && parsed[avishkaarIndex].galleryImages.length > 0)
+          ? parsed[avishkaarIndex].galleryImages
+          : mockEvents[0].galleryImages,
         title: mockEvents[0].title,
         shortDescription: mockEvents[0].shortDescription || parsed[avishkaarIndex].shortDescription,
         image: mockEvents[0].image,
@@ -83,22 +86,30 @@ const saveStoredEvents = (items: EventItem[]) => {
 };
 
 /** Normalize DB row to frontend EventItem */
-const mapEvent = (e: any): EventItem => ({
-  ...e,
-  date: e.date || (e.event_date ? new Date(e.event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Date TBA'),
-  event_date: e.event_date || e.date || new Date().toISOString().split('T')[0],
-  time: e.event_time || e.time || 'Time TBA',
-  event_time: e.event_time || e.time || 'Time TBA',
-  venue: e.venue || e.location || 'CMRIT Campus, Bengaluru',
-  location: e.venue || e.location || 'CMRIT Campus, Bengaluru',
-  image: e.image_url || e.image || '',
-  image_url: e.image_url || e.image || '',
-  is_published: e.status ? e.status === 'published' : (e.is_published !== false),
-  status: e.status || (e.is_published !== false ? 'published' : 'draft'),
-  is_pinned: Boolean(e.is_pinned),
-  registrationOpen: e.registrationOpen ?? (e.status === 'published' || e.is_published !== false),
-  shortDescription: e.shortDescription || e.description?.slice(0, 180) + (e.description && e.description.length > 180 ? '...' : '')
-});
+const mapEvent = (e: any): EventItem => {
+  const galleryImages = Array.isArray(e.galleryImages) && e.galleryImages.length > 0
+    ? e.galleryImages
+    : (e.image || e.image_url ? [e.image || e.image_url] : []);
+  const primaryImage = e.image || e.image_url || galleryImages[0] || '';
+
+  return {
+    ...e,
+    date: e.date || (e.event_date ? new Date(e.event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Date TBA'),
+    event_date: e.event_date || e.date || new Date().toISOString().split('T')[0],
+    time: e.event_time || e.time || 'Time TBA',
+    event_time: e.event_time || e.time || 'Time TBA',
+    venue: e.venue || e.location || 'CMRIT Campus, Bengaluru',
+    location: e.venue || e.location || 'CMRIT Campus, Bengaluru',
+    image: primaryImage,
+    image_url: primaryImage,
+    galleryImages,
+    is_published: e.status ? e.status === 'published' : (e.is_published !== false),
+    status: e.status || (e.is_published !== false ? 'published' : 'draft'),
+    is_pinned: Boolean(e.is_pinned),
+    registrationOpen: e.registrationOpen ?? (e.status === 'published' || e.is_published !== false),
+    shortDescription: e.shortDescription || e.description?.slice(0, 180) + (e.description && e.description.length > 180 ? '...' : '')
+  };
+};
 
 const sortEvents = (a: EventItem, b: EventItem) => {
   if (a.is_pinned && !b.is_pinned) return -1;
@@ -263,6 +274,9 @@ export const eventsService = {
       shortDescription: event.shortDescription || (event.description ? event.description.slice(0, 150) : ''),
       image: event.image || event.image_url || '',
       image_url: event.image || event.image_url || '',
+      galleryImages: Array.isArray(event.galleryImages) && event.galleryImages.length > 0
+        ? event.galleryImages
+        : (event.image || event.image_url ? [event.image || event.image_url] : []),
       organizer: event.organizer || 'CSI CMRIT',
       highlights: Array.isArray(event.highlights) ? event.highlights : [],
       registrationOpen: event.registrationOpen !== false,
@@ -328,6 +342,7 @@ export const eventsService = {
         if (updates.time) { next.event_time = updates.time; next.time = updates.time; }
         if (updates.location) { next.venue = updates.location; next.location = updates.location; }
         if (updates.image) { next.image_url = updates.image; next.image = updates.image; }
+        if (updates.galleryImages) { next.galleryImages = updates.galleryImages; }
         if (updates.is_published !== undefined) {
           next.status = updates.is_published ? 'published' : 'draft';
         }

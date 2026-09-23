@@ -69,18 +69,25 @@ const saveStoredHighlights = (items: ChapterHighlightItem[]) => {
 };
 
 /** Map DB columns to frontend display properties */
-const mapHighlight = (h: any): ChapterHighlightItem => ({
-  ...h,
-  imageUrl: h.image_url || h.imageUrl,
-  image_url: h.image_url || h.imageUrl,
-  date: h.event_date || h.date || 'Chapter Activity',
-  event_date: h.event_date || h.date || new Date().toISOString().split('T')[0],
-  description: h.caption || h.description || h.title,
-  caption: h.caption || h.description || h.title,
-  is_published: h.status ? h.status === 'published' : (h.is_published !== false),
-  status: h.status || (h.is_published !== false ? 'published' : 'draft'),
-  is_pinned: Boolean(h.is_pinned)
-});
+const mapHighlight = (h: any): ChapterHighlightItem => {
+  const imagesList = Array.isArray(h.images) && h.images.length > 0
+    ? h.images
+    : [h.image_url || h.imageUrl].filter(Boolean);
+
+  return {
+    ...h,
+    imageUrl: h.image_url || h.imageUrl || imagesList[0] || '',
+    image_url: h.image_url || h.imageUrl || imagesList[0] || '',
+    images: imagesList,
+    date: h.event_date || h.date || 'Chapter Activity',
+    event_date: h.event_date || h.date || new Date().toISOString().split('T')[0],
+    description: h.caption || h.description || h.title,
+    caption: h.caption || h.description || h.title,
+    is_published: h.status ? h.status === 'published' : (h.is_published !== false),
+    status: h.status || (h.is_published !== false ? 'published' : 'draft'),
+    is_pinned: Boolean(h.is_pinned)
+  };
+};
 
 export const highlightsService = {
   /**
@@ -158,6 +165,10 @@ export const highlightsService = {
     } catch (authErr: any) {
       return { error: authErr.message || 'Unauthorized' };
     }
+    const imagesList = Array.isArray(item.images) && item.images.length > 0
+      ? item.images
+      : [item.imageUrl || item.image_url].filter(Boolean);
+
     const newItem: ChapterHighlightItem = {
       id: item.id || `hl-${Date.now()}`,
       title: item.title || 'Chapter Highlight',
@@ -166,8 +177,9 @@ export const highlightsService = {
       date: item.date || item.event_date || new Date().toISOString().split('T')[0],
       caption: item.caption || item.description || item.title || '',
       description: item.caption || item.description || item.title || '',
-      image_url: item.imageUrl || item.image_url || '',
-      imageUrl: item.imageUrl || item.image_url || '',
+      image_url: imagesList[0] || item.imageUrl || item.image_url || '',
+      imageUrl: imagesList[0] || item.imageUrl || item.image_url || '',
+      images: imagesList,
       status: item.is_published !== false && item.status !== 'draft' ? 'published' : 'draft',
       is_published: item.is_published !== false && item.status !== 'draft',
       created_at: new Date().toISOString()
@@ -194,7 +206,7 @@ export const highlightsService = {
           .single();
 
         if (!error && data) {
-          return { data: mapHighlight(data) };
+          return { data: mapHighlight({ ...data, images: imagesList }) };
         }
       } catch (err) {
         console.warn('Supabase highlight insert error:', err);
@@ -217,8 +229,17 @@ export const highlightsService = {
     const updated = current.map(h => {
       if (h.id === id) {
         const next = { ...h, ...updates };
-        if (updates.imageUrl) next.image_url = updates.imageUrl;
-        if (updates.image_url) next.imageUrl = updates.image_url;
+        if (updates.images && Array.isArray(updates.images)) {
+          next.images = updates.images;
+          if (updates.images[0]) {
+            next.image_url = updates.images[0];
+            next.imageUrl = updates.images[0];
+          }
+        } else if (updates.imageUrl) {
+          next.image_url = updates.imageUrl;
+          next.imageUrl = updates.imageUrl;
+          next.images = [updates.imageUrl];
+        }
         if (updates.date) next.event_date = updates.date;
         if (updates.event_date) next.date = updates.event_date;
         if (updates.description) next.caption = updates.description;

@@ -35,6 +35,53 @@
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(226, 232, 240, 0.8);
   }
+
+  @keyframes modalSlideDown {
+    0% {
+      opacity: 0;
+      transform: translateY(-55px) scale(0.94);
+    }
+    65% {
+      opacity: 1;
+      transform: translateY(4px) scale(1.008);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes modalSlideUpExit {
+    0% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-35px) scale(0.96);
+    }
+  }
+
+  @keyframes modalBackdropFade {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
+  .animate-modal-slide-down {
+    animation: modalSlideDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-modal-exit {
+    animation: modalSlideUpExit 0.22s ease-in forwards;
+  }
+
+  .animate-backdrop-fade {
+    animation: modalBackdropFade 0.25s ease-out forwards;
+  }
 }
 
 /* Custom scrollbar */

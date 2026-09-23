@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, MapPin, ArrowRight, Clock, Pencil, Trash2, Shield, Eye, EyeOff, Pin } from 'lucide-react';
+import { Calendar, MapPin, ArrowRight, Clock, Pencil, Trash2, Shield, Eye, EyeOff, Pin, Images } from 'lucide-react';
 import { EventItem } from '../../types';
 import { Badge } from '../common/Badge';
 import { useAuth } from '../../context/AuthContext';
@@ -138,6 +138,14 @@ export const EventCard: React.FC<EventCardProps> = ({
                 <Trash2 className="w-3.5 h-3.5 text-rose-400" />
               </button>
             )}
+          </div>
+        )}
+
+        {/* Multi-image photo count indicator */}
+        {event.galleryImages && event.galleryImages.length > 1 && (
+          <div className="absolute bottom-2.5 right-2.5 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-950/80 backdrop-blur-md text-white text-[11px] font-semibold border border-white/15 shadow-md pointer-events-none">
+            <Images className="w-3.5 h-3.5 text-blue-400" />
+            <span>{event.galleryImages.length} photos</span>
           </div>
         )}
       </div>

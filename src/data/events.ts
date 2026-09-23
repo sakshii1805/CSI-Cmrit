@@ -37,7 +37,10 @@ export const mockEvents: EventItem[] = [
     organizer: 'CSI CMRIT Chapter & CMRIT (UGC Autonomous)',
     image: '/images/avishkaar_poster.jpg',
     galleryImages: [
-      '/images/avishkaar_poster.jpg'
+      '/images/avishkaar_poster.jpg',
+      '/images/avishkar_promo_! (1).png',
+      '/images/avishkar_promo_! (2).png',
+      '/images/avishkar_promo_! (3).png'
     ],
     status: 'published',
     registrationOpen: true

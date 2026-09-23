@@ -9,6 +9,12 @@ export const mockGallery: GalleryItem[] = [
     event_date: '2026-09-22',
     imageUrl: '/images/avishkaar_poster.jpg',
     image_url: '/images/avishkaar_poster.jpg',
+    images: [
+      '/images/avishkaar_poster.jpg',
+      '/images/avishkar_promo_! (1).png',
+      '/images/avishkar_promo_! (2).png',
+      '/images/avishkar_promo_! (3).png'
+    ],
     description: 'Full event poster: Preliminary Round on 26 Sept 2026, Grand Finale on 9-10 Oct 2026 with 20 pre-selected industry problem statements.',
     caption: 'Full event poster: Preliminary Round on 26 Sept 2026, Grand Finale on 9-10 Oct 2026 with 20 pre-selected industry problem statements.',
     is_published: true,
@@ -24,6 +30,11 @@ export const mockGallery: GalleryItem[] = [
     event_date: '2026-09-20',
     imageUrl: '/images/avishkar_promo_! (3).png',
     image_url: '/images/avishkar_promo_! (3).png',
+    images: [
+      '/images/avishkar_promo_! (3).png',
+      '/images/avishkar_promo_! (2).png',
+      '/images/cmrit_campus.png'
+    ],
     description: 'Presenting the hackathon roadmap and inviting interdisciplinary engineering teams across all branches at CMRIT.',
     caption: 'Presenting the hackathon roadmap and inviting interdisciplinary engineering teams across all branches at CMRIT.',
     is_published: true,

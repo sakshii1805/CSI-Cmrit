@@ -251,13 +251,16 @@ export const Navbar: React.FC = () => {
                 )}
               </div>
             ) : (
-              <Link
-                to="/admin/login"
-                className="hidden lg:inline-flex items-center gap-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all whitespace-nowrap border border-slate-600 text-slate-300 px-3 py-1.5 hover:border-slate-400 hover:text-white"
+              <button
+                type="button"
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent('csi_open_login_modal'));
+                }}
+                className="hidden lg:inline-flex items-center gap-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all whitespace-nowrap border border-slate-600 text-slate-300 px-3 py-1.5 hover:border-slate-400 hover:text-white cursor-pointer"
                 aria-label="Admin Portal"
               >
                 Login
-              </Link>
+              </button>
             )}
 
             {/* Mobile hamburger */}
@@ -344,13 +347,17 @@ export const Navbar: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <Link
-                to="/admin/login"
-                className="flex items-center justify-center gap-2 rounded-full text-[11px] font-bold uppercase tracking-wider border border-slate-700 text-slate-300 py-3 hover:border-slate-500 hover:text-white transition-all"
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  window.dispatchEvent(new CustomEvent('csi_open_login_modal'));
+                }}
+                className="w-full flex items-center justify-center gap-2 rounded-full text-[11px] font-bold uppercase tracking-wider border border-slate-700 text-slate-300 py-3 hover:border-slate-500 hover:text-white transition-all cursor-pointer"
               >
                 <Shield className="w-3.5 h-3.5" />
                 Admin Portal
-              </Link>
+              </button>
             )}
           </div>
         </div>

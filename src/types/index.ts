@@ -136,6 +136,7 @@ export interface ChapterHighlightItem {
 
   // Frontend display aliases
   imageUrl?: string;
+  images?: string[];
   date?: string;
   description?: string;
   location?: string;

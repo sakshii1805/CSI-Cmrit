@@ -1,22 +1,30 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
 import {
+  X,
   Shield,
   Lock,
   Mail,
-  ArrowLeft,
   Loader2,
   AlertCircle,
   Eye,
   EyeOff
 } from 'lucide-react';
-import { useToast } from '../components/common/Toast';
-import { useAuth } from '../context/AuthContext';
+import { useToast } from '../common/Toast';
+import { useAuth } from '../../context/AuthContext';
 
-export const AdminLogin: React.FC = () => {
-  const navigate = useNavigate();
+interface AdminLoginDrawerProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess?: () => void;
+}
+
+export const AdminLoginDrawer: React.FC<AdminLoginDrawerProps> = ({
+  isOpen,
+  onClose,
+  onSuccess
+}) => {
   const { showToast } = useToast();
-  const { signIn, isAuthenticated, isAdmin, loading: authLoading } = useAuth();
+  const { signIn, isAuthenticated, isAdmin } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,12 +33,29 @@ export const AdminLogin: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [justFilled, setJustFilled] = useState(false);
 
-  // If already logged in and confirmed admin, redirect directly to home in admin mode
+  // If already authenticated as admin, close drawer
   useEffect(() => {
-    if (!authLoading && isAuthenticated && isAdmin) {
-      navigate('/', { replace: true });
+    if (isOpen && isAuthenticated && isAdmin) {
+      onClose();
     }
-  }, [authLoading, isAuthenticated, isAdmin, navigate]);
+  }, [isOpen, isAuthenticated, isAdmin, onClose]);
+
+  // Handle escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,7 +90,8 @@ export const AdminLogin: React.FC = () => {
       }
 
       showToast('Signed in successfully. Admin mode active.', 'success');
-      navigate('/');
+      onSuccess?.();
+      onClose();
     } catch (err: any) {
       const msg = err?.message || 'Authentication failed. Please try again.';
       setErrorMessage(msg);
@@ -85,47 +111,75 @@ export const AdminLogin: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
-      {/* Top back navigation */}
-      <div className="absolute top-6 left-6">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back to website</span>
-        </Link>
-      </div>
+    <div
+      className={`fixed inset-0 z-50 transition-visibility duration-300 ${
+        isOpen ? 'pointer-events-auto visible' : 'pointer-events-none invisible'
+      }`}
+      aria-modal="true"
+      role="dialog"
+    >
+      {/* Backdrop overlay */}
+      <div
+        className={`fixed inset-0 bg-slate-900/40 backdrop-blur-xs transition-opacity duration-300 ease-out ${
+          isOpen ? 'opacity-100' : 'opacity-0'
+        }`}
+        onClick={onClose}
+        aria-hidden="true"
+      />
 
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        {/* Institutional Branding */}
-        <div className="flex flex-col items-center justify-center mb-6 text-center">
-          <div className="flex items-center justify-center gap-3 mb-4 bg-white p-2.5 px-4 rounded-xl border border-slate-200/80 shadow-xs">
-            <img
-              src="/images/logos/cmrit_csi_logo.jpeg"
-              alt="CSI CMRIT"
-              className="h-9 w-auto object-contain rounded"
-            />
-            <div className="h-5 w-px bg-slate-200" />
-            <img
-              src="/images/logos/cmr_new_logo.png"
-              alt="CMR Institute of Technology"
-              className="h-8 w-auto object-contain"
-            />
+      {/* Slide-in Panel from Right */}
+      <div
+        className={`fixed inset-y-0 right-0 max-w-md w-full bg-white shadow-2xl flex flex-col z-10 transform transition-transform duration-300 ease-out ${
+          isOpen ? 'translate-x-0' : 'translate-x-full'
+        }`}
+      >
+        {/* Panel Header */}
+        <div className="p-5 sm:p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+          <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2 bg-white px-2.5 py-1 rounded-lg border border-slate-200 shadow-xs">
+              <img
+                src="/images/logos/cmrit_csi_logo.jpeg"
+                alt="CSI CMRIT"
+                className="h-6 w-auto object-contain rounded"
+              />
+              <div className="h-4 w-px bg-slate-200" />
+              <img
+                src="/images/logos/cmr_new_logo.png"
+                alt="CMRIT College"
+                className="h-5 w-auto object-contain"
+              />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-slate-900 leading-tight">
+                Admin Portal
+              </h2>
+              <p className="text-[11px] text-slate-500">CSI CMRIT Chapter</p>
+            </div>
           </div>
 
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
-            Administrator Sign In
-          </h1>
-          <p className="text-xs text-slate-500 mt-1">
-            Computer Society of India &bull; CMRIT Student Chapter
-          </p>
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition-colors"
+            aria-label="Close admin login drawer"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
-        {/* Clean Corporate Login Dialog Box with Dynamic Slide-Down Effect */}
-        <div className="bg-white border border-slate-200/90 rounded-3xl shadow-2xl p-6 sm:p-8 animate-modal-slide-down">
-          {/* Subtle Demo Credentials Helper */}
-          <div className="mb-6 p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between text-xs">
+        {/* Panel Body */}
+        <div className="p-6 sm:p-7 flex-1 overflow-y-auto space-y-6">
+          <div>
+            <h1 className="text-xl font-bold tracking-tight text-slate-900">
+              Sign in to manage
+            </h1>
+            <p className="text-xs text-slate-500 mt-1">
+              Enter your chapter credentials to access admin controls.
+            </p>
+          </div>
+
+          {/* Institutional Demo Credentials Pill */}
+          <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between text-xs">
             <div className="text-slate-600 min-w-0 pr-2">
               <span className="font-semibold text-slate-800 block text-[11px]">
                 Authorized Demo Account
@@ -144,7 +198,7 @@ export const AdminLogin: React.FC = () => {
           </div>
 
           {errorMessage && (
-            <div className="mb-5 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2.5">
+            <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2.5">
               <AlertCircle className="w-4 h-4 shrink-0 text-rose-500 mt-0.5" />
               <div className="flex-1 leading-relaxed">
                 <p className="font-semibold">Authentication Error</p>
@@ -156,13 +210,13 @@ export const AdminLogin: React.FC = () => {
           <form onSubmit={handleLogin} className="space-y-4">
             {/* Email Field */}
             <div>
-              <label htmlFor="admin-email" className="block text-xs font-semibold text-slate-700 mb-1.5">
+              <label htmlFor="drawer-admin-email" className="block text-xs font-semibold text-slate-700 mb-1.5">
                 Email address
               </label>
               <div className="relative">
                 <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none" />
                 <input
-                  id="admin-email"
+                  id="drawer-admin-email"
                   type="email"
                   required
                   value={email}
@@ -178,13 +232,13 @@ export const AdminLogin: React.FC = () => {
 
             {/* Password Field */}
             <div>
-              <label htmlFor="admin-password" className="block text-xs font-semibold text-slate-700 mb-1.5">
+              <label htmlFor="drawer-admin-password" className="block text-xs font-semibold text-slate-700 mb-1.5">
                 Password
               </label>
               <div className="relative">
                 <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none" />
                 <input
-                  id="admin-password"
+                  id="drawer-admin-password"
                   type={showPassword ? 'text' : 'password'}
                   required
                   value={password}
@@ -227,21 +281,16 @@ export const AdminLogin: React.FC = () => {
               </button>
             </div>
           </form>
-
-          {/* Secure Footer */}
-          <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
-            <span>CMRIT Student Chapter</span>
-            <span>Secure Access</span>
-          </div>
         </div>
 
-        {/* Bottom Helper */}
-        <p className="text-center text-[11px] text-slate-400 mt-6">
-          Authorized personnel only &bull; All sessions are logged
-        </p>
+        {/* Panel Footer */}
+        <div className="p-4 px-6 border-t border-slate-100 bg-slate-50 flex items-center justify-between text-[11px] text-slate-400">
+          <span>CMRIT Student Chapter</span>
+          <span>Encrypted Session</span>
+        </div>
       </div>
     </div>
   );
 };
 
-export default AdminLogin;
+export default AdminLoginDrawer;

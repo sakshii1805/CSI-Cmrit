@@ -9,7 +9,10 @@ import {
   Maximize2,
   Sparkles,
   Check,
-  Pin
+  Pin,
+  ChevronLeft,
+  ChevronRight,
+  Images
 } from 'lucide-react';
 import { GalleryPost } from '../../types';
 import { useAuth } from '../../context/AuthContext';
@@ -35,7 +38,17 @@ export const GalleryPostCard: React.FC<GalleryPostCardProps> = ({
   const [imageError, setImageError] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const rawImage = post.cover_image || post.images?.[0]?.image_url;
+  const postImages = React.useMemo(() => {
+    if (post.images && Array.isArray(post.images) && post.images.length > 0) {
+      return post.images.map((img) => img.image_url);
+    }
+    const fallback = post.cover_image;
+    return fallback ? [fallback] : [];
+  }, [post]);
+
+  const [activeImageIdx, setActiveImageIdx] = useState(0);
+
+  const rawImage = postImages[activeImageIdx] || post.cover_image || post.images?.[0]?.image_url;
   const displayImage = imageError || !rawImage ? '/images/avishkaar_poster.jpg' : rawImage;
 
   const formattedDate = post.event_date
@@ -200,7 +213,7 @@ export const GalleryPostCard: React.FC<GalleryPostCardProps> = ({
           </span>
         </div>
 
-        {/* Floating Category Tag */}
+        {/* Category & Date Tags */}
         <div className="absolute top-2.5 left-2.5 z-20 pointer-events-none">
           <span className="text-[10px] font-semibold tracking-wide px-2.5 py-0.5 rounded-full bg-slate-950/75 backdrop-blur-md text-white border border-slate-700/60 shadow-md">
             {post.category || 'Chapter Visual'}
@@ -214,6 +227,44 @@ export const GalleryPostCard: React.FC<GalleryPostCardProps> = ({
               {formattedDate}
             </span>
           </div>
+        )}
+
+        {/* Multi-Photo Count Badge */}
+        {postImages.length > 1 && (
+          <div className="absolute bottom-2.5 right-2.5 z-20 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-950/80 backdrop-blur-md text-white text-[11px] font-semibold border border-white/15 shadow-md pointer-events-none">
+            <Images className="w-3.5 h-3.5 text-purple-400" />
+            <span>{activeImageIdx + 1} / {postImages.length}</span>
+          </div>
+        )}
+
+        {/* Carousel controls if more than 1 image */}
+        {postImages.length > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setActiveImageIdx((prev) => (prev > 0 ? prev - 1 : postImages.length - 1));
+              }}
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 z-30 p-1.5 rounded-full bg-slate-950/75 hover:bg-purple-600 text-white backdrop-blur-md opacity-80 sm:opacity-0 group-hover/stage:opacity-100 transition-all border border-white/20 shadow-md"
+              title="Previous photo in this post"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setActiveImageIdx((prev) => (prev < postImages.length - 1 ? prev + 1 : 0));
+              }}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 z-30 p-1.5 rounded-full bg-slate-950/75 hover:bg-purple-600 text-white backdrop-blur-md opacity-80 sm:opacity-0 group-hover/stage:opacity-100 transition-all border border-white/20 shadow-md"
+              title="Next photo in this post"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </>
         )}
       </div>
 

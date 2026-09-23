@@ -8,6 +8,7 @@ import { EventModal } from './components/admin/in-place/EventModal';
 import { AnnouncementModal } from './components/admin/in-place/AnnouncementModal';
 import { GalleryModal } from './components/admin/in-place/GalleryModal';
 import { AdminSubmissionsDrawer } from './components/admin/in-place/AdminSubmissionsDrawer';
+import { AdminLoginModal } from './components/admin/AdminLoginModal';
 
 // Pages
 import { Home } from './pages/Home';
@@ -46,6 +47,7 @@ const PublicLayout: React.FC = () => {
   const [eventModalOpen, setEventModalOpen] = useState(false);
   const [announcementModalOpen, setAnnouncementModalOpen] = useState(false);
   const [galleryModalOpen, setGalleryModalOpen] = useState(false);
+  const [loginDrawerOpen, setLoginDrawerOpen] = useState(false);
 
   useEffect(() => {
     const handleOpenSubmissions = (e: any) => {
@@ -55,17 +57,20 @@ const PublicLayout: React.FC = () => {
     const handleOpenEventModal = () => setEventModalOpen(true);
     const handleOpenAnnouncementModal = () => setAnnouncementModalOpen(true);
     const handleOpenGalleryModal = () => setGalleryModalOpen(true);
+    const handleOpenLogin = () => setLoginDrawerOpen(true);
 
     window.addEventListener('csi_open_submissions_drawer', handleOpenSubmissions);
     window.addEventListener('csi_open_event_modal', handleOpenEventModal);
     window.addEventListener('csi_open_announcement_modal', handleOpenAnnouncementModal);
     window.addEventListener('csi_open_gallery_modal', handleOpenGalleryModal);
+    window.addEventListener('csi_open_login_modal', handleOpenLogin);
 
     return () => {
       window.removeEventListener('csi_open_submissions_drawer', handleOpenSubmissions);
       window.removeEventListener('csi_open_event_modal', handleOpenEventModal);
       window.removeEventListener('csi_open_announcement_modal', handleOpenAnnouncementModal);
       window.removeEventListener('csi_open_gallery_modal', handleOpenGalleryModal);
+      window.removeEventListener('csi_open_login_modal', handleOpenLogin);
     };
   }, []);
 
@@ -113,6 +118,12 @@ const PublicLayout: React.FC = () => {
           />
         </>
       )}
+
+      {/* Dynamic Pop-in Admin Login Dialog Box */}
+      <AdminLoginModal
+        isOpen={loginDrawerOpen}
+        onClose={() => setLoginDrawerOpen(false)}
+      />
     </div>
   );
 };

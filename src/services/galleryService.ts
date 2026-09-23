@@ -38,28 +38,36 @@ export const galleryService = {
 
       // Fallback & unified feed: convert highlightsService items to GalleryPosts
       const highlightsRes = await highlightsService.getPublishedHighlights();
-      const mappedFromHighlights: GalleryPost[] = (highlightsRes.data || []).map((h) => ({
-        id: h.id,
-        slug: h.id,
-        title: h.title,
-        category: h.category || 'Community',
-        cover_image: h.imageUrl || h.image_url || '',
-        event_date: h.event_date || h.date,
-        description: h.description || h.caption,
-        is_pinned: Boolean(h.is_pinned),
-        image_count: 1,
-        images: [{
-          id: `img-${h.id}`,
+      const mappedFromHighlights: GalleryPost[] = (highlightsRes.data || []).map((h) => {
+        const rawImages = (Array.isArray(h.images) && h.images.length > 0)
+          ? h.images
+          : [h.imageUrl || h.image_url].filter(Boolean) as string[];
+        const imagesList: string[] = rawImages.length > 0 ? rawImages : ['/images/avishkaar_poster.jpg'];
+        const galleryImages = imagesList.map((url, idx) => ({
+          id: `img-${h.id}-${idx}`,
           gallery_post_id: h.id,
-          image_url: h.imageUrl || h.image_url || '',
+          image_url: String(url),
           caption: h.description || h.caption,
-          display_order: 0,
+          display_order: idx,
           created_at: h.created_at || new Date().toISOString()
-        }],
-        status: 'published',
-        created_at: h.created_at || new Date().toISOString(),
-        updated_at: h.updated_at || h.created_at || new Date().toISOString()
-      }));
+        }));
+
+        return {
+          id: h.id,
+          slug: h.id,
+          title: h.title,
+          category: h.category || 'Community',
+          cover_image: galleryImages[0]?.image_url || h.imageUrl || h.image_url || '',
+          event_date: h.event_date || h.date,
+          description: h.description || h.caption,
+          is_pinned: Boolean(h.is_pinned),
+          image_count: galleryImages.length,
+          images: galleryImages,
+          status: 'published',
+          created_at: h.created_at || new Date().toISOString(),
+          updated_at: h.updated_at || h.created_at || new Date().toISOString()
+        };
+      });
 
       // Sort with pinned items first, then latest stack order
       mappedFromHighlights.sort(sortGalleryPosts);
@@ -111,24 +119,30 @@ export const galleryService = {
       const highlightsRes = await highlightsService.getPublishedHighlights();
       const match = (highlightsRes.data || []).find((h) => h.id === slug || h.title.toLowerCase().replace(/[^a-z0-9]+/g, '-') === slug);
       if (match) {
+        const rawImages = (Array.isArray(match.images) && match.images.length > 0)
+          ? match.images
+          : [match.imageUrl || match.image_url].filter(Boolean) as string[];
+        const imagesList: string[] = rawImages.length > 0 ? rawImages : ['/images/avishkaar_poster.jpg'];
+        const galleryImages = imagesList.map((url, idx) => ({
+          id: `img-${match.id}-${idx}`,
+          gallery_post_id: match.id,
+          image_url: String(url),
+          caption: match.description || match.caption,
+          display_order: idx,
+          created_at: match.created_at || new Date().toISOString()
+        }));
+
         return {
           data: {
             id: match.id,
             slug: match.id,
             title: match.title,
             category: match.category || 'Community',
-            cover_image: match.imageUrl || match.image_url || '',
+            cover_image: galleryImages[0]?.image_url || match.imageUrl || match.image_url || '',
             event_date: match.event_date || match.date,
             description: match.description || match.caption,
-            image_count: 1,
-            images: [{
-              id: `img-${match.id}`,
-              gallery_post_id: match.id,
-              image_url: match.imageUrl || match.image_url || '',
-              caption: match.description || match.caption,
-              display_order: 0,
-              created_at: match.created_at || new Date().toISOString()
-            }],
+            image_count: galleryImages.length,
+            images: galleryImages,
             status: 'published',
             created_at: match.created_at || new Date().toISOString(),
             updated_at: match.updated_at || match.created_at || new Date().toISOString()
@@ -159,12 +173,13 @@ export const galleryService = {
   ): Promise<{ data?: GalleryPost; error?: string }> {
     try {
       await requireAdmin();
-      // Also create highlight for unified experience
+      // Also create highlight for unified experience with all images
       await highlightsService.createHighlight({
         title: post.title,
         category: post.category as any,
         event_date: post.event_date || new Date().toISOString().split('T')[0],
         imageUrl: post.cover_image || images[0]?.image_url,
+        images: images.map(img => img.image_url),
         description: post.description || '',
         is_published: post.status === 'published'
       });

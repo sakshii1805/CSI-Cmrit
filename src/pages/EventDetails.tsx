@@ -14,7 +14,12 @@ import {
   Trash2,
   Shield,
   Eye,
-  EyeOff
+  EyeOff,
+  Images,
+  ChevronLeft,
+  ChevronRight,
+  Maximize2,
+  X
 } from 'lucide-react';
 import { eventsService } from '../services/eventsService';
 import { EventItem } from '../types';
@@ -40,6 +45,52 @@ export const EventDetails: React.FC = () => {
   // In-place edit and delete state
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+
+  // Multi-image gallery state
+  const [activeImageIdx, setActiveImageIdx] = useState<number>(0);
+  const [lightboxOpen, setLightboxOpen] = useState<boolean>(false);
+
+  const allImages = React.useMemo(() => {
+    if (!event) return [];
+    if (event.galleryImages && Array.isArray(event.galleryImages) && event.galleryImages.length > 0) {
+      return event.galleryImages.filter(Boolean);
+    }
+    const fallback = event.image_url || event.image;
+    return fallback ? [fallback] : [];
+  }, [event]);
+
+  useEffect(() => {
+    if (activeImageIdx >= allImages.length && allImages.length > 0) {
+      setActiveImageIdx(0);
+    }
+  }, [allImages.length, activeImageIdx]);
+
+  const handlePrevImage = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (allImages.length <= 1) return;
+    setActiveImageIdx((prev) => (prev > 0 ? prev - 1 : allImages.length - 1));
+  };
+
+  const handleNextImage = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    if (allImages.length <= 1) return;
+    setActiveImageIdx((prev) => (prev < allImages.length - 1 ? prev + 1 : 0));
+  };
+
+  useEffect(() => {
+    if (!lightboxOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightboxOpen(false);
+      if (e.key === 'ArrowLeft') handlePrevImage();
+      if (e.key === 'ArrowRight') handleNextImage();
+    };
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = 'unset';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [lightboxOpen, allImages.length]);
 
   const fetchEvent = async () => {
     if (!id) return;
@@ -214,14 +265,103 @@ export const EventDetails: React.FC = () => {
                 {event.title}
               </h1>
 
-              {/* Event Image Banner */}
-              {(event.image_url || event.image) && (
-                <div className="rounded-xl overflow-hidden border border-slate-200 bg-slate-900 max-h-96">
-                  <img
-                    src={event.image_url || event.image || ''}
-                    alt={event.title}
-                    className="w-full h-full object-cover object-center max-h-96"
-                  />
+              {/* Event Images / Multi-Photo Showcase */}
+              {allImages.length > 0 && (
+                <div className="space-y-3">
+                  {/* Main Active Image Stage */}
+                  <div className="relative group rounded-2xl overflow-hidden border border-slate-800 bg-slate-950 shadow-lg">
+                    {/* Ambient Glow */}
+                    <div
+                      className="absolute inset-0 bg-cover bg-center opacity-25 blur-2xl scale-110 pointer-events-none"
+                      style={{ backgroundImage: `url(${allImages[activeImageIdx] || allImages[0]})` }}
+                    />
+
+                    {/* Centered Main Image */}
+                    <div
+                      className="relative z-10 w-full flex items-center justify-center cursor-pointer min-h-[260px] sm:min-h-[380px] max-h-[500px]"
+                      onClick={() => setLightboxOpen(true)}
+                    >
+                      <img
+                        src={allImages[activeImageIdx] || allImages[0]}
+                        alt={`${event.title} - Photo ${activeImageIdx + 1}`}
+                        className="max-h-[500px] w-auto max-w-full object-contain mx-auto transition-transform duration-300 group-hover:scale-[1.01]"
+                      />
+                    </div>
+
+                    {/* Top badges & tools */}
+                    <div className="absolute top-3 inset-x-3 z-20 flex items-center justify-between pointer-events-none">
+                      {allImages.length > 1 ? (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/80 backdrop-blur-md text-white text-xs font-semibold border border-white/10 shadow-sm pointer-events-auto">
+                          <Images className="w-3.5 h-3.5 text-blue-400" />
+                          <span>{activeImageIdx + 1} / {allImages.length}</span>
+                        </span>
+                      ) : <span />}
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setLightboxOpen(true);
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900/80 hover:bg-slate-800 backdrop-blur-md text-slate-200 hover:text-white text-xs font-medium border border-white/10 shadow-sm pointer-events-auto transition-colors"
+                        title="Click to expand full resolution"
+                      >
+                        <Maximize2 className="w-3.5 h-3.5" />
+                        <span>View Fullscreen</span>
+                      </button>
+                    </div>
+
+                    {/* Prev / Next arrows for multi-image */}
+                    {allImages.length > 1 && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={handlePrevImage}
+                          className="absolute left-3 top-1/2 -translate-y-1/2 z-20 p-2 sm:p-2.5 rounded-full bg-slate-950/70 hover:bg-slate-900 text-white border border-white/15 backdrop-blur-md opacity-80 sm:opacity-0 group-hover:opacity-100 transition-all focus:opacity-100 shadow-md"
+                          aria-label="Previous image"
+                        >
+                          <ChevronLeft className="w-5 h-5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleNextImage}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 z-20 p-2 sm:p-2.5 rounded-full bg-slate-950/70 hover:bg-slate-900 text-white border border-white/15 backdrop-blur-md opacity-80 sm:opacity-0 group-hover:opacity-100 transition-all focus:opacity-100 shadow-md"
+                          aria-label="Next image"
+                        >
+                          <ChevronRight className="w-5 h-5" />
+                        </button>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Thumbnail Strip */}
+                  {allImages.length > 1 && (
+                    <div className="flex items-center gap-2.5 overflow-x-auto pb-1.5 scrollbar-thin">
+                      {allImages.map((imgUrl, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setActiveImageIdx(idx)}
+                          className={`relative shrink-0 rounded-lg overflow-hidden transition-all ${
+                            idx === activeImageIdx
+                              ? 'ring-2 ring-blue-500 scale-105 shadow-md border-2 border-transparent'
+                              : 'opacity-70 hover:opacity-100 border border-slate-200'
+                          }`}
+                        >
+                          <img
+                            src={imgUrl}
+                            alt={`Thumbnail ${idx + 1}`}
+                            className="w-16 h-12 sm:w-20 sm:h-14 object-cover"
+                          />
+                          {idx === 0 && (
+                            <span className="absolute bottom-0 inset-x-0 bg-blue-600/90 text-white text-[9px] font-bold text-center py-0.5 uppercase tracking-wider">
+                              Cover
+                            </span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -388,6 +528,84 @@ export const EventDetails: React.FC = () => {
           onConfirm={handleDeleteConfirm}
           onClose={() => setDeleteDialogOpen(false)}
         />
+      )}
+
+      {/* Event Photo Fullscreen Lightbox Modal */}
+      {lightboxOpen && allImages.length > 0 && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="fixed inset-0 bg-slate-950/92 backdrop-blur-md"
+            onClick={() => setLightboxOpen(false)}
+          />
+
+          <button
+            onClick={() => setLightboxOpen(false)}
+            className="absolute top-5 right-5 z-20 p-2.5 rounded-full bg-slate-900/80 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-700 transition-colors"
+            aria-label="Close photo preview"
+          >
+            <X className="w-6 h-6" />
+          </button>
+
+          {allImages.length > 1 && (
+            <>
+              <button
+                onClick={handlePrevImage}
+                className="absolute left-3 sm:left-6 z-20 p-3 rounded-full bg-slate-900/80 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-700 transition-colors"
+                aria-label="Previous photo"
+              >
+                <ChevronLeft className="w-6 h-6" />
+              </button>
+              <button
+                onClick={handleNextImage}
+                className="absolute right-3 sm:right-6 z-20 p-3 rounded-full bg-slate-900/80 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-700 transition-colors"
+                aria-label="Next photo"
+              >
+                <ChevronRight className="w-6 h-6" />
+              </button>
+            </>
+          )}
+
+          <div className="relative z-10 max-w-5xl w-full max-h-[92vh] flex flex-col bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">
+            {/* Header info */}
+            <div className="px-5 py-3 bg-slate-950/80 border-b border-slate-800 flex items-center justify-between text-xs text-slate-300">
+              <span className="font-semibold text-white truncate max-w-md">{event.title}</span>
+              <span className="font-mono text-slate-400">Photo {activeImageIdx + 1} of {allImages.length}</span>
+            </div>
+
+            {/* Main Stage */}
+            <div className="flex-1 bg-black flex items-center justify-center p-2 overflow-hidden max-h-[72vh]">
+              <img
+                src={allImages[activeImageIdx] || allImages[0]}
+                alt={`${event.title} - Full size photo`}
+                className="w-full h-full object-contain max-h-[72vh]"
+              />
+            </div>
+
+            {/* Bottom thumbnail strip inside lightbox */}
+            {allImages.length > 1 && (
+              <div className="p-3 bg-slate-950/80 border-t border-slate-800 flex items-center justify-center gap-2 overflow-x-auto">
+                {allImages.map((imgUrl, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setActiveImageIdx(idx)}
+                    className={`w-12 h-10 rounded overflow-hidden transition-all ${
+                      idx === activeImageIdx
+                        ? 'ring-2 ring-blue-500 scale-105'
+                        : 'opacity-50 hover:opacity-100'
+                    }`}
+                  >
+                    <img src={imgUrl} alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );
