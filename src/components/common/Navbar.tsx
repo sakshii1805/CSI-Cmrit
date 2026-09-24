@@ -67,9 +67,9 @@ export const Navbar: React.FC = () => {
   return (
     <>
       {/* Floating navbar wrapper */}
-      <div className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-3 sm:pt-4 px-3 sm:px-4 md:px-8 pointer-events-none">
+      <div className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-2.5 sm:pt-4 px-2.5 sm:px-4 md:px-8 pointer-events-none">
         <nav
-          className={`flex items-center justify-between w-full max-w-7xl pointer-events-auto transition-all duration-300 ease-in-out px-4 sm:px-5 py-2 sm:py-2.5 rounded-2xl border ${
+          className={`flex items-center justify-between w-full max-w-7xl pointer-events-auto transition-all duration-300 ease-in-out px-3 sm:px-5 py-2 sm:py-2.5 rounded-2xl border ${
             isScrolled
               ? 'bg-slate-950/95 backdrop-blur-md border-slate-800/80 shadow-xl shadow-black/40'
               : isHomePage
@@ -77,23 +77,34 @@ export const Navbar: React.FC = () => {
                 : 'bg-slate-950/90 backdrop-blur-md border-slate-800/80 shadow-lg shadow-black/30'
           }`}
         >
-          {/* Left: Logo + college info (visible at top, collapses on scroll) */}
+          {/* Left: Logo + college info (compact on mobile, full on desktop) */}
           <Link
             to="/"
-            className="flex items-center gap-3 group pointer-events-auto min-w-0"
+            className="flex items-center gap-2 sm:gap-3 group pointer-events-auto min-w-0 shrink"
             aria-label="CSI CMRIT Chapter Home"
           >
             {/* CSI CMRIT Logo */}
             <img
               src="/images/logos/cmrit_csi_logo.jpeg"
               alt="CSI CMRIT Logo"
-              className="h-8 md:h-9 w-auto object-contain rounded-sm transition-all duration-500 shrink-0"
+              className="h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9 object-contain rounded-md transition-all duration-500 shrink-0"
             />
 
-            {/* Divider + Text block — fades out on scroll */}
+            {/* Mobile-only brand badge (visible only on mobile) */}
+            <div className="flex flex-col min-w-0 sm:hidden">
+              <span className="text-[12px] font-extrabold text-white tracking-tight leading-tight truncate">
+                CSI CMRIT
+              </span>
+              <span className="text-[8px] font-medium text-slate-400 tracking-wider leading-none mt-0.5 truncate">
+                Student Chapter
+              </span>
+            </div>
+
+            {/* Divider + Full Text block — visible on sm+ screens, collapses on scroll */}
             <div
-              className={`flex items-center gap-2.5 transition-all duration-500 overflow-hidden ${isScrolled ? 'max-w-0 opacity-0' : 'max-w-xs opacity-100'
-                }`}
+              className={`hidden sm:flex items-center gap-2.5 transition-all duration-500 overflow-hidden ${
+                isScrolled ? 'max-w-0 opacity-0' : 'max-w-xs opacity-100'
+              }`}
             >
               {/* Text */}
               <div className="flex flex-col gap-0.5 min-w-0">
@@ -108,16 +119,17 @@ export const Navbar: React.FC = () => {
               </div>
             </div>
 
-            {/* CMR College Logo + label — fades out on scroll */}
+            {/* CMR College Logo + label — visible on md+ screens, collapses on scroll */}
             <div
-              className={`flex items-center gap-2 transition-all duration-500 overflow-hidden ${isScrolled ? 'max-w-0 opacity-0' : 'max-w-xs opacity-100'
-                }`}
+              className={`hidden md:flex items-center gap-2 transition-all duration-500 overflow-hidden ${
+                isScrolled ? 'max-w-0 opacity-0' : 'max-w-xs opacity-100'
+              }`}
             >
               {/* Second vertical divider */}
-              <div className="h-8 w-px bg-slate-600/70 shrink-0" />
+              <div className="h-7 w-px bg-slate-600/70 shrink-0" />
 
               {/* Logo square */}
-              <div className="w-7 h-7 rounded-sm flex items-center justify-center shrink-0">
+              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-sm flex items-center justify-center shrink-0">
                 <img
                   src="/images/logos/cmr_new_logo.png"
                   alt="CMRIT College Logo"

@@ -54,7 +54,7 @@ export const EventCard: React.FC<EventCardProps> = ({
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent opacity-60 pointer-events-none" />
 
         {/* Category & Status badges */}
-        <div className="absolute top-3 left-3 flex items-center gap-1.5 flex-wrap pointer-events-none">
+        <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap pointer-events-none max-w-[calc(100%-140px)] z-10">
           {event.is_pinned && (
             <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500 text-white shadow-xs">
               <Pin className="w-2.5 h-2.5 fill-white" />
@@ -81,7 +81,7 @@ export const EventCard: React.FC<EventCardProps> = ({
 
         {/* In-Place Admin Quick Actions (pinned top-right of image) */}
         {isAdmin && (
-          <div className="absolute top-2.5 right-2.5 flex items-center gap-1 bg-slate-950/80 backdrop-blur-md p-1 rounded-lg border border-slate-700 shadow-md">
+          <div className="absolute top-2.5 right-2.5 flex items-center gap-1 bg-slate-950/80 backdrop-blur-md p-1 rounded-lg border border-slate-700 shadow-md z-20">
             {onTogglePin && (
               <button
                 type="button"
