@@ -144,9 +144,9 @@ export const Events: React.FC = () => {
   }, [events, searchQuery, selectedCategory]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-50">
+    <div className="flex flex-col min-h-screen bg-slate-50 w-full max-w-full overflow-x-hidden">
       {/* Header Banner */}
-      <section className="bg-slate-950 text-white pt-20 sm:pt-24 md:pt-28 pb-10 sm:pb-14 border-b border-slate-800 relative overflow-hidden">
+      <section className="bg-slate-950 text-white pt-20 sm:pt-24 md:pt-28 pb-10 sm:pb-14 border-b border-slate-800 relative overflow-hidden w-full max-w-full">
         <div
           className="absolute inset-0 opacity-5 pointer-events-none"
           style={{
@@ -154,7 +154,7 @@ export const Events: React.FC = () => {
             backgroundSize: '28px 28px'
           }}
         />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative w-full">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 sm:gap-6">
             <div className="max-w-3xl">
               <span className="text-xs font-bold text-blue-400 uppercase tracking-widest bg-slate-900 border border-slate-800 px-3 py-1 rounded-md inline-block">
@@ -189,7 +189,7 @@ export const Events: React.FC = () => {
       </section>
 
       {/* Main Content Area */}
-      <section className="py-8 sm:py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex-1">
+      <section className="py-8 sm:py-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full max-w-full flex-1">
         {/* Controls Bar: Search & Filters */}
         <div className="bg-white rounded-2xl border border-slate-200/90 p-3.5 sm:p-5 shadow-subtle mb-6 sm:mb-8 space-y-3 sm:space-y-4">
           <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">

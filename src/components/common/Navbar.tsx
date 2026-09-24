@@ -119,9 +119,9 @@ export const Navbar: React.FC = () => {
               </div>
             </div>
 
-            {/* CMR College Logo + label — visible on md+ screens, collapses on scroll */}
+            {/* CMR College Logo + label — visible on lg+ screens, collapses on scroll */}
             <div
-              className={`hidden md:flex items-center gap-2 transition-all duration-500 overflow-hidden ${
+              className={`hidden lg:flex items-center gap-2 transition-all duration-500 overflow-hidden ${
                 isScrolled ? 'max-w-0 opacity-0' : 'max-w-xs opacity-100'
               }`}
             >
