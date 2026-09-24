@@ -80,12 +80,12 @@ export const HeroSection: React.FC = () => {
 
           {/* CTA Buttons */}
           <div
-            className="flex items-center justify-center gap-3 sm:gap-4 flex-wrap pt-3"
+            className="flex items-center justify-center gap-3 sm:gap-4 flex-wrap pt-3 w-full"
             style={{ animation: 'fadeSlideUp 0.5s ease 0.36s both' }}
           >
             <Link
               to="/events"
-              className="group inline-flex items-center gap-2 px-7 py-3 font-sans text-sm sm:text-base font-semibold rounded-full bg-white text-slate-950 hover:bg-slate-100 transition-all duration-300 shadow-xl shadow-white/15 hover:shadow-white/25 hover:scale-105 active:scale-95"
+              className="group inline-flex items-center justify-center gap-2 px-7 py-3 font-sans text-sm sm:text-base font-semibold rounded-full bg-white text-slate-950 hover:bg-slate-100 transition-all duration-300 shadow-xl shadow-white/15 hover:shadow-white/25 hover:scale-105 active:scale-95 w-full sm:w-auto text-center"
             >
               <span>Explore Events</span>
               <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
@@ -93,7 +93,7 @@ export const HeroSection: React.FC = () => {
 
             <Link
               to="/join"
-              className="inline-flex items-center px-7 py-3 font-sans text-sm sm:text-base font-semibold rounded-full border border-white/35 text-white hover:bg-white hover:text-slate-950 transition-all duration-300 hover:scale-105 active:scale-95 backdrop-blur-md bg-white/5"
+              className="inline-flex items-center justify-center px-7 py-3 font-sans text-sm sm:text-base font-semibold rounded-full border border-white/35 text-white hover:bg-white hover:text-slate-950 transition-all duration-300 hover:scale-105 active:scale-95 backdrop-blur-md bg-white/5 w-full sm:w-auto text-center"
             >
               Join Us
             </Link>

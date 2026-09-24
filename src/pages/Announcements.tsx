@@ -186,7 +186,7 @@ export const Announcements: React.FC = () => {
               )}
             </div>
 
-            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto w-full sm:w-auto min-w-0 max-w-full pb-1 scrollbar-none">
+            <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto w-full sm:w-auto min-w-0 max-w-full py-1 scrollbar-none overscroll-x-contain">
               <span className="text-xs font-semibold text-slate-400 mr-1 shrink-0 flex items-center gap-1">
                 <Filter className="w-3.5 h-3.5" />
                 Filter:
@@ -195,7 +195,7 @@ export const Announcements: React.FC = () => {
                 <button
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
-                  className={`text-xs px-3 sm:px-3.5 py-1.5 rounded-full font-medium whitespace-nowrap transition-all shrink-0 ${
+                  className={`text-xs px-3 sm:px-3.5 py-1.5 rounded-full font-medium whitespace-nowrap transition-all shrink-0 cursor-pointer ${
                     selectedCategory === cat
                       ? 'bg-blue-600 text-white font-semibold shadow-xs'
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200/60'

@@ -54,7 +54,9 @@ export const EventCard: React.FC<EventCardProps> = ({
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent opacity-60 pointer-events-none" />
 
         {/* Category & Status badges */}
-        <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap pointer-events-none max-w-[calc(100%-140px)] z-10">
+        <div className={`absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap pointer-events-none z-10 ${
+          isAdmin ? 'max-w-[calc(100%-145px)]' : 'max-w-[calc(100%-20px)]'
+        }`}>
           {event.is_pinned && (
             <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-500 text-white shadow-xs">
               <Pin className="w-2.5 h-2.5 fill-white" />
@@ -151,14 +153,14 @@ export const EventCard: React.FC<EventCardProps> = ({
       </div>
 
       {/* Card Body */}
-      <div className="p-5 flex flex-col flex-1">
+      <div className="p-4 sm:p-5 flex flex-col flex-1">
         {/* Meta Info */}
-        <div className="flex items-center gap-3 text-xs text-slate-500 mb-2.5">
-          <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2.5 sm:gap-3 text-xs text-slate-500 mb-2 sm:mb-2.5 flex-wrap">
+          <div className="flex items-center gap-1 shrink-0">
             <Calendar className="w-3.5 h-3.5 text-blue-600 shrink-0" />
             <span>{event.date || event.event_date}</span>
           </div>
-          <span>•</span>
+          <span className="text-slate-300">•</span>
           <div className="flex items-center gap-1 truncate">
             <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
             <span className="truncate">{(event.time || event.event_time || '').split('–')[0].trim()}</span>
@@ -166,7 +168,7 @@ export const EventCard: React.FC<EventCardProps> = ({
         </div>
 
         {/* Title */}
-        <h3 className="text-base font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-2 leading-snug mb-2">
+        <h3 className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-2 leading-snug mb-2">
           <Link to={`/events/${event.slug || event.id}`}>
             {event.title}
           </Link>
