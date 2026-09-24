@@ -42,7 +42,7 @@ export const About: React.FC = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <section className="bg-slate-950 text-white pt-24 sm:pt-28 pb-14 sm:pb-16 border-b border-slate-800 relative overflow-hidden">
+      <section className="bg-slate-950 text-white pt-20 sm:pt-24 md:pt-28 pb-12 sm:pb-16 border-b border-slate-800 relative overflow-hidden">
         <div
           className="absolute inset-0 opacity-5 pointer-events-none"
           style={{
@@ -55,20 +55,20 @@ export const About: React.FC = () => {
             <span className="text-xs font-bold text-blue-400 uppercase tracking-widest bg-slate-900 border border-slate-800 px-3 py-1 rounded-md">
               About
             </span>
-            <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white mt-4 mb-4">
+            <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white mt-3 sm:mt-4 mb-3 sm:mb-4">
               CSI India &amp; CSI CMRIT
             </h1>
-            <p className="text-base sm:text-lg text-slate-300 leading-relaxed">
+            <p className="text-sm sm:text-base lg:text-lg text-slate-300 leading-relaxed">
               The national body for computing professionals, and the student chapter that brings that mission to CMR Institute of Technology.
             </p>
           </div>
         </div>
       </section>
 
-      <section className="py-16 sm:py-20 bg-white border-b border-slate-200/80">
+      <section className="py-14 sm:py-20 bg-white border-b border-slate-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
-            <div className="lg:col-span-7 space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-start">
+            <div className="lg:col-span-7 space-y-4 sm:space-y-6">
               <div>
                 <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">
                   National Body
@@ -86,25 +86,27 @@ export const About: React.FC = () => {
               <p className="text-sm sm:text-base text-slate-600 leading-relaxed">
                 With chapters across the country and hundreds of student branches, CSI exists to spread knowledge and open professional opportunities to as many students and practitioners as possible.
               </p>
-              <a
-                href="https://csiindia.org/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700"
-              >
-                Visit csiindia.org
-                <ExternalLink className="w-4 h-4" />
-              </a>
+              <div>
+                <a
+                  href="https://csiindia.org/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700"
+                >
+                  <span>Visit csiindia.org</span>
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              </div>
             </div>
 
-            <div className="lg:col-span-5">
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-8 shadow-subtle text-center">
+            <div className="lg:col-span-5 w-full flex justify-center">
+              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6 sm:p-8 shadow-subtle text-center max-w-sm w-full">
                 <img
                   src="/images/logo.png"
                   alt="Computer Society of India logo"
-                  className="w-40 h-40 sm:w-44 sm:h-44 object-contain mx-auto"
+                  className="w-32 h-32 sm:w-44 sm:h-44 object-contain mx-auto"
                 />
-                <p className="mt-4 text-sm font-bold text-slate-900">Computer Society of India</p>
+                <p className="mt-4 text-sm sm:text-base font-bold text-slate-900">Computer Society of India</p>
                 <p className="mt-1 text-xs font-semibold uppercase tracking-widest text-blue-600">
                   Only IFIP member from India
                 </p>
@@ -112,14 +114,14 @@ export const About: React.FC = () => {
             </div>
           </div>
 
-          <div className="mt-12 grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="mt-8 sm:mt-12 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {csiIndiaStats.map((stat) => (
               <div
                 key={stat.label}
-                className="rounded-xl border border-slate-200 bg-white px-5 py-6 text-center shadow-subtle"
+                className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-6 text-center shadow-subtle"
               >
-                <p className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">{stat.value}</p>
-                <p className="mt-1 text-[11px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500">
+                <p className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight">{stat.value}</p>
+                <p className="mt-1 text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-slate-500">
                   {stat.label}
                 </p>
               </div>
@@ -128,68 +130,68 @@ export const About: React.FC = () => {
         </div>
       </section>
 
-      <section className="py-16 sm:py-20 bg-slate-50 border-b border-slate-200/80">
+      <section className="py-14 sm:py-20 bg-slate-50 border-b border-slate-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mb-10">
+          <div className="max-w-3xl mb-8 sm:mb-10">
             <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">
               Student Chapter
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
               CSI CMRIT Chapter
             </h2>
-            <p className="text-sm sm:text-base text-slate-600 leading-relaxed mt-3">
+            <p className="text-sm sm:text-base text-slate-600 leading-relaxed mt-2 sm:mt-3">
               The CSI Student Branch at CMR Institute of Technology is a student-led chapter of CSI. It runs events, competitions, and workshops so students can go beyond the syllabus and practise computer science with peers and mentors.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-subtle">
-              <Globe2 className="w-8 h-8 text-blue-600 mb-4" />
-              <h3 className="text-base font-bold text-slate-900">National affiliation</h3>
-              <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-5 mb-8 sm:mb-10">
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-subtle">
+              <Globe2 className="w-7 h-7 sm:w-8 sm:h-8 text-blue-600 mb-3 sm:mb-4" />
+              <h3 className="text-sm sm:text-base font-bold text-slate-900">National affiliation</h3>
+              <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed">
                 Members belong to CSI as well as the campus chapter, with access to national contests, seminars, and student programmes.
               </p>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-subtle">
-              <Users className="w-8 h-8 text-indigo-600 mb-4" />
-              <h3 className="text-base font-bold text-slate-900">Student-led work</h3>
-              <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-subtle">
+              <Users className="w-7 h-7 sm:w-8 sm:h-8 text-indigo-600 mb-3 sm:mb-4" />
+              <h3 className="text-sm sm:text-base font-bold text-slate-900">Student-led work</h3>
+              <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed">
                 Core team leads plan workshops, hackathons, talks, and community projects with faculty guidance.
               </p>
             </div>
-            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-subtle">
-              <Award className="w-8 h-8 text-emerald-600 mb-4" />
-              <h3 className="text-base font-bold text-slate-900">Build and compete</h3>
-              <p className="mt-2 text-sm text-slate-600 leading-relaxed">
+            <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-6 shadow-subtle sm:col-span-2 md:col-span-1">
+              <Award className="w-7 h-7 sm:w-8 sm:h-8 text-emerald-600 mb-3 sm:mb-4" />
+              <h3 className="text-sm sm:text-base font-bold text-slate-900">Build and compete</h3>
+              <p className="mt-2 text-xs sm:text-sm text-slate-600 leading-relaxed">
                 Hands-on sessions, coding contests, and hackathon-style problem solving are the chapter&apos;s year-round focus.
               </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white rounded-2xl p-8 border border-slate-200/80 shadow-subtle flex flex-col">
-              <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
-                <Compass className="w-6 h-6" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-subtle flex flex-col">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center border border-blue-100">
+                <Compass className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <h3 className="text-xl font-bold text-slate-900 tracking-tight mt-4"> OurVision</h3>
-              <p className="text-sm sm:text-base text-slate-600 leading-relaxed mt-3 flex-1">
+              <h3 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight mt-4">Our Vision</h3>
+              <p className="text-xs sm:text-sm md:text-base text-slate-600 leading-relaxed mt-2.5 sm:mt-3 flex-1">
                 A strong, inclusive technology community at CMRIT where students pursue excellence, solve real problems with integrity, and grow into ethical engineering leaders.
               </p>
-              <div className="pt-6 mt-6 border-t border-slate-100 flex items-center gap-2 text-xs font-semibold text-blue-600 uppercase tracking-wider">
-                <CheckCircle2 className="w-4 h-4 text-blue-500" />
+              <div className="pt-4 sm:pt-6 mt-4 sm:mt-6 border-t border-slate-100 flex items-center gap-2 text-xs font-semibold text-blue-600 uppercase tracking-wider">
+                <CheckCircle2 className="w-4 h-4 text-blue-500 shrink-0" />
                 <span>Excellence · Ethics · Leadership</span>
               </div>
             </div>
-            <div className="bg-white rounded-2xl p-8 border border-slate-200/80 shadow-subtle flex flex-col">
-              <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
-                <Target className="w-6 h-6" />
+            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-subtle flex flex-col">
+              <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+                <Target className="w-5 h-5 sm:w-6 sm:h-6" />
               </div>
-              <h3 className="text-xl font-bold text-slate-900 tracking-tight mt-4"> Our Mission</h3>
-              <p className="text-sm sm:text-base text-slate-600 leading-relaxed mt-3 flex-1">
+              <h3 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight mt-4">Our Mission</h3>
+              <p className="text-xs sm:text-sm md:text-base text-slate-600 leading-relaxed mt-2.5 sm:mt-3 flex-1">
                 Run structured workshops, coding and hackathon tracks, peer learning, and industry mentorship so students can ship useful software and systems.
               </p>
-              <div className="pt-6 mt-6 border-t border-slate-100 flex items-center gap-2 text-xs font-semibold text-emerald-600 uppercase tracking-wider">
-                <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+              <div className="pt-4 sm:pt-6 mt-4 sm:mt-6 border-t border-slate-100 flex items-center gap-2 text-xs font-semibold text-emerald-600 uppercase tracking-wider">
+                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                 <span>Mentorship · Innovation · Collaboration</span>
               </div>
             </div>
@@ -197,65 +199,65 @@ export const About: React.FC = () => {
         </div>
       </section>
 
-      <section className="py-16 sm:py-20 bg-white border-b border-slate-200/80">
+      <section className="py-14 sm:py-20 bg-white border-b border-slate-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-2xl mb-10">
+          <div className="max-w-2xl mb-8 sm:mb-10">
             <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">
               Faculty
             </span>
             <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
               Faculty Coordinator
             </h2>
-            <p className="text-sm sm:text-base text-slate-600 mt-2">
+            <p className="text-xs sm:text-sm md:text-base text-slate-600 mt-2">
               Academic leadership and mentorship for the CSI CMRIT Student Chapter.
             </p>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-slate-50/60 overflow-hidden shadow-subtle">
+          <div className="rounded-3xl border border-slate-200 bg-slate-50/60 overflow-hidden shadow-subtle">
             <div className="grid grid-cols-1 md:grid-cols-12">
-              <div className="md:col-span-4 lg:col-span-3">
+              <div className="md:col-span-4 lg:col-span-3 bg-slate-950 flex items-center justify-center overflow-hidden">
                 {facultyCoordinator.photo ? (
                   <img
                     src={facultyCoordinator.photo}
                     alt={facultyCoordinator.name}
-                    className="w-full h-72 md:h-full object-cover object-top"
+                    className="w-full max-h-72 sm:max-h-80 md:max-h-none md:h-full object-cover object-top"
                   />
                 ) : (
                   <PortraitPlaceholder
                     initials={facultyCoordinator.initials}
-                    className="w-full h-72 md:h-full text-5xl"
+                    className="w-full h-64 sm:h-72 md:h-full text-5xl"
                   />
                 )}
               </div>
-              <div className="md:col-span-8 lg:col-span-9 p-6 sm:p-8 lg:p-10 space-y-5">
+              <div className="md:col-span-8 lg:col-span-9 p-5 sm:p-8 lg:p-10 space-y-4 sm:space-y-5">
                 <div>
                   <span className="inline-flex items-center rounded-md bg-blue-50 border border-blue-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-blue-700">
                     {facultyCoordinator.role}
                   </span>
-                  <h3 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-3">
+                  <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight mt-2 sm:mt-3">
                     {facultyCoordinator.name}
                   </h3>
                 </div>
-                <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="flex items-start gap-3">
-                    <GraduationCap className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
+                <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="flex items-start gap-2.5 sm:gap-3">
+                    <GraduationCap className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 mt-0.5 shrink-0" />
                     <div>
-                      <dt className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Department</dt>
-                      <dd className="text-sm font-semibold text-slate-800 mt-0.5">{facultyCoordinator.department}</dd>
+                      <dt className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400">Department</dt>
+                      <dd className="text-xs sm:text-sm font-semibold text-slate-800 mt-0.5">{facultyCoordinator.department}</dd>
                     </div>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <Building2 className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
+                  <div className="flex items-start gap-2.5 sm:gap-3">
+                    <Building2 className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 mt-0.5 shrink-0" />
                     <div>
-                      <dt className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Institution</dt>
-                      <dd className="text-sm font-semibold text-slate-800 mt-0.5">{facultyCoordinator.institution}</dd>
+                      <dt className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400">Institution</dt>
+                      <dd className="text-xs sm:text-sm font-semibold text-slate-800 mt-0.5">{facultyCoordinator.institution}</dd>
                     </div>
                   </div>
-                  <div className="flex items-start gap-3 sm:col-span-2">
-                    <MapPin className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
+                  <div className="flex items-start gap-2.5 sm:gap-3 sm:col-span-2">
+                    <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 mt-0.5 shrink-0" />
                     <div>
-                      <dt className="text-[11px] font-bold uppercase tracking-wider text-slate-400">Chapter</dt>
-                      <dd className="text-sm font-semibold text-slate-800 mt-0.5">
+                      <dt className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-slate-400">Chapter</dt>
+                      <dd className="text-xs sm:text-sm font-semibold text-slate-800 mt-0.5">
                         CSI Student Chapter, CMRIT
                       </dd>
                     </div>
@@ -263,20 +265,22 @@ export const About: React.FC = () => {
                 </dl>
                 <ul className="space-y-2">
                   {facultyCoordinator.details.map((line) => (
-                    <li key={line} className="flex items-start gap-2 text-sm text-slate-600 leading-relaxed">
+                    <li key={line} className="flex items-start gap-2 text-xs sm:text-sm text-slate-600 leading-relaxed">
                       <CheckCircle2 className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
                       <span>{line}</span>
                     </li>
                   ))}
                 </ul>
                 {facultyCoordinator.email ? (
-                  <a
-                    href={`mailto:${facultyCoordinator.email}`}
-                    className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-700"
-                  >
-                    <Mail className="w-4 h-4" />
-                    {facultyCoordinator.email}
-                  </a>
+                  <div className="pt-1">
+                    <a
+                      href={`mailto:${facultyCoordinator.email}`}
+                      className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-blue-600 hover:text-blue-700"
+                    >
+                      <Mail className="w-4 h-4" />
+                      {facultyCoordinator.email}
+                    </a>
+                  </div>
                 ) : null}
               </div>
             </div>
@@ -284,9 +288,9 @@ export const About: React.FC = () => {
         </div>
       </section>
 
-      <section className="py-16 sm:py-20 bg-slate-50 border-b border-slate-200/80">
+      <section className="py-14 sm:py-20 bg-slate-50 border-b border-slate-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
+          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8 sm:mb-10">
             <div className="max-w-2xl">
               <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">
                 Core Team 2026-27
@@ -294,35 +298,37 @@ export const About: React.FC = () => {
               <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1">
                 Team Leads
               </h2>
-              <p className="text-sm sm:text-base text-slate-600 mt-2">
+              <p className="text-xs sm:text-sm md:text-base text-slate-600 mt-1.5 sm:mt-2">
                 Student officers who lead, plan, and run CSI CMRIT through the year.
               </p>
             </div>
             {teamLeads.length > 4 && (
               showAll ? (
                 <button
+                  type="button"
                   onClick={() => setShowAll(false)}
-                  className="self-start sm:self-auto inline-flex items-center gap-2 px-6 py-2.5 text-xs font-semibold uppercase tracking-wider text-slate-500 border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors"
+                  className="self-stretch sm:self-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-slate-600 border border-slate-200 rounded-full hover:bg-slate-100 transition-colors"
                 >
                   View Less
                 </button>
               ) : (
                 <button
+                  type="button"
                   onClick={() => setShowAll(true)}
-                  className="self-start sm:self-auto inline-flex items-center gap-2 px-6 py-2.5 text-xs font-semibold uppercase tracking-wider text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors"
+                  className="self-stretch sm:self-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-blue-600 border border-blue-200 rounded-full hover:bg-blue-50 transition-colors"
                 >
-                  View More Team Leads
+                  <span>View More Team Leads</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               )
             )}
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
             {visibleLeads.map((member, index) => (
               <article
                 key={`${member.role}-${index}`}
-                className="group rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-subtle hover:shadow-card transition-shadow"
+                className="group rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-subtle hover:shadow-card transition-shadow flex flex-col justify-between"
               >
                 {member.photo ? (
                   <img
@@ -333,36 +339,36 @@ export const About: React.FC = () => {
                 ) : (
                   <PortraitPlaceholder
                     initials={member.initials}
-                    className="w-full aspect-[3/4] text-3xl sm:text-4xl"
+                    className="w-full aspect-[3/4] text-2xl sm:text-3xl md:text-4xl"
                   />
                 )}
-                <div className="p-4">
+                <div className="p-3 sm:p-4">
                   {member.name ? (
                     <>
-                      <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">{member.name}</h3>
-                      <p className="text-xs sm:text-sm text-slate-500 mt-0.5">{member.role}</p>
+                      <h3 className="text-xs sm:text-sm md:text-base font-bold text-slate-900 leading-snug line-clamp-1">{member.name}</h3>
+                      <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 line-clamp-1">{member.role}</p>
                     </>
                   ) : (
-                    <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">{member.role}</h3>
+                    <h3 className="text-xs sm:text-sm md:text-base font-bold text-slate-900 leading-snug line-clamp-2">{member.role}</h3>
                   )}
                 </div>
               </article>
             ))}
           </div>
-          </div>
-        </section>
+        </div>
+      </section>
 
-      <section className="py-16 bg-white">
+      <section className="py-12 sm:py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="rounded-2xl bg-slate-950 text-white px-6 py-10 sm:px-10 sm:py-12 flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+          <div className="rounded-3xl bg-slate-950 text-white px-6 py-8 sm:px-10 sm:py-12 flex flex-col md:flex-row md:items-center md:justify-between gap-6 text-center md:text-left">
             <div className="max-w-xl">
-              <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">Join CSI CMRIT</h2>
-              <p className="text-sm sm:text-base text-slate-300 mt-2 leading-relaxed">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight">Join CSI CMRIT</h2>
+              <p className="text-xs sm:text-sm md:text-base text-slate-300 mt-2 leading-relaxed">
                 Workshops, contests, and a campus community around computing. Apply to become a student member.
               </p>
             </div>
-            <Link to="/join">
-              <Button variant="accent" size="lg" rightIcon={<ArrowRight className="w-4 h-4" />}>
+            <Link to="/join" className="w-full md:w-auto">
+              <Button variant="accent" size="lg" rightIcon={<ArrowRight className="w-4 h-4" />} className="w-full sm:w-auto justify-center">
                 Become a member
               </Button>
             </Link>

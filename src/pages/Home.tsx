@@ -269,11 +269,15 @@ export const Home: React.FC = () => {
                     </div>
 
                     {/* Coordinators & Registration Info */}
-                    <div className="pt-2 text-xs text-slate-500 space-y-1">
-                      <p>
-                        <strong className="text-slate-700">Student Coordinators:</strong> B. Akshitha (+91 95734 69911) <br />&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp;&ensp; Medi Sumeet (+91 80748 29165)
-                      </p>
-                      <br />
+                    <div className="pt-2 text-xs text-slate-500 space-y-2">
+                      <div>
+                        <span className="font-bold text-slate-700 block mb-1">Student Coordinators:</span>
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-3 text-slate-600">
+                          <span>B. Akshitha (+91 95734 69911)</span>
+                          <span className="hidden sm:inline text-slate-300">•</span>
+                          <span>Medi Sumeet (+91 80748 29165)</span>
+                        </div>
+                      </div>
                       <p>
                         <strong className="text-slate-700">Fee:</strong> ₹1,200 per team (Applicable only for shortlisted teams)
                       </p>
@@ -288,7 +292,7 @@ export const Home: React.FC = () => {
                     </div>
                     <Link
                       to={`/events/${upcomingEvents[0].slug || upcomingEvents[0].id}`}
-                      className="inline-flex items-center gap-2 px-6 py-3 rounded-full text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-md shadow-blue-500/20 hover:shadow-lg hover:scale-105 active:scale-95"
+                      className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-md shadow-blue-500/20 hover:shadow-lg hover:scale-105 active:scale-95 w-full sm:w-auto"
                     >
                       <span>View Full Event Details</span>
                       <ArrowRight className="w-4 h-4" />
