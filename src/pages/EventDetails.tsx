@@ -184,7 +184,8 @@ export const EventDetails: React.FC = () => {
       {/* Top Breadcrumb Header */}
       <section className="bg-slate-950 text-white pt-24 sm:pt-28 pb-6 sm:pb-8 border-b border-slate-800 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between flex-wrap gap-4">
+          {/* Row 1: back link + share */}
+          <div className="flex items-center justify-between gap-3">
             <Link
               to="/events"
               className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
@@ -193,60 +194,58 @@ export const EventDetails: React.FC = () => {
               <span>Back to all events</span>
             </Link>
 
-            <div className="flex items-center gap-2">
-              {/* In-Place Admin Controls */}
-              {isAdmin && (
-                <div className="flex items-center gap-2 pr-3 border-r border-slate-800">
-                  <button
-                    type="button"
-                    onClick={handleTogglePublish}
-                    className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                      isPublished
-                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30'
-                        : 'bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30'
-                    }`}
-                  >
-                    {isPublished ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-                    <span>{isPublished ? 'Published' : 'Draft'}</span>
-                  </button>
+            <button
+              onClick={handleShare}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 hover:text-white hover:bg-slate-800 text-xs font-medium border border-slate-800 transition-colors shrink-0"
+            >
+              <Share2 className="w-3.5 h-3.5" />
+              <span>Share</span>
+            </button>
+          </div>
 
-                  <button
-                    type="button"
-                    onClick={() => setEditModalOpen(true)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-xs"
-                  >
-                    <Pencil className="w-3.5 h-3.5" />
-                    <span>Edit Event</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setDeleteDialogOpen(true)}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-semibold transition-all"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    <span>Delete</span>
-                  </button>
-                </div>
-              )}
+          {/* Row 2: Admin controls (wraps on mobile) */}
+          {isAdmin && (
+            <div className="flex items-center gap-2 flex-wrap mt-3 pt-3 border-t border-slate-800">
+              <button
+                type="button"
+                onClick={handleTogglePublish}
+                className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  isPublished
+                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30'
+                    : 'bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30'
+                }`}
+              >
+                {isPublished ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                <span>{isPublished ? 'Published' : 'Draft'}</span>
+              </button>
 
               <button
-                onClick={handleShare}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-900 text-slate-300 hover:text-white hover:bg-slate-800 text-xs font-medium border border-slate-800 transition-colors"
+                type="button"
+                onClick={() => setEditModalOpen(true)}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-xs"
               >
-                <Share2 className="w-3.5 h-3.5" />
-                <span>Share</span>
+                <Pencil className="w-3.5 h-3.5" />
+                <span>Edit Event</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setDeleteDialogOpen(true)}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-xs font-semibold transition-all"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Delete</span>
               </button>
             </div>
-          </div>
+          )}
         </div>
       </section>
 
       {/* Main Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          {/* Left / Main Content (Col 8) */}
-          <div className="lg:col-span-8 space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Left / Main Content (Col 8) — order-2 on mobile so sidebar appears first */}
+          <div className="lg:col-span-8 space-y-8 order-2 lg:order-1">
             {/* Main Header Card */}
             <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-subtle space-y-4">
               <div className="flex items-center gap-2 flex-wrap">
@@ -397,9 +396,9 @@ export const EventDetails: React.FC = () => {
             />
           </div>
 
-          {/* Right Sidebar: Registration & Logistics (Col 4) */}
-          <div className="lg:col-span-4 space-y-6">
-            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-subtle space-y-5 sticky top-24">
+          {/* Right Sidebar: Registration & Logistics (Col 4) — order-1 on mobile so it shows first */}
+          <div className="lg:col-span-4 space-y-6 order-1 lg:order-2">
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-subtle space-y-5 lg:sticky lg:top-24">
               <h3 className="text-base font-bold text-slate-900 pb-3 border-b border-slate-100">
                 Event Logistics
               </h3>
