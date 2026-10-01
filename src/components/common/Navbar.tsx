@@ -74,7 +74,7 @@ export const Navbar: React.FC = () => {
               ? 'bg-slate-950/95 backdrop-blur-md border-slate-800/80 shadow-xl shadow-black/40'
               : isHomePage
                 ? 'bg-transparent border-transparent'
-                : 'bg-slate-950/90 backdrop-blur-md border-slate-800/80 shadow-lg shadow-black/30'
+                : 'bg-slate-950/80 backdrop-blur-md border-slate-800/60 shadow-md shadow-black/20'
           }`}
         >
           {/* Left: Logo + college info (compact on mobile, full on desktop) */}
@@ -293,33 +293,90 @@ export const Navbar: React.FC = () => {
 
       {/* Mobile full-screen drawer */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-40 bg-slate-950/97 backdrop-blur-xl flex flex-col pt-24 px-6 pb-10 lg:hidden">
-          <nav className="flex flex-col gap-1">
-            {navLinks.map((link) => (
+        <div
+          className="fixed inset-0 z-40 bg-slate-950 flex flex-col lg:hidden overflow-y-auto"
+          style={{ animation: 'mobileDrawerIn 0.25s cubic-bezier(0.4,0,0.2,1) both' }}
+        >
+          {/* Drawer Header */}
+          <div className="flex items-center justify-between px-6 pt-5 pb-4 border-b border-slate-800/80">
+            <Link
+              to="/"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center gap-2.5"
+            >
+              <img
+                src="/images/logos/cmrit_csi_logo.jpeg"
+                alt="CSI CMRIT"
+                className="h-8 w-8 object-contain rounded-md"
+              />
+              <div className="flex flex-col">
+                <span className="text-[13px] font-extrabold text-white tracking-tight leading-tight">
+                  CSI CMRIT
+                </span>
+                <span className="text-[9px] font-medium text-slate-400 tracking-wider leading-none mt-0.5">
+                  Student Chapter
+                </span>
+              </div>
+            </Link>
+
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(false)}
+              className="p-2 rounded-xl bg-slate-800/60 text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
+              aria-label="Close menu"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Accent gradient line */}
+          <div className="h-px w-full bg-gradient-to-r from-transparent via-blue-500/40 to-transparent" />
+
+          {/* Nav Links */}
+          <nav className="flex flex-col px-4 pt-4 pb-2 gap-1">
+            {navLinks.map((link, idx) => (
               <NavLink
                 key={link.path}
                 to={link.path}
                 end={link.path === '/'}
+                onClick={() => setMobileMenuOpen(false)}
                 className={({ isActive }) =>
-                  `text-sm font-semibold uppercase tracking-widest py-3.5 border-b border-slate-800 transition-opacity ${isActive ? 'text-white' : 'text-slate-400 hover:text-white'
+                  `flex items-center gap-4 px-4 py-3.5 rounded-xl font-semibold text-sm tracking-wide transition-all duration-150 ${
+                    isActive
+                      ? 'bg-blue-600/15 text-white border border-blue-500/20'
+                      : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
                   }`
                 }
               >
-                {link.name}
+                {({ isActive }) => (
+                  <>
+                    <span className={`text-[10px] font-mono w-4 shrink-0 ${isActive ? 'text-blue-400' : 'text-slate-600'}`}>
+                      {String(idx + 1).padStart(2, '0')}
+                    </span>
+                    <span className="flex-1 uppercase tracking-widest text-xs font-bold">
+                      {link.name}
+                    </span>
+                    {isActive && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-400 shrink-0" />
+                    )}
+                  </>
+                )}
               </NavLink>
             ))}
           </nav>
 
-          <div className="mt-8 flex flex-col gap-3">
+          {/* Bottom CTA section */}
+          <div className="mt-auto px-4 pb-8 pt-4 flex flex-col gap-3 border-t border-slate-800/60">
             <Link
               to="/join"
-              className="flex items-center justify-center rounded-full text-[11px] font-bold uppercase tracking-wider bg-white text-slate-950 py-3 hover:bg-slate-200 transition-all"
+              onClick={() => setMobileMenuOpen(false)}
+              className="flex items-center justify-center rounded-full text-[11px] font-bold uppercase tracking-widest bg-white text-slate-950 py-3.5 hover:bg-slate-100 transition-all shadow-lg shadow-white/10"
             >
               Join Us
             </Link>
 
             {isAdmin ? (
-              <div className="flex flex-col gap-2 pt-2 border-t border-slate-800/80">
+              <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-3 px-3 py-2.5 bg-slate-900/60 rounded-xl border border-slate-800">
                   <div className="w-10 h-10 rounded-full ring-2 ring-blue-500/30 overflow-hidden bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xs shrink-0">
                     {profile?.avatar_url ? (
@@ -374,6 +431,14 @@ export const Navbar: React.FC = () => {
           </div>
         </div>
       )}
+
+      <style>{`
+        @keyframes mobileDrawerIn {
+          from { opacity: 0; transform: translateY(-12px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
+
 
       {/* Edit Profile Modal */}
       <EditProfileModal
