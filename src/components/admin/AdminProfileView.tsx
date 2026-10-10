@@ -10,7 +10,8 @@ import {
   Check,
   X,
   Copy,
-  CheckCircle2
+  CheckCircle2,
+  Key
 } from 'lucide-react';
 import { Button } from '../common/Button';
 
@@ -36,6 +37,7 @@ interface AdminProfileViewProps {
   showToast: (message: string, type: 'success' | 'error' | 'info') => void;
   adminEmail?: string;
   isDarkMode?: boolean;
+  onNavigateSecurity?: () => void;
 }
 
 export const AdminProfileView: React.FC<AdminProfileViewProps> = ({
@@ -44,8 +46,9 @@ export const AdminProfileView: React.FC<AdminProfileViewProps> = ({
   onSaveProfile,
   updatingProfile,
   showToast,
-  adminEmail = 'admin@cmritsi.in',
-  isDarkMode = true
+  adminEmail = 'csi@cmritonline.ac.in',
+  isDarkMode = true,
+  onNavigateSecurity
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
@@ -353,6 +356,38 @@ export const AdminProfileView: React.FC<AdminProfileViewProps> = ({
             </div>
           )}
         </form>
+      </div>
+
+      {/* Security & Password Quick Access Card */}
+      <div className={`p-5 sm:p-6 rounded-2xl border ${cardBg} shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-colors`}>
+        <div className="flex items-start sm:items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500 flex items-center justify-center shrink-0">
+            <Key className="w-5 h-5" />
+          </div>
+          <div>
+            <h4 className={`text-sm font-bold ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>
+              Administrator Security &amp; Password
+            </h4>
+            <p className={`text-xs mt-0.5 ${subtextColor}`}>
+              Need to change your login credentials or update passphrase?
+            </p>
+          </div>
+        </div>
+        {onNavigateSecurity && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onNavigateSecurity}
+            className={`shrink-0 text-xs font-semibold ${
+              isDarkMode
+                ? 'bg-slate-900/60 border-slate-700 text-slate-200 hover:bg-slate-800 hover:text-white'
+                : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50 hover:text-slate-900'
+            }`}
+          >
+            Change Password &rarr;
+          </Button>
+        )}
       </div>
     </div>
   );

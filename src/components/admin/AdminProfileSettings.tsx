@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../common/Button';
 import { adminService } from '../../services/adminService';
+import { useAuth } from '../../context/AuthContext';
 
 interface AdminProfileSettingsProps {
   profileForm: {
@@ -63,6 +64,8 @@ export const AdminProfileSettings: React.FC<AdminProfileSettingsProps> = ({
   showToast,
   targetSection
 }) => {
+  const { user } = useAuth();
+
   // Personal Information Edit Mode state
   const [isEditingPersonal, setIsEditingPersonal] = useState(false);
   const [personalDraft, setPersonalDraft] = useState({ ...profileForm });
@@ -238,7 +241,11 @@ export const AdminProfileSettings: React.FC<AdminProfileSettingsProps> = ({
 
     try {
       setUpdatingPassword(true);
-      await adminService.changePassword(newPassword);
+      const res = await adminService.changePassword(newPassword, user?.email, currentPassword);
+      if (!res.success) {
+        showToast(res.error || 'Password update failed.', 'error');
+        return;
+      }
       showToast('Administrator password updated successfully!', 'success');
       setPasswordModalOpen(false);
       setCurrentPassword('');
@@ -338,7 +345,7 @@ export const AdminProfileSettings: React.FC<AdminProfileSettingsProps> = ({
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             <span className="font-medium text-slate-200">Authorized Session</span>
             <span className="text-slate-500">&bull;</span>
-            <span className="font-mono text-slate-400">admin@cmritonline.ac.in</span>
+            <span className="font-mono text-slate-400">csi@cmritonline.ac.in</span>
           </div>
         </div>
       </div>
@@ -432,11 +439,11 @@ export const AdminProfileSettings: React.FC<AdminProfileSettingsProps> = ({
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-mono font-medium text-slate-200">
-                          admin@cmritonline.ac.in
+                          csi@cmritonline.ac.in
                         </span>
                         <button
                           type="button"
-                          onClick={() => copyText('admin@cmritonline.ac.in', 'Admin Email')}
+                          onClick={() => copyText('csi@cmritonline.ac.in', 'Admin Email')}
                           className="text-slate-400 hover:text-slate-200 p-1 rounded"
                           title="Copy Email"
                         >
@@ -529,7 +536,7 @@ export const AdminProfileSettings: React.FC<AdminProfileSettingsProps> = ({
                       <input
                         type="email"
                         disabled
-                        value="admin@cmritonline.ac.in"
+                        value="csi@cmritonline.ac.in"
                         className="w-full px-3 py-2 bg-slate-950/40 border border-slate-800 rounded-lg text-xs font-mono text-slate-400 cursor-not-allowed"
                       />
                     </div>
@@ -868,7 +875,7 @@ export const AdminProfileSettings: React.FC<AdminProfileSettingsProps> = ({
                     Public Contact Inquiries Address
                   </span>
                   <span className="text-[11px] text-slate-400 block mt-0.5">
-                    Show institutional email (<span className="font-mono text-slate-300">admin@cmritonline.ac.in</span>) on chapter contact page.
+                    Show institutional email (<span className="font-mono text-slate-300">csi@cmritonline.ac.in</span>) on chapter contact page.
                   </span>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer shrink-0">
@@ -970,7 +977,7 @@ export const AdminProfileSettings: React.FC<AdminProfileSettingsProps> = ({
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-slate-400 font-medium text-[11px]">Account ID</span>
-                  <span className="font-mono text-slate-200 text-[10px]">admin@cmritonline.ac.in</span>
+                  <span className="font-mono text-slate-200 text-[10px]">csi@cmritonline.ac.in</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-slate-400 font-medium text-[11px]">Two-Factor (2FA)</span>
@@ -1146,7 +1153,7 @@ export const AdminProfileSettings: React.FC<AdminProfileSettingsProps> = ({
                     type={showCurrentPassword ? 'text' : 'password'}
                     value={currentPassword}
                     onChange={e => setCurrentPassword(e.target.value)}
-                    placeholder="Enter current password (admin123)"
+                    placeholder="Enter current password"
                     className="w-full px-3 py-2 pr-9 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40"
                   />
                   <button

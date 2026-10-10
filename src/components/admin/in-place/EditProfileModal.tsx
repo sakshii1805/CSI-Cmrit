@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, User, Briefcase, Building, Phone, FileText, Save, Loader2 } from 'lucide-react';
+import { X, User, Briefcase, Building, Phone, FileText, Save, Loader2, Key } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import { useToast } from '../../common/Toast';
 
@@ -220,6 +220,29 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ isOpen, onCl
               placeholder="Brief summary of your administrative role in the CSI chapter..."
               className="w-full px-3.5 py-2.5 text-sm rounded-xl bg-slate-950 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors resize-none"
             />
+          </div>
+
+          {/* Change Password Prompt Card */}
+          <div className="p-3.5 rounded-2xl bg-slate-800/60 border border-slate-700/80 flex items-center justify-between text-xs gap-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center shrink-0">
+                <Key className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="font-bold text-white text-xs">Administrator Password</p>
+                <p className="text-[11px] text-slate-400">Update your login passphrase</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                onClose();
+                window.dispatchEvent(new CustomEvent('csi_open_change_password_modal'));
+              }}
+              className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-amber-500/15 border border-amber-500/30 text-amber-300 hover:bg-amber-500/25 transition-colors cursor-pointer shrink-0"
+            >
+              Change Password &rarr;
+            </button>
           </div>
 
           {/* Footer Actions */}

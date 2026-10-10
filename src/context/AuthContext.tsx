@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 import { AdminProfile } from '../types';
+import { adminAuthService } from '../services/adminAuthService';
 
 interface AuthContextType {
   user: User | null;
@@ -22,52 +23,49 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const DEFAULT_ADMIN_PROFILE: AdminProfile = {
-  id: 'admin-cmrit-01',
-  full_name: 'Student Admin',
-  email: 'admin@cmritonline.ac.in',
+  id: 'admin-01',
+  full_name: 'Chapter Executive',
+  email: 'csi@cmritonline.ac.in',
   role: 'super_admin',
   avatar_url: '', // Default clean: No profile picture (initials monogram)
-  designation: 'Student Coordinator',
+  designation: 'CSI Chapter Lead',
   department: 'Department of Computer Science & Engineering',
   phone: '+91 80 2852 4466',
-  bio: 'Student coordinator for CSI CMRIT chapter. Managing chapter events, workshops, hackathons, and technical community activities.',
+  bio: 'Authorized administrator for CSI CMRIT chapter. Managing chapter events, workshops, hackathons, and technical community activities.',
   created_at: '2024-01-15T00:00:00.000Z'
 };
 
-export const getSavedProfile = (): AdminProfile => {
+export const getSavedProfile = (email?: string): AdminProfile => {
+  const cleanEmail = email?.trim().toLowerCase();
+  if (cleanEmail) {
+    const account = adminAuthService.getAccountByEmail(cleanEmail);
+    if (account) {
+      return {
+        id: account.id,
+        full_name: account.full_name,
+        email: account.email,
+        role: account.role,
+        avatar_url: '',
+        designation: account.designation,
+        department: account.department,
+        phone: account.phone,
+        bio: account.bio,
+        created_at: account.created_at
+      };
+    }
+  }
   try {
     const saved = localStorage.getItem('csi_admin_profile_data');
     if (saved) {
       const parsed = JSON.parse(saved);
-      let changed = false;
-      // Only fix empty names or known dummy placeholders
-      if (
-        !parsed.full_name ||
-        parsed.full_name === 'CMRIT CSI Administrator' ||
-        parsed.full_name === 'Prof. Rajesh Sharma'
-      ) {
-        parsed.full_name = 'Student Admin';
-        changed = true;
+      if (parsed.email && adminAuthService.isAuthorizedEmail(parsed.email)) {
+        const acc = adminAuthService.getAccountByEmail(parsed.email);
+        return {
+          ...DEFAULT_ADMIN_PROFILE,
+          ...acc,
+          ...parsed
+        };
       }
-      // If the avatar was any stock/unsplash photo, clear it to empty so it defaults to no profile picture
-      if (parsed.avatar_url && (parsed.avatar_url.includes('unsplash') || parsed.avatar_url.includes('photo-'))) {
-        parsed.avatar_url = '';
-        changed = true;
-      }
-      if (
-        !parsed.designation ||
-        parsed.designation === 'Lead Faculty Coordinator / Chapter Lead'
-      ) {
-        parsed.designation = 'Student Coordinator';
-        changed = true;
-      }
-      const merged = { ...DEFAULT_ADMIN_PROFILE, ...parsed };
-      if (changed) {
-        try {
-          localStorage.setItem('csi_admin_profile_data', JSON.stringify(merged));
-        } catch {}
-      }
-      return merged;
     }
   } catch {}
   return DEFAULT_ADMIN_PROFILE;
@@ -134,6 +132,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } catch {}
 
+      if (user?.email) {
+        adminAuthService.updateProfile(user.email, {
+          full_name: updated.full_name,
+          designation: updated.designation,
+          department: updated.department,
+          phone: updated.phone,
+          bio: updated.bio
+        });
+      }
+
       if (isSupabaseConfigured && user?.id) {
         try {
           await supabase
@@ -166,27 +174,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (saved) {
           try {
             const parsed = JSON.parse(saved);
-            const savedProfile = getSavedProfile();
-            // Strictly check that the session belongs to admin@cmritonline.ac.in
-            if (parsed.user?.email?.toLowerCase() === 'admin@cmritonline.ac.in') {
-              let cleanFullName = savedProfile.full_name || parsed.profile?.full_name || 'Student Admin';
-              if (cleanFullName === 'CMRIT CSI Administrator' || cleanFullName === 'Prof. Rajesh Sharma') {
-                cleanFullName = 'Student Admin';
-              }
-              let cleanAvatar = parsed.profile?.avatar_url ?? savedProfile.avatar_url ?? '';
-              if (cleanAvatar && (cleanAvatar.includes('unsplash') || cleanAvatar.includes('photo-'))) {
-                cleanAvatar = '';
-              }
-              const cleanProfile = {
-                ...savedProfile,
-                ...parsed.profile,
-                full_name: cleanFullName,
-                avatar_url: cleanAvatar
+            const savedEmail = parsed.user?.email?.toLowerCase();
+            if (savedEmail && adminAuthService.isValidCmritEmail(savedEmail) && adminAuthService.isAuthorizedEmail(savedEmail)) {
+              const account = adminAuthService.getAccountByEmail(savedEmail);
+              const cleanProfile: AdminProfile = {
+                id: account?.id || parsed.user.id || 'admin-01',
+                email: savedEmail,
+                full_name: parsed.profile?.full_name || account?.full_name || 'Administrator',
+                role: account?.role || 'admin',
+                avatar_url: parsed.profile?.avatar_url || '',
+                designation: parsed.profile?.designation || account?.designation || 'Student Coordinator',
+                department: parsed.profile?.department || account?.department || 'Department of Computer Science & Engineering',
+                phone: parsed.profile?.phone || account?.phone || '+91 80 2852 4466',
+                bio: parsed.profile?.bio || account?.bio || 'Authorized administrator for CSI CMRIT chapter.',
+                created_at: account?.created_at || '2024-01-15T00:00:00.000Z'
               };
-              if (parsed.user.user_metadata) {
-                parsed.user.user_metadata.full_name = cleanFullName;
-                parsed.user.user_metadata.avatar_url = cleanAvatar;
-              }
               setUser(parsed.user);
               setAdminProfile(cleanProfile);
               setSession({ user: parsed.user } as any);
@@ -200,11 +202,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (isSupabaseConfigured) {
           const { data: { session } } = await supabase.auth.getSession();
-          if (session?.user && session.user.email?.toLowerCase() === 'admin@cmritonline.ac.in') {
+          if (session?.user && session.user.email && adminAuthService.isAuthorizedEmail(session.user.email)) {
             setSession(session);
             setUser(session.user);
             const profile = await fetchAdminProfile(session.user.id);
-            setAdminProfile(profile || getSavedProfile());
+            setAdminProfile(profile || getSavedProfile(session.user.email));
           }
         }
       } catch (err) {
@@ -220,11 +222,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
-      if (newSession?.user && newSession.user.email?.toLowerCase() === 'admin@cmritonline.ac.in') {
+      if (newSession?.user && newSession.user.email && adminAuthService.isAuthorizedEmail(newSession.user.email)) {
         setSession(newSession);
         setUser(newSession.user);
         const profile = await fetchAdminProfile(newSession.user.id);
-        setAdminProfile(profile || getSavedProfile());
+        setAdminProfile(profile || getSavedProfile(newSession.user.email));
       } else if (!newSession) {
         // If not logged in via dev session either
         const saved = localStorage.getItem('csi_dev_admin_session');
@@ -242,7 +244,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
-  // Secure Sign In - STRICTLY enforces only admin@cmritonline.ac.in and admin123
+  // Secure Sign In - verifies strictly against 5 authorized administrator accounts (@cmritonline.ac.in)
   const signIn = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
       setIsLoading(true);
@@ -250,29 +252,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const cleanEmail = email.trim().toLowerCase();
       const cleanPassword = password.trim();
 
-      // RULE ENFORCEMENT: Only admin@cmritonline.ac.in with admin123 is allowed
-      if (cleanEmail !== 'admin@cmritonline.ac.in' || cleanPassword !== 'admin123') {
+      const verifyRes = adminAuthService.verifyCredentials(cleanEmail, cleanPassword);
+      if (!verifyRes.success || !verifyRes.account) {
         return {
           success: false,
-          error: 'Access denied: Invalid credentials. Only the authorized administrator account (admin@cmritonline.ac.in) is permitted.'
+          error: verifyRes.error || 'Access denied: Invalid credentials.'
         };
       }
 
-      const currentProfile = getSavedProfile();
+      const account = verifyRes.account;
+      const currentProfile: AdminProfile = {
+        id: account.id,
+        full_name: account.full_name,
+        email: account.email,
+        role: account.role,
+        avatar_url: '',
+        designation: account.designation,
+        department: account.department,
+        phone: account.phone,
+        bio: account.bio,
+        created_at: account.created_at
+      };
+
       const authorizedUser: any = {
-        id: currentProfile.id || 'admin-cmrit-01',
-        email: 'admin@cmritonline.ac.in',
-        app_metadata: { role: 'super_admin' },
+        id: account.id,
+        email: account.email,
+        app_metadata: { role: account.role },
         user_metadata: {
-          full_name: currentProfile.full_name,
-          avatar_url: currentProfile.avatar_url
+          full_name: account.full_name,
+          avatar_url: ''
         },
         aud: 'authenticated',
-        created_at: currentProfile.created_at || '2024-01-15T00:00:00.000Z'
+        created_at: account.created_at
       };
 
       const authorizedSession: any = {
-        access_token: 'auth-csi-cmrit-admin-token',
+        access_token: 'auth-csi-cmrit-admin-token-' + account.id,
         token_type: 'bearer',
         expires_in: 86400,
         refresh_token: 'auth-refresh-token',
@@ -300,7 +315,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             return { success: true };
           }
         } catch (supabaseErr) {
-          console.warn('[Auth] Supabase sign-in bypassed in favor of single authorized credential:', supabaseErr);
+          console.warn('[Auth] Supabase sign-in bypassed in favor of local authorized credential:', supabaseErr);
         }
       }
 

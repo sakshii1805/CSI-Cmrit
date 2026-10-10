@@ -97,15 +97,39 @@ export const adminService = {
   },
 
   /**
-   * Change current admin password through Supabase Auth
+   * Change current admin password through persistent adminAuthService and Supabase Auth
    */
-  async changePassword(newPassword: string): Promise<{ success: boolean; error?: string }> {
+  async changePassword(newPassword: string, email?: string, currentPassword?: string): Promise<{ success: boolean; error?: string }> {
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword,
-      });
+      // 1. Update in adminAuthService registry
+      let targetEmail = email;
+      if (!targetEmail) {
+        try {
+          const saved = localStorage.getItem('csi_dev_admin_session');
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            targetEmail = parsed?.user?.email;
+          }
+        } catch {}
+      }
+      if (targetEmail) {
+        const { adminAuthService } = await import('./adminAuthService');
+        const authRes = adminAuthService.changePassword(targetEmail, newPassword, currentPassword);
+        if (!authRes.success) {
+          return { success: false, error: authRes.error };
+        }
+      }
 
-      if (error) return { success: false, error: error.message };
+      // 2. If Supabase is configured, update Supabase auth
+      const { isSupabaseConfigured } = await import('../lib/supabaseClient');
+      if (isSupabaseConfigured) {
+        const { error } = await supabase.auth.updateUser({
+          password: newPassword,
+        });
+
+        if (error) return { success: false, error: error.message };
+      }
+
       return { success: true };
     } catch (err: unknown) {
       const error = err as Error;

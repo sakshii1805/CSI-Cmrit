@@ -17,6 +17,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { Button } from '../common/Button';
+import { adminAuthService } from '../../services/adminAuthService';
 
 interface AdminSecurityViewProps {
   showToast: (message: string, type: 'success' | 'error' | 'info') => void;
@@ -26,7 +27,7 @@ interface AdminSecurityViewProps {
 
 export const AdminSecurityView: React.FC<AdminSecurityViewProps> = ({
   showToast,
-  adminEmail = 'admin@cmritsi.in',
+  adminEmail = 'csi@cmritonline.ac.in',
   isDarkMode = false
 }) => {
   // Modals state
@@ -78,8 +79,8 @@ export const AdminSecurityView: React.FC<AdminSecurityViewProps> = ({
       showToast('Please enter your current password.', 'error');
       return;
     }
-    if (newPassword.length < 8) {
-      showToast('New password must be at least 8 characters.', 'error');
+    if (newPassword.length < 6) {
+      showToast('New password must be at least 6 characters.', 'error');
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -88,14 +89,22 @@ export const AdminSecurityView: React.FC<AdminSecurityViewProps> = ({
     }
 
     setIsChangingPassword(true);
-    setTimeout(() => {
-      setIsChangingPassword(false);
+    try {
+      const res = adminAuthService.changePassword(adminEmail, newPassword, currentPassword);
+      if (!res.success) {
+        showToast(res.error || 'Password update failed.', 'error');
+        return;
+      }
       setPasswordModalOpen(false);
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
       showToast('Password updated successfully! Next login will require the new credentials.', 'success');
-    }, 800);
+    } catch (err: any) {
+      showToast(err?.message || 'Password update failed.', 'error');
+    } finally {
+      setIsChangingPassword(false);
+    }
   };
 
   const handleTerminateOtherSessions = () => {

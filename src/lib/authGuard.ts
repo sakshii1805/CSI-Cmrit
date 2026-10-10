@@ -1,4 +1,5 @@
 import { supabase, isSupabaseConfigured } from './supabaseClient';
+import { adminAuthService } from '../services/adminAuthService';
 
 /**
  * Validates whether the current runtime environment / browser session has admin authorization.
@@ -12,7 +13,7 @@ export const checkAdminAuthorization = async (): Promise<boolean> => {
       try {
         const parsed = JSON.parse(saved);
         const email = parsed?.user?.email?.toLowerCase();
-        if (email === 'admin@cmritonline.ac.in' || email === 'admin@cmritsi.in') {
+        if (email && adminAuthService.isAuthorizedEmail(email)) {
           return true;
         }
       } catch {}
@@ -22,7 +23,7 @@ export const checkAdminAuthorization = async (): Promise<boolean> => {
     if (isSupabaseConfigured) {
       const { data: { session } } = await supabase.auth.getSession();
       const email = session?.user?.email?.toLowerCase();
-      if (email === 'admin@cmritonline.ac.in' || email === 'admin@cmritsi.in') {
+      if (email && adminAuthService.isAuthorizedEmail(email)) {
         return true;
       }
     }

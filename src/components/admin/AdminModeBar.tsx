@@ -87,7 +87,7 @@ export const AdminModeBar: React.FC<AdminModeBarProps> = ({
               {profile?.full_name || 'Student Admin'}
             </span>
             <span>•</span>
-            <span className="font-mono text-slate-400">admin@cmritonline.ac.in</span>
+            <span className="font-mono text-slate-400">{profile?.email || 'csi@cmritonline.ac.in'}</span>
           </div>
         </div>
 

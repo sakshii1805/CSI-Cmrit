@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '../components/common/Toast';
 import { useAuth } from '../context/AuthContext';
+import { adminAuthService } from '../services/adminAuthService';
 
 export const AdminLogin: React.FC = () => {
   const navigate = useNavigate();
@@ -23,7 +24,6 @@ export const AdminLogin: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [justFilled, setJustFilled] = useState(false);
 
   // If already logged in and confirmed admin, redirect directly to home in admin mode
   useEffect(() => {
@@ -42,12 +42,15 @@ export const AdminLogin: React.FC = () => {
       return;
     }
 
-    const isValidAdmin =
-      (cleanEmail === 'admin@cmritsi.in' || cleanEmail === 'admin@cmritonline.ac.in') &&
-      cleanPass === 'admin123';
+    if (!adminAuthService.isValidEmailFormat(cleanEmail)) {
+      const msg = 'Invalid institutional email format. Please use username@cmritonline.ac.in';
+      setErrorMessage(msg);
+      showToast(msg, 'error');
+      return;
+    }
 
-    if (!isValidAdmin) {
-      const msg = 'Invalid credentials. Please verify your email and password.';
+    if (!adminAuthService.isAuthorizedEmail(cleanEmail)) {
+      const msg = 'Access denied. This institutional account is not authorized for administrator access.';
       setErrorMessage(msg);
       showToast(msg, 'error');
       return;
@@ -59,7 +62,7 @@ export const AdminLogin: React.FC = () => {
       const res = await signIn(cleanEmail, cleanPass);
 
       if (!res.success) {
-        setErrorMessage(res.error || 'Authentication failed.');
+        setErrorMessage(res.error || 'Authentication failed. Please verify your credentials.');
         showToast(res.error || 'Authentication failed.', 'error');
         return;
       }
@@ -73,15 +76,6 @@ export const AdminLogin: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleFillAuthorizedCredentials = () => {
-    setEmail('admin@cmritonline.ac.in');
-    setPassword('admin123');
-    setErrorMessage(null);
-    setJustFilled(true);
-    showToast('Credentials filled.', 'info');
-    setTimeout(() => setJustFilled(false), 2000);
   };
 
   return (
@@ -124,25 +118,6 @@ export const AdminLogin: React.FC = () => {
 
         {/* Clean Corporate Login Dialog Box with Dynamic Slide-Down Effect */}
         <div className="bg-white border border-slate-200/90 rounded-3xl shadow-2xl p-6 sm:p-8 animate-modal-slide-down">
-          {/* Subtle Demo Credentials Helper */}
-          <div className="mb-6 p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center justify-between text-xs">
-            <div className="text-slate-600 min-w-0 pr-2">
-              <span className="font-semibold text-slate-800 block text-[11px]">
-                Authorized Demo Account
-              </span>
-              <span className="font-mono text-[11px] text-slate-500 truncate block">
-                admin@cmritonline.ac.in &bull; admin123
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={handleFillAuthorizedCredentials}
-              className="shrink-0 text-xs font-semibold text-blue-600 hover:text-blue-800 px-2.5 py-1 rounded bg-blue-50 hover:bg-blue-100 transition-colors"
-            >
-              {justFilled ? 'Filled' : 'Auto-fill'}
-            </button>
-          </div>
-
           {errorMessage && (
             <div className="mb-5 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-start gap-2.5">
               <AlertCircle className="w-4 h-4 shrink-0 text-rose-500 mt-0.5" />
@@ -157,7 +132,7 @@ export const AdminLogin: React.FC = () => {
             {/* Email Field */}
             <div>
               <label htmlFor="admin-email" className="block text-xs font-semibold text-slate-700 mb-1.5">
-                Email address
+                Institutional Email address
               </label>
               <div className="relative">
                 <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none" />
@@ -170,7 +145,7 @@ export const AdminLogin: React.FC = () => {
                     setEmail(e.target.value);
                     if (errorMessage) setErrorMessage(null);
                   }}
-                  placeholder="admin@cmritonline.ac.in"
+                  placeholder="username@cmritonline.ac.in"
                   className="w-full pl-10 pr-4 py-2 text-sm bg-white border border-slate-300 rounded-lg text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition-all"
                 />
               </div>

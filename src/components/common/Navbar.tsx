@@ -1,14 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
-import { Menu, X, Shield, LogOut, UserCog } from 'lucide-react';
+import { Menu, X, Shield, LogOut, UserCog, Key } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { EditProfileModal } from '../admin/in-place/EditProfileModal';
+import { ChangePasswordModal } from '../admin/in-place/ChangePasswordModal';
 
 export const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const profileDropdownRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
 
@@ -26,6 +28,12 @@ export const Navbar: React.FC = () => {
     setMobileMenuOpen(false);
     setProfileDropdownOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    const handleOpenPassword = () => setIsChangePasswordOpen(true);
+    window.addEventListener('csi_open_change_password_modal', handleOpenPassword);
+    return () => window.removeEventListener('csi_open_change_password_modal', handleOpenPassword);
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
@@ -67,9 +75,9 @@ export const Navbar: React.FC = () => {
   return (
     <>
       {/* Floating navbar wrapper */}
-      <div className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-2.5 sm:pt-4 px-2.5 sm:px-4 md:px-8 pointer-events-none">
+      <div className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-2.5 sm:pt-4 px-2 sm:px-4 md:px-8 pointer-events-none">
         <nav
-          className={`flex items-center justify-between w-full max-w-7xl pointer-events-auto transition-all duration-300 ease-in-out px-3 sm:px-5 py-2 sm:py-2.5 rounded-2xl border ${
+          className={`flex items-center justify-between w-full max-w-7xl pointer-events-auto transition-all duration-300 ease-in-out pl-3 sm:pl-5 pr-1.5 sm:pr-4 py-2 sm:py-2.5 rounded-2xl border ${
             isScrolled
               ? 'bg-slate-950/95 backdrop-blur-md border-slate-800/80 shadow-xl shadow-black/40'
               : isHomePage
@@ -77,32 +85,22 @@ export const Navbar: React.FC = () => {
                 : 'bg-slate-950/90 backdrop-blur-md border-slate-800/80 shadow-lg shadow-black/30'
           }`}
         >
-          {/* Left: Logo + college info (compact on mobile, full on desktop) */}
+          {/* Left: Logo + college info (visible at top, collapses on scroll) */}
           <Link
             to="/"
-            className="flex items-center gap-2 sm:gap-3 group pointer-events-auto min-w-0 shrink"
+            className="flex items-center gap-3 group pointer-events-auto min-w-0"
             aria-label="CSI CMRIT Chapter Home"
           >
             {/* CSI CMRIT Logo */}
             <img
               src="/images/logos/cmrit_csi_logo.jpeg"
               alt="CSI CMRIT Logo"
-              className="h-7 w-7 sm:h-8 sm:w-8 md:h-9 md:w-9 object-contain rounded-md transition-all duration-500 shrink-0"
+              className="h-8 md:h-9 w-auto object-contain rounded-sm transition-all duration-500 shrink-0"
             />
 
-            {/* Mobile-only brand badge (visible only on mobile) */}
-            <div className="flex flex-col min-w-0 sm:hidden">
-              <span className="text-[12px] font-extrabold text-white tracking-tight leading-tight truncate">
-                CSI CMRIT
-              </span>
-              <span className="text-[8px] font-medium text-slate-400 tracking-wider leading-none mt-0.5 truncate">
-                Student Chapter
-              </span>
-            </div>
-
-            {/* Divider + Full Text block — visible on sm+ screens, collapses on scroll */}
+            {/* Divider + Text block — fades out on scroll */}
             <div
-              className={`hidden sm:flex items-center gap-2.5 transition-all duration-500 overflow-hidden ${
+              className={`flex items-center gap-2 sm:gap-2.5 transition-all duration-500 overflow-hidden ${
                 isScrolled ? 'max-w-0 opacity-0' : 'max-w-xs opacity-100'
               }`}
             >
@@ -119,17 +117,17 @@ export const Navbar: React.FC = () => {
               </div>
             </div>
 
-            {/* CMR College Logo + label — visible on lg+ screens, collapses on scroll */}
+            {/* CMR College Logo + label — fades out on scroll */}
             <div
-              className={`hidden lg:flex items-center gap-2 transition-all duration-500 overflow-hidden ${
+              className={`flex items-center gap-1.5 sm:gap-2 transition-all duration-500 overflow-hidden ${
                 isScrolled ? 'max-w-0 opacity-0' : 'max-w-xs opacity-100'
               }`}
             >
               {/* Second vertical divider */}
-              <div className="h-7 w-px bg-slate-600/70 shrink-0" />
+              <div className="h-7 sm:h-8 w-px bg-slate-600/70 shrink-0" />
 
               {/* Logo square */}
-              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-sm flex items-center justify-center shrink-0">
+              <div className="w-7 h-7 rounded-sm flex items-center justify-center shrink-0">
                 <img
                   src="/images/logos/cmr_new_logo.png"
                   alt="CMRIT College Logo"
@@ -138,7 +136,7 @@ export const Navbar: React.FC = () => {
               </div>
 
               {/* College name + tagline */}
-              <div className="flex flex-col gap-0.5">
+              <div className="flex flex-col gap-0.5 min-w-0">
                 <span className="text-[10px] sm:text-[11px] font-semibold text-slate-300 whitespace-nowrap tracking-tight leading-none">
                   CMR Institute of Technology
                 </span>
@@ -169,7 +167,7 @@ export const Navbar: React.FC = () => {
           </div>
 
           {/* Right: CTA + Admin Profile / Login + Mobile toggle */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0 ml-auto pl-1 sm:pl-2">
             {/* Join Us CTA */}
             <Link
               to="/join"
@@ -225,7 +223,7 @@ export const Navbar: React.FC = () => {
                             {profile?.full_name || 'Student Admin'}
                           </p>
                           <p className="text-[10px] text-slate-400 truncate">
-                            {profile?.email || 'admin@cmritonline.ac.in'}
+                            {profile?.email || 'csi@cmritonline.ac.in'}
                           </p>
                           <span className="inline-block mt-0.5 text-[9px] font-semibold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">
                             {profile?.designation || 'Administrator'}
@@ -246,6 +244,20 @@ export const Navbar: React.FC = () => {
                         <UserCog className="w-4 h-4 text-blue-400" />
                         <span>Edit Profile</span>
                       </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setProfileDropdownOpen(false);
+                          setIsChangePasswordOpen(true);
+                        }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-amber-300 hover:text-amber-200 hover:bg-amber-500/10 rounded-xl transition-colors text-left cursor-pointer"
+                      >
+                        <Key className="w-4 h-4 text-amber-400" />
+                        <span>Change Password</span>
+                      </button>
+
+                      <div className="my-1 border-t border-slate-800" />
 
                       <button
                         type="button"
@@ -279,7 +291,7 @@ export const Navbar: React.FC = () => {
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 text-slate-300 hover:text-white transition-colors"
+              className="lg:hidden p-1 sm:p-2 text-slate-300 hover:text-white transition-colors"
               aria-label="Toggle navigation menu"
             >
               {mobileMenuOpen
@@ -330,7 +342,7 @@ export const Navbar: React.FC = () => {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-semibold text-white truncate">{profile?.full_name || 'Student Admin'}</p>
-                    <p className="text-[10px] text-slate-400 truncate">{profile?.email || 'admin@cmritonline.ac.in'}</p>
+                    <p className="text-[10px] text-slate-400 truncate">{profile?.email || 'csi@cmritonline.ac.in'}</p>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
@@ -347,16 +359,27 @@ export const Navbar: React.FC = () => {
                   </button>
                   <button
                     type="button"
-                    onClick={async () => {
+                    onClick={() => {
                       setMobileMenuOpen(false);
-                      await signOut();
+                      setIsChangePasswordOpen(true);
                     }}
-                    className="flex items-center justify-center gap-1.5 rounded-xl text-xs font-semibold bg-rose-600/20 border border-rose-500/30 text-rose-300 py-2.5 hover:bg-rose-600/30 transition-all cursor-pointer"
+                    className="flex items-center justify-center gap-1.5 rounded-xl text-xs font-semibold bg-amber-500/15 border border-amber-500/30 text-amber-300 py-2.5 hover:bg-amber-500/25 transition-all cursor-pointer"
                   >
-                    <LogOut className="w-3.5 h-3.5" />
-                    Logout
+                    <Key className="w-3.5 h-3.5 text-amber-400" />
+                    Password
                   </button>
                 </div>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setMobileMenuOpen(false);
+                    await signOut();
+                  }}
+                  className="w-full mt-2 flex items-center justify-center gap-1.5 rounded-xl text-xs font-semibold bg-rose-600/20 border border-rose-500/30 text-rose-300 py-2.5 hover:bg-rose-600/30 transition-all cursor-pointer"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  Logout
+                </button>
               </div>
             ) : (
               <button
@@ -379,6 +402,12 @@ export const Navbar: React.FC = () => {
       <EditProfileModal
         isOpen={isEditProfileOpen}
         onClose={() => setIsEditProfileOpen(false)}
+      />
+
+      {/* Dedicated Change Password Modal */}
+      <ChangePasswordModal
+        isOpen={isChangePasswordOpen}
+        onClose={() => setIsChangePasswordOpen(false)}
       />
     </>
   );

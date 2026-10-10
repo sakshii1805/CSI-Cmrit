@@ -407,7 +407,7 @@ export const AdminSubmissionsDrawer: React.FC<AdminSubmissionsDrawerProps> = ({
                 </div>
                 <div>
                   <h4 className="text-sm font-bold text-slate-900">{fullName || 'Student Admin'}</h4>
-                  <p className="text-xs text-slate-500 font-mono">admin@cmritonline.ac.in</p>
+                  <p className="text-xs text-slate-500 font-mono">csi@cmritonline.ac.in</p>
                   <span className="inline-block mt-0.5 px-2 py-0.2 rounded bg-blue-100 text-blue-700 font-semibold text-[10px]">
                     Authorized Chapter Admin
                   </span>

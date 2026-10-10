@@ -55,6 +55,7 @@ import { AdminProfileView } from '../components/admin/AdminProfileView';
 import { AdminAccountSettingsView } from '../components/admin/AdminAccountSettingsView';
 import { AdminSecurityView } from '../components/admin/AdminSecurityView';
 import { ConfirmDialog } from '../components/common/ConfirmDialog';
+import { ChangePasswordModal } from '../components/admin/in-place/ChangePasswordModal';
 import { adminService } from '../services/adminService';
 import { eventsService } from '../services/eventsService';
 import { announcementsService } from '../services/announcementsService';
@@ -111,6 +112,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+  const [changePasswordModalOpen, setChangePasswordModalOpen] = useState(false);
   const [accountMenuOpen, setAccountMenuOpen] = useState(() => {
     const path = location.pathname.toLowerCase();
     return path.includes('/profile') || path.includes('/settings') || path.includes('/security');
@@ -948,7 +950,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
 
     try {
       setUpdatingProfile(true);
-      await adminService.changePassword(newPassword);
+      const res = await adminService.changePassword(newPassword, user?.email);
+      if (res && !res.success) {
+        showToast(res.error || 'Password update failed.', 'error');
+        return;
+      }
       setNewPassword('');
       setConfirmPassword('');
       showToast('Password changed successfully!', 'success');
@@ -1118,7 +1124,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
             {cleanAdminName}
           </p>
           <p className={`text-[10px] font-mono truncate ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-            {user?.email || 'admin@cmritsi.in'}
+            {user?.email || 'csi@cmritonline.ac.in'}
           </p>
         </div>
 
@@ -1373,20 +1379,67 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
                 >
                   <div className={`px-4 py-3 border-b ${isDarkMode ? 'border-slate-800/80' : 'border-slate-100'}`}>
                     <p className={`text-xs font-bold truncate ${isDarkMode ? 'text-white' : 'text-slate-900'}`}>{cleanAdminName}</p>
-                    <p className={`text-[11px] font-mono truncate ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>{user?.email || 'admin@cmritsi.in'}</p>
+                    <p className={`text-[11px] font-mono truncate ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>{user?.email || 'csi@cmritonline.ac.in'}</p>
                     <div className="mt-1.5 inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/20 text-blue-500 text-[10px] font-semibold">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                       Student Admin
                     </div>
                   </div>
 
-                  <div className="p-1.5">
+                  <div className="p-1.5 space-y-0.5">
+                    <button
+                      onClick={() => {
+                        setProfileDropdownOpen(false);
+                        handleTabChange('profile');
+                      }}
+                      className={`w-full text-left px-3.5 py-2 rounded-lg flex items-center gap-2.5 font-semibold text-xs transition-colors ${
+                        isDarkMode
+                          ? 'hover:bg-slate-800 text-slate-200'
+                          : 'hover:bg-slate-100 text-slate-700'
+                      }`}
+                    >
+                      <User className="w-4 h-4 text-blue-500" />
+                      <span>Profile</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setProfileDropdownOpen(false);
+                        handleTabChange('settings');
+                      }}
+                      className={`w-full text-left px-3.5 py-2 rounded-lg flex items-center gap-2.5 font-semibold text-xs transition-colors ${
+                        isDarkMode
+                          ? 'hover:bg-slate-800 text-slate-200'
+                          : 'hover:bg-slate-100 text-slate-700'
+                      }`}
+                    >
+                      <Sliders className="w-4 h-4 text-indigo-500" />
+                      <span>Account Settings</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setProfileDropdownOpen(false);
+                        setChangePasswordModalOpen(true);
+                      }}
+                      className={`w-full text-left px-3.5 py-2 rounded-lg flex items-center gap-2.5 font-semibold text-xs transition-colors ${
+                        isDarkMode
+                          ? 'hover:bg-slate-800 text-amber-300'
+                          : 'hover:bg-amber-50 text-amber-700'
+                      }`}
+                    >
+                      <Key className="w-4 h-4 text-amber-400" />
+                      <span className="font-bold">Change Password</span>
+                    </button>
+
+                    <div className={`my-1 border-t ${isDarkMode ? 'border-slate-800' : 'border-slate-100'}`} />
+
                     <button
                       onClick={() => {
                         setProfileDropdownOpen(false);
                         setLogoutModalOpen(true);
                       }}
-                      className={`w-full text-left px-3.5 py-2.5 rounded-xl flex items-center gap-2.5 font-semibold text-xs transition-colors ${
+                      className={`w-full text-left px-3.5 py-2 rounded-lg flex items-center gap-2.5 font-semibold text-xs transition-colors ${
                         isDarkMode
                           ? 'hover:bg-rose-950/40 text-rose-400 hover:text-rose-300'
                           : 'hover:bg-rose-50 text-rose-600 hover:text-rose-700'
@@ -2435,8 +2488,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
               onSaveProfile={handleSaveProfile}
               updatingProfile={updatingProfile}
               showToast={showToast}
-              adminEmail={user?.email || 'admin@cmritsi.in'}
+              adminEmail={user?.email || 'csi@cmritonline.ac.in'}
               isDarkMode={isDarkMode}
+              onNavigateSecurity={() => handleTabChange('security')}
             />
           )}
 
@@ -2453,7 +2507,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
           {activeTab === 'security' && (
             <AdminSecurityView
               showToast={showToast}
-              adminEmail={user?.email || 'admin@cmritsi.in'}
+              adminEmail={user?.email || 'csi@cmritonline.ac.in'}
               isDarkMode={isDarkMode}
             />
           )}
@@ -3068,6 +3122,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
           </div>
         </div>
       )}
+
+      {/* Dedicated Change Password Modal */}
+      <ChangePasswordModal
+        isOpen={changePasswordModalOpen}
+        onClose={() => setChangePasswordModalOpen(false)}
+      />
     </div>
   );
 };
