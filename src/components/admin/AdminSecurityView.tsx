@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import { Button } from '../common/Button';
 import { adminAuthService } from '../../services/adminAuthService';
+import { validatePasswordStrict, evaluatePasswordSecurity } from '../../lib/passwordSecurity';
+import { PasswordStrengthIndicator } from '../common/PasswordStrengthIndicator';
 
 interface AdminSecurityViewProps {
   showToast: (message: string, type: 'success' | 'error' | 'info') => void;
@@ -73,14 +75,17 @@ export const AdminSecurityView: React.FC<AdminSecurityViewProps> = ({
     setTimeout(() => setCopiedId(false), 2000);
   };
 
+  const pwdSecurity = evaluatePasswordSecurity(newPassword);
+
   const handleChangePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentPassword) {
       showToast('Please enter your current password.', 'error');
       return;
     }
-    if (newPassword.length < 6) {
-      showToast('New password must be at least 6 characters.', 'error');
+    const validation = validatePasswordStrict(newPassword);
+    if (!validation.isValid) {
+      showToast(validation.error || 'Password does not meet institutional requirements.', 'error');
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -350,10 +355,17 @@ export const AdminSecurityView: React.FC<AdminSecurityViewProps> = ({
                   required
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Enter strong new password"
+                  placeholder="Enter strong new password (min. 8 chars, A-Z, 0-9, special char)"
                   className={`w-full px-3.5 py-2.5 rounded-xl border text-xs outline-none ${inputBg}`}
                 />
               </div>
+
+              {/* Password Strength & Requirements Meter */}
+              <PasswordStrengthIndicator
+                password={newPassword}
+                confirmPassword={confirmPassword}
+                isDarkMode={isDarkMode}
+              />
 
               <div>
                 <label className={`block text-xs font-semibold mb-1 ${labelColor}`}>Confirm New Password *</label>
@@ -396,8 +408,8 @@ export const AdminSecurityView: React.FC<AdminSecurityViewProps> = ({
                   type="submit"
                   variant="primary"
                   size="sm"
-                  disabled={isChangingPassword}
-                  className="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs"
+                  disabled={isChangingPassword || !currentPassword || !newPassword || !confirmPassword || newPassword !== confirmPassword || !pwdSecurity.isValid}
+                  className="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {isChangingPassword ? 'Verifying...' : 'Update Password'}
                 </Button>

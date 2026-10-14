@@ -4,6 +4,8 @@
  * and their password modification lifecycle.
  */
 
+import { validatePasswordStrict, evaluatePasswordSecurity, PasswordValidationResult } from '../lib/passwordSecurity';
+
 export interface AuthorizedAdminAccount {
   id: string;
   email: string;
@@ -192,6 +194,7 @@ export const adminAuthService = {
 
   /**
    * Modifies an administrator's password.
+   * Enforces institutional security rules: min 8 chars, uppercase, lowercase, number, special char.
    * Can optionally verify the current password before changing.
    */
   changePassword(
@@ -207,19 +210,28 @@ export const adminAuthService = {
       return { success: false, error: 'Administrator account not found.' };
     }
 
-    if (!newPassword || newPassword.trim().length < 6) {
-      return { success: false, error: 'New password must be at least 6 characters long.' };
+    const cleanPass = (newPassword || '').trim();
+    const validation = validatePasswordStrict(cleanPass);
+    if (!validation.isValid) {
+      return { success: false, error: validation.error };
     }
 
     if (currentPassword !== undefined && currentPassword !== accounts[index].password) {
       return { success: false, error: 'Current password does not match.' };
     }
 
-    accounts[index].password = newPassword.trim();
+    accounts[index].password = cleanPass;
     accounts[index].password_updated_at = new Date().toISOString();
     this.saveAccounts(accounts);
 
     return { success: true };
+  },
+
+  /**
+   * Evaluates password security against institutional standards
+   */
+  evaluatePassword(password: string): PasswordValidationResult {
+    return evaluatePasswordSecurity(password);
   },
 
   /**

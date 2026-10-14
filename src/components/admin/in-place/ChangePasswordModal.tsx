@@ -4,6 +4,8 @@ import { useAuth } from '../../../context/AuthContext';
 import { useToast } from '../../common/Toast';
 import { adminAuthService } from '../../../services/adminAuthService';
 import { adminService } from '../../../services/adminService';
+import { validatePasswordStrict, evaluatePasswordSecurity } from '../../../lib/passwordSecurity';
+import { PasswordStrengthIndicator } from '../../common/PasswordStrengthIndicator';
 
 interface ChangePasswordModalProps {
   isOpen: boolean;
@@ -30,6 +32,8 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
 
   const targetEmail = user?.email || profile?.email || 'csi@cmritonline.ac.in';
 
+  const pwdSecurity = evaluatePasswordSecurity(newPassword);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
@@ -43,8 +47,9 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
       return;
     }
 
-    if (cleanNewPass.length < 6) {
-      const msg = 'New password must be at least 6 characters long.';
+    const validation = validatePasswordStrict(cleanNewPass);
+    if (!validation.isValid) {
+      const msg = validation.error || 'Password does not meet security requirements.';
       setErrorMessage(msg);
       showToast(msg, 'error');
       return;
@@ -158,7 +163,7 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                   setNewPassword(e.target.value);
                   if (errorMessage) setErrorMessage(null);
                 }}
-                placeholder="Enter new password (min. 6 characters)"
+                placeholder="Enter new password (min. 8 characters)"
                 className="w-full pl-3.5 pr-10 py-2.5 text-xs sm:text-sm rounded-xl bg-slate-950 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/30 transition-all"
               />
               <button
@@ -170,6 +175,13 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                 {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
+
+            {/* Real-time Password Security Meter & Criteria Checklist */}
+            <PasswordStrengthIndicator
+              password={newPassword}
+              confirmPassword={confirmPassword}
+              isDarkMode={true}
+            />
           </div>
 
           {/* Confirm Password */}
@@ -205,14 +217,6 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
                 {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
-
-            {/* Match Indicator */}
-            {passwordsMatch && (
-              <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-emerald-400">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Passwords match</span>
-              </div>
-            )}
           </div>
 
           {/* Info Pill */}
@@ -232,8 +236,8 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
             </button>
             <button
               type="submit"
-              disabled={loading}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-500 active:bg-blue-700 shadow-md shadow-blue-600/30 transition-all disabled:opacity-50 disabled:pointer-events-none cursor-pointer"
+              disabled={loading || !newPassword || !confirmPassword || !passwordsMatch || !pwdSecurity.isValid}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-blue-600 hover:bg-blue-500 active:bg-blue-700 shadow-md shadow-blue-600/30 transition-all disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             >
               {loading ? (
                 <>

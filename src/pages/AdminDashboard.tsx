@@ -63,6 +63,7 @@ import { highlightsService } from '../services/highlightsService';
 import { commentsService } from '../services/commentsService';
 import { joinService } from '../services/joinService';
 import { contactService } from '../services/contactService';
+import { validatePasswordStrict } from '../lib/passwordSecurity';
 import { storageService } from '../services/storageService';
 import { isSupabaseConfigured } from '../lib/supabaseClient';
 import {
@@ -939,12 +940,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ defaultTab }) =>
       showToast('Please enter a new password.', 'error');
       return;
     }
-    if (newPassword !== confirmPassword) {
-      showToast('Passwords do not match.', 'error');
+    const validation = validatePasswordStrict(newPassword.trim());
+    if (!validation.isValid) {
+      showToast(validation.error || 'Password does not meet security requirements.', 'error');
       return;
     }
-    if (newPassword.length < 6) {
-      showToast('Password must be at least 6 characters long.', 'error');
+    if (newPassword !== confirmPassword) {
+      showToast('Passwords do not match.', 'error');
       return;
     }
 

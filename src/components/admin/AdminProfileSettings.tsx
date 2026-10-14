@@ -32,6 +32,8 @@ import {
 import { Button } from '../common/Button';
 import { adminService } from '../../services/adminService';
 import { useAuth } from '../../context/AuthContext';
+import { validatePasswordStrict, evaluatePasswordSecurity } from '../../lib/passwordSecurity';
+import { PasswordStrengthIndicator } from '../common/PasswordStrengthIndicator';
 
 interface AdminProfileSettingsProps {
   profileForm: {
@@ -230,8 +232,9 @@ export const AdminProfileSettings: React.FC<AdminProfileSettingsProps> = ({
       showToast('Please enter a new password.', 'error');
       return;
     }
-    if (newPassword.length < 6) {
-      showToast('Password must be at least 6 characters.', 'error');
+    const validation = validatePasswordStrict(newPassword.trim());
+    if (!validation.isValid) {
+      showToast(validation.error || 'Password does not meet institutional requirements.', 'error');
       return;
     }
     if (newPassword !== confirmPassword) {
@@ -1176,7 +1179,7 @@ export const AdminProfileSettings: React.FC<AdminProfileSettingsProps> = ({
                     required
                     value={newPassword}
                     onChange={e => setNewPassword(e.target.value)}
-                    placeholder="Enter new password (min 6 characters)"
+                    placeholder="Enter new password (min 8 characters, capital, number, special)"
                     className="w-full px-3 py-2 pr-9 bg-slate-950 border border-slate-700 rounded-lg text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/40"
                   />
                   <button
@@ -1187,6 +1190,13 @@ export const AdminProfileSettings: React.FC<AdminProfileSettingsProps> = ({
                     {showNewPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                   </button>
                 </div>
+
+                {/* Password Strength & Requirements Checklist */}
+                <PasswordStrengthIndicator
+                  password={newPassword}
+                  confirmPassword={confirmPassword}
+                  isDarkMode={true}
+                />
               </div>
 
               <div>
@@ -1203,10 +1213,6 @@ export const AdminProfileSettings: React.FC<AdminProfileSettingsProps> = ({
                 />
               </div>
 
-              <div className="p-3 rounded-lg bg-slate-950/60 border border-slate-800 text-[11px] text-slate-400">
-                Password should be minimum 6 characters. Avoid common university passwords.
-              </div>
-
               <div className="flex items-center justify-end gap-3 pt-2">
                 <button
                   type="button"
@@ -1219,8 +1225,9 @@ export const AdminProfileSettings: React.FC<AdminProfileSettingsProps> = ({
                   type="submit"
                   variant="primary"
                   size="sm"
-                  disabled={updatingPassword}
+                  disabled={updatingPassword || !newPassword || !confirmPassword || newPassword !== confirmPassword || !evaluatePasswordSecurity(newPassword).isValid}
                   leftIcon={updatingPassword ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Lock className="w-3.5 h-3.5" />}
+                  className="disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {updatingPassword ? 'Updating...' : 'Update Password'}
                 </Button>
