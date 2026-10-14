@@ -75,9 +75,9 @@ export const Navbar: React.FC = () => {
   return (
     <>
       {/* Floating navbar wrapper */}
-      <div className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-2.5 sm:pt-4 px-2 sm:px-4 md:px-8 pointer-events-none">
+      <div className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-4 px-4 md:px-10 pointer-events-none">
         <nav
-          className={`flex items-center justify-between w-full max-w-7xl pointer-events-auto transition-all duration-300 ease-in-out pl-3 sm:pl-5 pr-1.5 sm:pr-4 py-2 sm:py-2.5 rounded-2xl border ${
+          className={`flex items-center justify-between w-full max-w-7xl pointer-events-auto transition-all duration-300 ease-in-out px-5 py-2.5 rounded-2xl border ${
             isScrolled
               ? 'bg-slate-950/95 backdrop-blur-md border-slate-800/80 shadow-xl shadow-black/40'
               : isHomePage
@@ -88,7 +88,7 @@ export const Navbar: React.FC = () => {
           {/* Left: Logo + college info (visible at top, collapses on scroll) */}
           <Link
             to="/"
-            className="flex items-center gap-3 group pointer-events-auto min-w-0"
+            className="flex items-center gap-3 group pointer-events-auto shrink-0"
             aria-label="CSI CMRIT Chapter Home"
           >
             {/* CSI CMRIT Logo */}
@@ -167,7 +167,7 @@ export const Navbar: React.FC = () => {
           </div>
 
           {/* Right: CTA + Admin Profile / Login + Mobile toggle */}
-          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0 ml-auto pl-1 sm:pl-2">
+          <div className="flex items-center gap-3 shrink-0">
             {/* Join Us CTA */}
             <Link
               to="/join"
@@ -280,7 +280,7 @@ export const Navbar: React.FC = () => {
                 onClick={() => {
                   window.dispatchEvent(new CustomEvent('csi_open_login_modal'));
                 }}
-                className="hidden lg:inline-flex items-center gap-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all whitespace-nowrap border border-slate-600 text-slate-300 px-3 py-1.5 hover:border-slate-400 hover:text-white cursor-pointer"
+                className="hidden lg:inline-flex items-center gap-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all whitespace-nowrap border border-slate-600 text-slate-300 px-4 py-2 hover:border-slate-400 hover:text-white cursor-pointer"
                 aria-label="Admin Portal"
               >
                 Login
