@@ -57,7 +57,7 @@ export const Home: React.FC = () => {
         announcementsService.getPublishedAnnouncements(),
         highlightsService.getPublishedHighlights()
       ]);
-      const loadedEvents = (evts.data && evts.data.length > 0) ? evts.data : mockEvents;
+      const loadedEvents = evts.data !== undefined ? evts.data : mockEvents;
       setEvents(loadedEvents);
       setAnnouncements(anns.data || []);
       setHighlights(hls.data || []);

@@ -45,23 +45,25 @@ const getStoredEvents = (): EventItem[] => {
     const forbiddenIds = new Set(['evt-01', 'evt-02', 'evt-03', 'mock-evt-1', 'mock-evt-2']);
     parsed = parsed.filter(e => !forbiddenIds.has(e.id) && !deleted.has(e.id));
 
-    // Ensure baseline Hackathon event (avishkaar-2026) is always present with complete info
-    const avishkaarIndex = parsed.findIndex(e => e.id === 'avishkaar-2026' || e.slug === 'avishkaar-2026');
-    if (avishkaarIndex >= 0) {
-      parsed[avishkaarIndex] = {
-        ...mockEvents[0],
-        ...parsed[avishkaarIndex],
-        galleryImages: (parsed[avishkaarIndex].galleryImages && parsed[avishkaarIndex].galleryImages.length > 0)
-          ? parsed[avishkaarIndex].galleryImages
-          : mockEvents[0].galleryImages,
-        title: mockEvents[0].title,
-        shortDescription: mockEvents[0].shortDescription || parsed[avishkaarIndex].shortDescription,
-        image: mockEvents[0].image,
-        is_published: true,
-        status: 'published'
-      };
-    } else if (mockEvents.length > 0) {
-      parsed.unshift(mockEvents[0]);
+    // Ensure baseline Hackathon event (avishkaar-2026) is present only if not deleted by admin
+    if (!deleted.has('avishkaar-2026')) {
+      const avishkaarIndex = parsed.findIndex(e => e.id === 'avishkaar-2026' || e.slug === 'avishkaar-2026');
+      if (avishkaarIndex >= 0) {
+        parsed[avishkaarIndex] = {
+          ...mockEvents[0],
+          ...parsed[avishkaarIndex],
+          galleryImages: (parsed[avishkaarIndex].galleryImages && parsed[avishkaarIndex].galleryImages.length > 0)
+            ? parsed[avishkaarIndex].galleryImages
+            : mockEvents[0].galleryImages,
+          title: mockEvents[0].title,
+          shortDescription: mockEvents[0].shortDescription || parsed[avishkaarIndex].shortDescription,
+          image: mockEvents[0].image,
+          is_published: true,
+          status: 'published'
+        };
+      } else if (mockEvents.length > 0) {
+        parsed.unshift(mockEvents[0]);
+      }
     }
 
     try {
@@ -126,9 +128,6 @@ export const eventsService = {
   async getPublishedEvents(): Promise<{ data: EventItem[]; error?: string }> {
     try {
       const deleted = getDeletedEventIds();
-      if (deleted.has('avishkaar-2026')) {
-        deleted.delete('avishkaar-2026');
-      }
       if (isSupabaseConfigured) {
         const { data, error } = await supabase
           .from('events')
@@ -142,15 +141,15 @@ export const eventsService = {
           const remoteIds = new Set(mapped.map(m => m.id));
           const localOnly = local.filter(l => !remoteIds.has(l.id));
           const combined = [...localOnly, ...mapped].sort(sortEvents);
-          return { data: combined.length > 0 ? combined : (mockEvents as EventItem[]).sort(sortEvents) };
+          return { data: combined };
         }
       }
 
       const local = getStoredEvents().filter(e => e.is_published !== false && e.status !== 'draft').sort(sortEvents);
-      return { data: local.length > 0 ? local : (mockEvents as EventItem[]).sort(sortEvents) };
+      return { data: local };
     } catch (err: unknown) {
       const local = getStoredEvents().filter(e => e.is_published !== false && e.status !== 'draft').sort(sortEvents);
-      return { data: local.length > 0 ? local : (mockEvents as EventItem[]).sort(sortEvents) };
+      return { data: local };
     }
   },
 

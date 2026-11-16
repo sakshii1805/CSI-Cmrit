@@ -5,18 +5,25 @@ import { mockGallery } from '../data/gallery';
 
 const STORAGE_KEY = 'csi_published_highlights';
 const DELETED_HIGHLIGHTS_KEY = 'csi_deleted_highlights';
+const FORBIDDEN_HIGHLIGHT_IDS = new Set([
+  'hl-avishkaar-campaign',
+  'hl-avishkaar-faculty',
+  'hl-avishkaar-launch'
+]);
 
 // Purge any old demo/mock storage cache once on module evaluation
 try {
   localStorage.removeItem('csi_highlights_data');
 } catch { }
 
-const getDeletedHighlightIds = (): Set<string> => {
+export const getDeletedHighlightIds = (): Set<string> => {
   try {
     const raw = localStorage.getItem(DELETED_HIGHLIGHTS_KEY);
-    return raw ? new Set(JSON.parse(raw)) : new Set();
+    const set: Set<string> = raw ? new Set(JSON.parse(raw)) : new Set();
+    FORBIDDEN_HIGHLIGHT_IDS.forEach(id => set.add(id));
+    return set;
   } catch {
-    return new Set();
+    return new Set(FORBIDDEN_HIGHLIGHT_IDS);
   }
 };
 
@@ -41,19 +48,19 @@ const getStoredHighlights = (): ChapterHighlightItem[] => {
     const deleted = getDeletedHighlightIds();
     const raw = localStorage.getItem(STORAGE_KEY);
     const parsed: ChapterHighlightItem[] = raw ? JSON.parse(raw) : [];
-    const filtered = parsed.filter(p => !deleted.has(p.id));
+    const filtered = parsed.filter(p => !deleted.has(p.id) && !FORBIDDEN_HIGHLIGHT_IDS.has(p.id));
     const ids = new Set(filtered.map(p => p.id));
 
     // Only populate baseline items that haven't been deleted by admin
     for (const m of mockGallery) {
-      if (!ids.has(m.id) && !deleted.has(m.id)) {
+      if (!ids.has(m.id) && !deleted.has(m.id) && !FORBIDDEN_HIGHLIGHT_IDS.has(m.id)) {
         filtered.push(m as any);
       }
     }
     return filtered.sort(sortByLatest);
   } catch {
     const deleted = getDeletedHighlightIds();
-    return (mockGallery as any[]).filter(m => !deleted.has(m.id)).sort(sortByLatest);
+    return (mockGallery as any[]).filter(m => !deleted.has(m.id) && !FORBIDDEN_HIGHLIGHT_IDS.has(m.id)).sort(sortByLatest);
   }
 };
 
@@ -327,6 +334,13 @@ export const highlightsService = {
   },
 
   /**
+   * Helper: Get currently deleted highlight IDs
+   */
+  getDeletedHighlightIds(): Set<string> {
+    return getDeletedHighlightIds();
+  },
+
+  /**
    * Admin: Delete highlight permanently
    */
   async deleteHighlight(id: string): Promise<{ success: boolean; error?: string }> {
@@ -341,7 +355,14 @@ export const highlightsService = {
 
     if (isSupabaseConfigured) {
       try {
-        await supabase.from('highlights').delete().eq('id', id);
+        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+        if (isUUID) {
+          const { error } = await supabase.from('highlights').delete().eq('id', id);
+          if (error) console.warn('Supabase highlight delete error:', error);
+          await supabase.from('gallery_posts').delete().eq('id', id);
+        } else {
+          await supabase.from('gallery_posts').delete().eq('slug', id);
+        }
       } catch (err) {
         console.warn('Supabase highlight delete error:', err);
       }

@@ -17,6 +17,7 @@ export const galleryService = {
    */
   async getPublishedGalleryPosts(): Promise<{ data: GalleryPost[]; error?: string }> {
     try {
+      const deleted = highlightsService.getDeletedHighlightIds();
       if (isSupabaseConfigured) {
         const { data, error } = await supabase
           .from('gallery_posts')
@@ -25,12 +26,14 @@ export const galleryService = {
           .order('created_at', { ascending: false });
 
         if (!error && data && data.length > 0) {
-          const mapped = (data || []).map((p: any) => ({
-            ...p,
-            is_pinned: Boolean(p.is_pinned),
-            image_count: p.gallery_images?.length || 0,
-            gallery_images: undefined,
-          })) as GalleryPost[];
+          const mapped = (data || [])
+            .map((p: any) => ({
+              ...p,
+              is_pinned: Boolean(p.is_pinned),
+              image_count: p.gallery_images?.length || 0,
+              gallery_images: undefined,
+            }))
+            .filter((p: any) => !deleted.has(p.id) && (!p.slug || !deleted.has(p.slug))) as GalleryPost[];
           mapped.sort(sortGalleryPosts);
           return { data: mapped };
         }
@@ -38,7 +41,9 @@ export const galleryService = {
 
       // Fallback & unified feed: convert highlightsService items to GalleryPosts
       const highlightsRes = await highlightsService.getPublishedHighlights();
-      const mappedFromHighlights: GalleryPost[] = (highlightsRes.data || []).map((h) => {
+      const mappedFromHighlights: GalleryPost[] = (highlightsRes.data || [])
+        .filter((h) => !deleted.has(h.id))
+        .map((h) => {
         const rawImages = (Array.isArray(h.images) && h.images.length > 0)
           ? h.images
           : [h.imageUrl || h.image_url].filter(Boolean) as string[];
@@ -246,7 +251,14 @@ export const galleryService = {
       await requireAdmin();
       await highlightsService.deleteHighlight(id);
       if (isSupabaseConfigured) {
-        await supabase.from('gallery_posts').delete().eq('id', id);
+        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+        if (isUUID) {
+          const { error } = await supabase.from('gallery_posts').delete().eq('id', id);
+          if (error) console.warn('Supabase gallery_posts delete error:', error);
+        } else {
+          const { error } = await supabase.from('gallery_posts').delete().eq('slug', id);
+          if (error) console.warn('Supabase gallery_posts delete error:', error);
+        }
       }
       return { success: true };
     } catch (err: any) {

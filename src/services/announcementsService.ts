@@ -38,10 +38,10 @@ const getStoredAnnouncements = (): AnnouncementItem[] => {
     const forbiddenIds = new Set(['ann-02', 'ann-03', 'ann-04', 'ann-05', 'mock-ann-1', 'mock-ann-2', 'mock-ann-3']);
     parsed = parsed.filter(p => !forbiddenIds.has(p.id) && !deleted.has(p.id) && !p.title.includes('Membership Drive') && !p.title.includes('Call for Core Student Coordinators'));
 
-    // Ensure baseline announcements are present & updated
+    // Ensure baseline announcements are present & updated only if not deleted
     for (const item of mockAnnouncements) {
-      if (deleted.has(item.id)) {
-        deleted.delete(item.id);
+      if (deleted.has(item.id) || forbiddenIds.has(item.id)) {
+        continue;
       }
       const existingIdx = parsed.findIndex(p => p.id === item.id);
       if (existingIdx >= 0) {
