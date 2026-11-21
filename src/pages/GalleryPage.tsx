@@ -5,15 +5,11 @@ import {
   Search,
   X,
   Loader2,
-  ChevronLeft,
-  ChevronRight,
   Plus,
-  Share2,
-  Maximize2,
-  Pin
 } from 'lucide-react';
 import { galleryService } from '../services/galleryService';
 import { GalleryPostCard } from '../components/gallery/GalleryPostCard';
+import { LightboxModal } from '../components/gallery/LightboxModal';
 import { GalleryPost, GalleryCategory } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/common/Toast';
@@ -31,7 +27,7 @@ export const GalleryPage: React.FC = () => {
 
   // Fullscreen Lightbox state
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-
+  const [lightboxImageIndex, setLightboxImageIndex] = useState(0);
   // In-place modal state
   const [modalOpen, setModalOpen] = useState(false);
   const [editingPost, setEditingPost] = useState<GalleryPost | null>(null);
@@ -92,37 +88,14 @@ export const GalleryPage: React.FC = () => {
       });
   }, [posts, selectedCategory, searchQuery]);
 
-  // Fullscreen keyboard navigation
-  useEffect(() => {
-    if (lightboxIndex === null) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setLightboxIndex(null);
-      if (e.key === 'ArrowRight' && filteredPosts.length > 0) {
-        setLightboxIndex((prev) => ((prev ?? 0) + 1) % filteredPosts.length);
-      }
-      if (e.key === 'ArrowLeft' && filteredPosts.length > 0) {
-        setLightboxIndex((prev) => ((prev ?? 0) - 1 + filteredPosts.length) % filteredPosts.length);
-      }
-    };
-    document.body.style.overflow = 'hidden';
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      document.body.style.overflow = '';
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [lightboxIndex, filteredPosts.length]);
-
+  // Fullscreen keyboard navigation — handled inside LightboxModal now
   const activeLightboxPost = lightboxIndex !== null && filteredPosts[lightboxIndex]
     ? filteredPosts[lightboxIndex]
     : null;
 
   const handleOpenLightbox = (post: GalleryPost) => {
     const idx = filteredPosts.findIndex((p) => p.id === post.id);
-    if (idx !== -1) {
-      setLightboxIndex(idx);
-    } else {
-      setLightboxIndex(0);
-    }
+    setLightboxIndex(idx !== -1 ? idx : 0);
   };
 
   const handleTogglePin = async (post: GalleryPost) => {
@@ -304,98 +277,14 @@ export const GalleryPage: React.FC = () => {
         )}
       </main>
 
-      {/* Fullscreen Lightbox for Any Clicked Post */}
-      {activeLightboxPost && (
-        <div
-          className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center p-4 sm:p-8 animate-in fade-in duration-200"
-          onClick={() => setLightboxIndex(null)}
-        >
-          {/* Close button */}
-          <button
-            type="button"
-            onClick={() => setLightboxIndex(null)}
-            className="absolute top-5 right-5 z-30 p-2.5 rounded-full bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-700 transition-colors focus:outline-none"
-            aria-label="Close fullscreen view"
-          >
-            <X className="w-6 h-6" />
-          </button>
-
-          {/* Navigation: Previous */}
-          {filteredPosts.length > 1 && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setLightboxIndex((prev) => ((prev ?? 0) - 1 + filteredPosts.length) % filteredPosts.length);
-              }}
-              className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-700 transition-all focus:outline-none shadow-xl"
-              aria-label="Previous photo"
-            >
-              <ChevronLeft className="w-6 h-6" />
-            </button>
-          )}
-
-          {/* Navigation: Next */}
-          {filteredPosts.length > 1 && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                setLightboxIndex((prev) => ((prev ?? 0) + 1) % filteredPosts.length);
-              }}
-              className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-700 transition-all focus:outline-none shadow-xl"
-              aria-label="Next photo"
-            >
-              <ChevronRight className="w-6 h-6" />
-            </button>
-          )}
-
-          {/* Modal Content */}
-          <div
-            className="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center justify-center select-none"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="relative max-h-[72vh] w-full flex items-center justify-center">
-              <img
-                src={activeLightboxPost.cover_image || activeLightboxPost.images?.[0]?.image_url || '/images/avishkaar_poster.jpg'}
-                alt={activeLightboxPost.title}
-                onError={(e) => {
-                  e.currentTarget.src = '/images/avishkaar_poster.jpg';
-                }}
-                className="max-h-[72vh] max-w-full object-contain rounded-2xl shadow-2xl"
-              />
-            </div>
-
-            {/* Bottom details */}
-            <div className="mt-4 text-center max-w-xl px-4">
-              <div className="flex items-center justify-center gap-2 mb-1.5 flex-wrap">
-                {activeLightboxPost.is_pinned && (
-                  <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-500 text-white shadow-xs flex items-center gap-1">
-                    <Pin className="w-3 h-3 fill-white" />
-                    Pinned
-                  </span>
-                )}
-                <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-600/30 text-blue-300 border border-blue-500/40">
-                  {activeLightboxPost.category || 'Chapter Visual'}
-                </span>
-                {lightboxIndex !== null && (
-                  <span className="text-xs text-slate-400 font-mono">
-                    {lightboxIndex + 1} of {filteredPosts.length}
-                  </span>
-                )}
-              </div>
-              <h4 className="text-base sm:text-lg font-bold text-white">
-                {activeLightboxPost.title}
-              </h4>
-              {activeLightboxPost.description && (
-                <p className="text-xs sm:text-sm text-slate-300 mt-1 leading-relaxed">
-                  {activeLightboxPost.description}
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Fullscreen Lightbox — full image navigation with swipe + keyboard */}
+      <LightboxModal
+        isOpen={lightboxIndex !== null}
+        post={activeLightboxPost}
+        allPosts={filteredPosts}
+        initialPostIndex={lightboxIndex ?? 0}
+        onClose={() => setLightboxIndex(null)}
+      />
 
       {/* In-Place Gallery Modal */}
       <GalleryModal

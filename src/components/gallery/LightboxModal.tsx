@@ -1,136 +1,192 @@
-import React, { useEffect } from 'react';
-import { X, ChevronLeft, ChevronRight, Calendar, MapPin } from 'lucide-react';
-import { GalleryItem } from '../../types';
-import { Badge } from '../common/Badge';
+import React, { useEffect, useState, useCallback } from 'react';
+import { X, ChevronLeft, ChevronRight, Images } from 'lucide-react';
+import { GalleryPost } from '../../types';
 
 interface LightboxModalProps {
   isOpen: boolean;
-  item: GalleryItem | null;
+  post: GalleryPost | null;
+  allPosts: GalleryPost[];
+  initialPostIndex: number;
   onClose: () => void;
-  onNext?: () => void;
-  onPrev?: () => void;
-  hasNext?: boolean;
-  hasPrev?: boolean;
 }
 
 export const LightboxModal: React.FC<LightboxModalProps> = ({
   isOpen,
-  item,
+  post: initialPost,
+  allPosts,
+  initialPostIndex,
   onClose,
-  onNext,
-  onPrev,
-  hasNext = true,
-  hasPrev = true
 }) => {
+  const [postIndex, setPostIndex] = useState(initialPostIndex);
+  const [imageIndex, setImageIndex] = useState(0);
+
+  // Reset when opened with a new post
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isOpen) return;
-      if (e.key === 'Escape') onClose();
-      if (e.key === 'ArrowRight' && onNext && hasNext) onNext();
-      if (e.key === 'ArrowLeft' && onPrev && hasPrev) onPrev();
-    };
-
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
-      window.addEventListener('keydown', handleKeyDown);
+      setPostIndex(initialPostIndex);
+      setImageIndex(0);
     }
+  }, [isOpen, initialPostIndex]);
 
+  const activePost = allPosts[postIndex] ?? initialPost;
+
+  const images = React.useMemo(() => {
+    if (!activePost) return [];
+    if (activePost.images && activePost.images.length > 0) {
+      return activePost.images.map(img => img.image_url);
+    }
+    return activePost.cover_image ? [activePost.cover_image] : ['/images/avishkaar_poster.jpg'];
+  }, [activePost]);
+
+  const totalImages = images.length;
+  const totalPosts = allPosts.length;
+
+  const goNextImage = useCallback(() => {
+    if (imageIndex < totalImages - 1) {
+      setImageIndex(i => i + 1);
+    } else if (postIndex < totalPosts - 1) {
+      setPostIndex(p => p + 1);
+      setImageIndex(0);
+    }
+  }, [imageIndex, totalImages, postIndex, totalPosts]);
+
+  const goPrevImage = useCallback(() => {
+    if (imageIndex > 0) {
+      setImageIndex(i => i - 1);
+    } else if (postIndex > 0) {
+      setPostIndex(p => p - 1);
+      setImageIndex(0);
+    }
+  }, [imageIndex, postIndex]);
+
+  const hasPrev = imageIndex > 0 || postIndex > 0;
+  const hasNext = imageIndex < totalImages - 1 || postIndex < totalPosts - 1;
+
+  // Touch/swipe support
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const handleTouchStart = (e: React.TouchEvent) => setTouchStart(e.touches[0].clientX);
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStart === null) return;
+    const diff = touchStart - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) goNextImage();
+      else goPrevImage();
+    }
+    setTouchStart(null);
+  };
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+      if (e.key === 'ArrowRight') goNextImage();
+      if (e.key === 'ArrowLeft') goPrevImage();
+    };
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = '';
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [isOpen, onClose, onNext, onPrev, hasNext, hasPrev]);
+  }, [isOpen, onClose, goNextImage, goPrevImage]);
 
-  if (!isOpen || !item) return null;
+  if (!isOpen || !activePost) return null;
+
+  const currentImageUrl = images[imageIndex] || '/images/avishkaar_poster.jpg';
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8"
-      role="dialog"
-      aria-modal="true"
+      className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex items-center justify-center"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
-      {/* Dark backdrop */}
-      <div
-        className="fixed inset-0 bg-slate-950/90 backdrop-blur-md transition-opacity"
-        onClick={onClose}
-        aria-hidden="true"
-      />
+      {/* Backdrop click closes */}
+      <div className="absolute inset-0" onClick={onClose} aria-hidden="true" />
 
-      {/* Close button */}
+      {/* Close */}
       <button
         onClick={onClose}
-        className="absolute top-5 right-5 z-20 p-2.5 rounded-full bg-slate-900/80 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
-        aria-label="Close photo preview"
+        className="absolute top-4 right-4 z-30 p-2.5 rounded-full bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-700 transition-colors focus:outline-none"
+        aria-label="Close"
       >
-        <X className="w-6 h-6" />
+        <X className="w-5 h-5" />
       </button>
 
-      {/* Navigation: Previous */}
-      {hasPrev && onPrev && (
+      {/* Prev */}
+      {hasPrev && (
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onPrev();
-          }}
-          className="absolute left-4 sm:left-6 z-20 p-3 rounded-full bg-slate-900/80 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+          onClick={(e) => { e.stopPropagation(); goPrevImage(); }}
+          className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-700 transition-all shadow-xl focus:outline-none"
           aria-label="Previous photo"
         >
           <ChevronLeft className="w-6 h-6" />
         </button>
       )}
 
-      {/* Navigation: Next */}
-      {hasNext && onNext && (
+      {/* Next */}
+      {hasNext && (
         <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onNext();
-          }}
-          className="absolute right-4 sm:right-6 z-20 p-3 rounded-full bg-slate-900/80 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+          onClick={(e) => { e.stopPropagation(); goNextImage(); }}
+          className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-slate-900/90 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-700 transition-all shadow-xl focus:outline-none"
           aria-label="Next photo"
         >
           <ChevronRight className="w-6 h-6" />
         </button>
       )}
 
-      {/* Container */}
-      <div className="relative z-10 max-w-5xl w-full max-h-[90vh] flex flex-col bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 shadow-elevated">
-        {/* Main Image */}
-        <div className="flex-1 bg-black flex items-center justify-center overflow-hidden max-h-[70vh]">
+      {/* Content */}
+      <div
+        className="relative max-w-4xl w-full max-h-[90vh] flex flex-col items-center px-16 select-none"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Image */}
+        <div className="relative max-h-[72vh] w-full flex items-center justify-center">
           <img
-            src={item.imageUrl}
-            alt={item.title}
-            className="w-full h-full object-contain max-h-[70vh]"
+            key={currentImageUrl}
+            src={currentImageUrl}
+            alt={activePost.title}
+            onError={(e) => { e.currentTarget.src = '/images/avishkaar_poster.jpg'; }}
+            className="max-h-[72vh] max-w-full object-contain rounded-2xl shadow-2xl"
           />
         </div>
 
-        {/* Footer Details */}
-        <div className="p-4 sm:p-6 bg-slate-900 border-t border-slate-800 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <Badge variant="blue" className="bg-blue-950/80 text-blue-300 border-blue-800">
-                {item.category}
-              </Badge>
-              <h3 className="text-base font-bold text-white">{item.title}</h3>
-            </div>
-            <p className="text-xs sm:text-sm text-slate-400 max-w-2xl">
-              {item.description}
-            </p>
-          </div>
-
-          <div className="flex items-center gap-4 text-xs text-slate-400 shrink-0">
-            <div className="flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-blue-400" />
-              <span>{item.date}</span>
-            </div>
-            {item.location && (
-              <div className="flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-blue-400" />
-                <span>{item.location}</span>
-              </div>
+        {/* Caption */}
+        <div className="mt-4 text-center max-w-xl px-2">
+          <div className="flex items-center justify-center gap-2 mb-1.5 flex-wrap">
+            <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-600/30 text-blue-300 border border-blue-500/40">
+              {activePost.category || 'Chapter Visual'}
+            </span>
+            {totalImages > 1 && (
+              <span className="text-xs text-slate-400 font-mono flex items-center gap-1">
+                <Images className="w-3 h-3" />
+                {imageIndex + 1} / {totalImages}
+              </span>
+            )}
+            {totalPosts > 1 && (
+              <span className="text-xs text-slate-500 font-mono">
+                Post {postIndex + 1} of {totalPosts}
+              </span>
             )}
           </div>
+          <h4 className="text-base sm:text-lg font-bold text-white">{activePost.title}</h4>
+          {activePost.description && (
+            <p className="text-xs sm:text-sm text-slate-300 mt-1 leading-relaxed">{activePost.description}</p>
+          )}
         </div>
+
+        {/* Image dot nav (if multi-image post) */}
+        {totalImages > 1 && (
+          <div className="flex items-center gap-1.5 mt-3">
+            {images.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setImageIndex(i)}
+                className={`w-2 h-2 rounded-full transition-all ${i === imageIndex ? 'bg-white scale-125' : 'bg-slate-600 hover:bg-slate-400'}`}
+                aria-label={`Go to image ${i + 1}`}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

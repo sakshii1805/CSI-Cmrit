@@ -18,7 +18,8 @@ import {
   Shield,
   CheckCircle2,
   AlertCircle,
-  Pin
+  Pin,
+  Loader2
 } from 'lucide-react';
 import { HeroSection } from '../components/home/HeroSection';
 import { HomeAboutRow } from '../components/home/HomeAboutRow';
@@ -27,9 +28,6 @@ import { eventsService } from '../services/eventsService';
 import { announcementsService } from '../services/announcementsService';
 import { highlightsService } from '../services/highlightsService';
 import { EventItem, AnnouncementItem, ChapterHighlightItem } from '../types';
-import { mockEvents } from '../data/events';
-import { mockAnnouncements } from '../data/announcements';
-import { mockGallery } from '../data/gallery';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../components/common/Toast';
 import { EventModal } from '../components/admin/in-place/EventModal';
@@ -40,30 +38,34 @@ export const Home: React.FC = () => {
   const { isAdmin } = useAuth();
   const { showToast } = useToast();
 
-  const [events, setEvents] = useState<EventItem[]>(mockEvents);
-  const [announcements, setAnnouncements] = useState<AnnouncementItem[]>(mockAnnouncements);
-  const [highlights, setHighlights] = useState<ChapterHighlightItem[]>(mockGallery as any);
+  const [events, setEvents] = useState<EventItem[]>([]);
+  const [announcements, setAnnouncements] = useState<AnnouncementItem[]>([]);
+  const [highlights, setHighlights] = useState<ChapterHighlightItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // In-place admin modal state
   const [eventModalOpen, setEventModalOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<EventItem | null>(null);
   const [announcementModalOpen, setAnnouncementModalOpen] = useState(false);
+  const [editingAnnouncement, setEditingAnnouncement] = useState<AnnouncementItem | null>(null);
   const [deletingEvent, setDeletingEvent] = useState<EventItem | null>(null);
+  const [deletingAnnouncement, setDeletingAnnouncement] = useState<AnnouncementItem | null>(null);
 
   const loadHomeContent = async () => {
     try {
+      setIsLoading(true);
       const [evts, anns, hls] = await Promise.all([
         eventsService.getPublishedEvents(),
         announcementsService.getPublishedAnnouncements(),
         highlightsService.getPublishedHighlights()
       ]);
-      const loadedEvents = evts.data !== undefined ? evts.data : mockEvents;
-      setEvents(loadedEvents);
+      setEvents(evts.data !== undefined ? evts.data : []);
       setAnnouncements(anns.data || []);
       setHighlights(hls.data || []);
     } catch (err) {
       console.error('Failed to load home page content:', err);
-      setEvents(mockEvents);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -87,6 +89,19 @@ export const Home: React.FC = () => {
       loadHomeContent();
     } catch (err: any) {
       showToast(err?.message || 'Failed to delete event', 'error');
+    }
+  };
+
+  const handleDeleteAnnouncementConfirm = async () => {
+    if (!deletingAnnouncement) return;
+    try {
+      const res = await announcementsService.deleteAnnouncement(deletingAnnouncement.id);
+      if (!res.success) throw new Error(res.error);
+      showToast('Announcement removed.', 'info');
+      setDeletingAnnouncement(null);
+      loadHomeContent();
+    } catch (err: any) {
+      showToast(err?.message || 'Failed to delete announcement', 'error');
     }
   };
 
@@ -538,6 +553,130 @@ export const Home: React.FC = () => {
       {/* 6. Why Join CSI CMRIT Section */}
       <WhyJoinCsi />
 
+      {/* 7. Latest Announcements Section */}
+      <section className="py-16 lg:py-20 bg-white border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 border border-amber-100 text-amber-700 text-xs font-semibold tracking-wider uppercase">
+                <Megaphone className="w-3.5 h-3.5" />
+                <span>Notice Board</span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+                Latest Announcements
+              </h2>
+            </div>
+            <div className="flex items-center gap-3">
+              {isAdmin && (
+                <button
+                  type="button"
+                  onClick={() => { setEditingAnnouncement(null); setAnnouncementModalOpen(true); }}
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 shadow-md transition-all"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Post Announcement</span>
+                </button>
+              )}
+              <Link
+                to="/announcements"
+                className="group inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-semibold text-white bg-slate-900 hover:bg-amber-600 shadow-md transition-all duration-300 hover:-translate-y-0.5 shrink-0"
+              >
+                <span>View All</span>
+                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
+          </div>
+
+          {/* Announcements List */}
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12 gap-3 text-slate-400">
+              <Loader2 className="w-6 h-6 animate-spin text-amber-500" />
+              <span className="text-sm font-mono">Loading announcements...</span>
+            </div>
+          ) : announcements.length === 0 ? (
+            <div className="bg-slate-50 rounded-2xl border border-slate-200 border-dashed p-10 text-center max-w-lg mx-auto">
+              <div className="w-12 h-12 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center mx-auto mb-3 text-amber-500">
+                <BellOff className="w-6 h-6" />
+              </div>
+              <h3 className="text-sm font-bold text-slate-900 mb-1">No announcements yet</h3>
+              <p className="text-xs text-slate-500">Check back soon for updates from CSI CMRIT Chapter.</p>
+              {isAdmin && (
+                <button
+                  type="button"
+                  onClick={() => { setEditingAnnouncement(null); setAnnouncementModalOpen(true); }}
+                  className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 transition-colors"
+                >
+                  <Plus className="w-3.5 h-3.5" /> Post First Announcement
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {announcements.slice(0, 4).map((ann) => (
+                <div
+                  key={ann.id}
+                  className={`relative bg-white rounded-2xl border p-5 flex gap-4 hover:shadow-md transition-all duration-200 group ${
+                    ann.is_pinned ? 'border-amber-300 ring-1 ring-amber-200' : 'border-slate-200/90'
+                  }`}
+                >
+                  {/* Urgency dot */}
+                  <div className={`mt-1 w-2.5 h-2.5 rounded-full shrink-0 ${
+                    ann.isUrgent || ann.priority === 'high' ? 'bg-rose-500' : 'bg-blue-500'
+                  }`} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      {ann.is_pinned && (
+                        <span className="inline-flex items-center gap-0.5 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500 text-white">
+                          <Pin className="w-2.5 h-2.5 fill-white" /> Pinned
+                        </span>
+                      )}
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">{ann.category}</span>
+                      {(ann.isUrgent || ann.priority === 'high') && (
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-600 border border-rose-200">Urgent</span>
+                      )}
+                    </div>
+                    <Link to={`/announcements/${ann.slug || ann.id}`}>
+                      <h3 className="text-sm font-bold text-slate-900 group-hover:text-amber-600 transition-colors line-clamp-2 leading-snug">
+                        {ann.title}
+                      </h3>
+                    </Link>
+                    <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">{ann.summary}</p>
+                    <div className="mt-2 flex items-center justify-between gap-2">
+                      <span className="text-[11px] text-slate-400">{ann.date || (ann.published_at ? new Date(ann.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '')}</span>
+                      <Link to={`/announcements/${ann.slug || ann.id}`} className="text-[11px] font-bold text-amber-600 hover:text-amber-700 flex items-center gap-1 transition-colors">
+                        Read more <ArrowRight className="w-3 h-3" />
+                      </Link>
+                    </div>
+                  </div>
+                  {/* Admin controls */}
+                  {isAdmin && (
+                    <div className="absolute top-2 right-2 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900/90 backdrop-blur-md rounded-xl px-1.5 py-1 border border-slate-700">
+                      <button
+                        type="button"
+                        onClick={() => { setEditingAnnouncement(ann); setAnnouncementModalOpen(true); }}
+                        className="p-1 rounded-lg text-blue-400 hover:text-white hover:bg-slate-800 transition-colors"
+                        title="Edit"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeletingAnnouncement(ann)}
+                        className="p-1 rounded-lg text-rose-400 hover:text-rose-200 hover:bg-slate-800 transition-colors"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
       {/* In-Place Event Modal for Home page */}
       <EventModal
         isOpen={eventModalOpen}
@@ -554,10 +693,22 @@ export const Home: React.FC = () => {
       {/* In-Place Announcement Modal for Home page */}
       <AnnouncementModal
         isOpen={announcementModalOpen}
-        onClose={() => setAnnouncementModalOpen(false)}
+        announcementToEdit={editingAnnouncement}
+        onClose={() => { setAnnouncementModalOpen(false); setEditingAnnouncement(null); }}
         onSuccess={() => {
           loadHomeContent();
         }}
+      />
+
+      {/* Confirmation Dialog for Deleting Announcement */}
+      <ConfirmDialog
+        isOpen={!!deletingAnnouncement}
+        title="Delete Announcement"
+        message={`Are you sure you want to delete "${deletingAnnouncement?.title}"? This cannot be undone.`}
+        confirmLabel="Delete Announcement"
+        variant="danger"
+        onConfirm={handleDeleteAnnouncementConfirm}
+        onClose={() => setDeletingAnnouncement(null)}
       />
 
       {/* Confirmation Dialog for Deleting Event */}
