@@ -135,16 +135,16 @@ export const eventsService = {
           .eq('status', 'published')
           .order('event_date', { ascending: false });
 
-        if (!error && data && data.length > 0) {
+        if (!error && data) {
           const mapped = data.map(mapEvent).filter(e => !deleted.has(e.id) && (!e.slug || !deleted.has(e.slug)));
-          const local = getStoredEvents().filter(e => e.is_published !== false && e.status !== 'draft');
-          const remoteIds = new Set(mapped.map(m => m.id));
-          const localOnly = local.filter(l => !remoteIds.has(l.id));
-          const combined = [...localOnly, ...mapped].sort(sortEvents);
-          return { data: combined };
+          return { data: mapped.sort(sortEvents) };
         }
+        // Supabase configured but query failed — return empty rather than stale local data
+        console.warn('[CSI] Supabase events query failed:', 'check connection');
+        return { data: [] };
       }
 
+      // Supabase NOT configured — use localStorage as fallback (dev mode only)
       const local = getStoredEvents().filter(e => e.is_published !== false && e.status !== 'draft').sort(sortEvents);
       return { data: local };
     } catch (err: unknown) {
@@ -230,13 +230,11 @@ export const eventsService = {
           .select('*')
           .order('created_at', { ascending: false });
 
-        if (!error && data && data.length > 0) {
+        if (!error && data) {
           const mapped = data.map(mapEvent).filter(e => !deleted.has(e.id) && (!e.slug || !deleted.has(e.slug)));
-          const local = getStoredEvents();
-          const remoteIds = new Set(mapped.map(m => m.id));
-          const localOnly = local.filter(l => !remoteIds.has(l.id));
-          return { data: [...localOnly, ...mapped] };
+          return { data: mapped };
         }
+        return { data: [] };
       }
 
       return { data: getStoredEvents() };

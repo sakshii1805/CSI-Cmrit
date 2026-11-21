@@ -110,16 +110,15 @@ export const highlightsService = {
           .eq('status', 'published')
           .order('created_at', { ascending: false });
 
-        if (!error && data && data.length > 0) {
+        if (!error && data) {
           const mapped = data.map(mapHighlight).filter(h => !deleted.has(h.id));
-          const local = getStoredHighlights().filter(h => h.is_published !== false && h.status !== 'draft');
-          const remoteIds = new Set(mapped.map(m => m.id));
-          const localOnly = local.filter(l => !remoteIds.has(l.id));
-          return { data: [...localOnly, ...mapped] };
+          return { data: mapped };
         }
+        console.warn('[CSI] Supabase highlights query failed:', 'check connection');
+        return { data: [] };
       }
 
-      // Return only what administrator has posted (and not deleted)
+      // Supabase NOT configured — use localStorage as fallback (dev mode only)
       const local = getStoredHighlights().filter(h => h.is_published !== false && h.status !== 'draft');
       return { data: local };
     } catch (err: unknown) {
@@ -148,13 +147,11 @@ export const highlightsService = {
           .select('*')
           .order('created_at', { ascending: false });
 
-        if (!error && data && data.length > 0) {
+        if (!error && data) {
           const mapped = data.map(mapHighlight).filter(h => !deleted.has(h.id));
-          const local = getStoredHighlights();
-          const remoteIds = new Set(mapped.map(m => m.id));
-          const localOnly = local.filter(l => !remoteIds.has(l.id));
-          return { data: [...localOnly, ...mapped] };
+          return { data: mapped };
         }
+        return { data: [] };
       }
 
       return { data: getStoredHighlights() };

@@ -113,16 +113,16 @@ export const announcementsService = {
           .eq('status', 'published')
           .order('published_at', { ascending: false });
 
-        if (!error && data && data.length > 0) {
+        if (!error && data) {
           const mapped = data.map(mapAnnouncement).filter(a => !deleted.has(a.id) && (!a.slug || !deleted.has(a.slug)));
-          const local = getStoredAnnouncements().filter(a => a.is_published !== false && a.status !== 'draft');
-          const remoteIds = new Set(mapped.map(m => m.id));
-          const localOnly = local.filter(l => !remoteIds.has(l.id));
-          const combined = [...localOnly, ...mapped].sort(sortAnnouncements);
-          return { data: combined };
+          return { data: mapped.sort(sortAnnouncements) };
         }
+        // Supabase configured but query failed — return empty rather than stale local data
+        console.warn('[CSI] Supabase announcements query failed:', 'check connection');
+        return { data: [] };
       }
 
+      // Supabase NOT configured — use localStorage as fallback (dev mode only)
       const local = getStoredAnnouncements().filter(a => a.is_published !== false && a.status !== 'draft').sort(sortAnnouncements);
       return { data: local.length > 0 ? local : (mockAnnouncements as AnnouncementItem[]).sort(sortAnnouncements) };
     } catch (err: unknown) {
@@ -188,13 +188,11 @@ export const announcementsService = {
           .select('*')
           .order('created_at', { ascending: false });
 
-        if (!error && data && data.length > 0) {
+        if (!error && data) {
           const mapped = data.map(mapAnnouncement).filter(a => !deleted.has(a.id) && (!a.slug || !deleted.has(a.slug)));
-          const local = getStoredAnnouncements();
-          const remoteIds = new Set(mapped.map(m => m.id));
-          const localOnly = local.filter(l => !remoteIds.has(l.id));
-          return { data: [...localOnly, ...mapped] };
+          return { data: mapped };
         }
+        return { data: [] };
       }
 
       return { data: getStoredAnnouncements() };
