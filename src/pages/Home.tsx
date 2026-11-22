@@ -612,11 +612,11 @@ export const Home: React.FC = () => {
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {announcements.slice(0, 4).map((ann) => (
+            <div className="max-w-3xl mx-auto">
+              {announcements.slice(0, 1).map((ann) => (
                 <div
                   key={ann.id}
-                  className={`relative bg-white rounded-2xl border p-5 flex gap-4 hover:shadow-md transition-all duration-200 group ${
+                  className={`relative bg-white rounded-2xl border p-6 flex gap-4 hover:shadow-md transition-all duration-200 group ${
                     ann.is_pinned ? 'border-amber-300 ring-1 ring-amber-200' : 'border-slate-200/90'
                   }`}
                 >
