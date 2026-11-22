@@ -137,7 +137,13 @@ export const eventsService = {
 
         if (!error && data) {
           const mapped = data.map(mapEvent).filter(e => !deleted.has(e.id) && (!e.slug || !deleted.has(e.slug)));
-          return { data: mapped.sort(sortEvents) };
+          // If Supabase table is empty or has items, merge baseline default events if they aren't deleted
+          const local = getStoredEvents().filter(e => e.is_published !== false && e.status !== 'draft');
+          const remoteIds = new Set(mapped.map(m => m.id));
+          const remoteSlugs = new Set(mapped.map(m => m.slug).filter(Boolean));
+          const localOnly = local.filter(l => !remoteIds.has(l.id) && (!l.slug || !remoteSlugs.has(l.slug)));
+          const combined = [...localOnly, ...mapped].sort(sortEvents);
+          return { data: combined };
         }
         // Supabase configured but query failed — return empty rather than stale local data
         console.warn('[CSI] Supabase events query failed:', 'check connection');

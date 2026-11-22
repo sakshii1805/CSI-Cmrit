@@ -112,7 +112,10 @@ export const highlightsService = {
 
         if (!error && data) {
           const mapped = data.map(mapHighlight).filter(h => !deleted.has(h.id));
-          return { data: mapped };
+          const local = getStoredHighlights().filter(h => h.is_published !== false && h.status !== 'draft');
+          const remoteIds = new Set(mapped.map(m => m.id));
+          const localOnly = local.filter(l => !remoteIds.has(l.id));
+          return { data: [...localOnly, ...mapped] };
         }
         console.warn('[CSI] Supabase highlights query failed:', 'check connection');
         return { data: [] };
@@ -149,7 +152,10 @@ export const highlightsService = {
 
         if (!error && data) {
           const mapped = data.map(mapHighlight).filter(h => !deleted.has(h.id));
-          return { data: mapped };
+          const local = getStoredHighlights().filter(h => h.is_published !== false && h.status !== 'draft');
+          const remoteIds = new Set(mapped.map(m => m.id));
+          const localOnly = local.filter(l => !remoteIds.has(l.id));
+          return { data: [...localOnly, ...mapped] };
         }
         return { data: [] };
       }

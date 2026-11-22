@@ -115,7 +115,12 @@ export const announcementsService = {
 
         if (!error && data) {
           const mapped = data.map(mapAnnouncement).filter(a => !deleted.has(a.id) && (!a.slug || !deleted.has(a.slug)));
-          return { data: mapped.sort(sortAnnouncements) };
+          const local = getStoredAnnouncements().filter(a => a.is_published !== false && a.status !== 'draft');
+          const remoteIds = new Set(mapped.map(m => m.id));
+          const remoteSlugs = new Set(mapped.map(m => m.slug).filter(Boolean));
+          const localOnly = local.filter(l => !remoteIds.has(l.id) && (!l.slug || !remoteSlugs.has(l.slug)));
+          const combined = [...localOnly, ...mapped].sort(sortAnnouncements);
+          return { data: combined };
         }
         // Supabase configured but query failed — return empty rather than stale local data
         console.warn('[CSI] Supabase announcements query failed:', 'check connection');
