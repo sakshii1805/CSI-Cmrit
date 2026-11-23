@@ -100,12 +100,6 @@ export const AdminLoginModal: React.FC<AdminLoginModalProps> = ({
       return;
     }
 
-    if (!adminAuthService.isAuthorizedEmail(cleanEmail)) {
-      const msg = 'Access denied. This institutional account is not authorized for administrator access.';
-      setErrorMessage(msg);
-      showToast(msg, 'error');
-      return;
-    }
 
     try {
       setLoading(true);

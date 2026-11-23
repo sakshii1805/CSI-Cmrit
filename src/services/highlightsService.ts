@@ -1,39 +1,9 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 import { requireAdmin } from '../lib/authGuard';
+import { matchIdOrSlug, notifyContentUpdated, isUuid } from '../lib/dbHelpers';
 import { ChapterHighlightItem } from '../types';
-import { mockGallery } from '../data/gallery';
 
-const STORAGE_KEY = 'csi_published_highlights';
-const DELETED_HIGHLIGHTS_KEY = 'csi_deleted_highlights';
-const FORBIDDEN_HIGHLIGHT_IDS = new Set([
-  'hl-avishkaar-campaign',
-  'hl-avishkaar-faculty',
-  'hl-avishkaar-launch'
-]);
-
-// Purge any old demo/mock storage cache once on module evaluation
-try {
-  localStorage.removeItem('csi_highlights_data');
-} catch { }
-
-export const getDeletedHighlightIds = (): Set<string> => {
-  try {
-    const raw = localStorage.getItem(DELETED_HIGHLIGHTS_KEY);
-    const set: Set<string> = raw ? new Set(JSON.parse(raw)) : new Set();
-    FORBIDDEN_HIGHLIGHT_IDS.forEach(id => set.add(id));
-    return set;
-  } catch {
-    return new Set(FORBIDDEN_HIGHLIGHT_IDS);
-  }
-};
-
-const saveDeletedHighlightId = (id: string) => {
-  try {
-    const set = getDeletedHighlightIds();
-    set.add(id);
-    localStorage.setItem(DELETED_HIGHLIGHTS_KEY, JSON.stringify(Array.from(set)));
-  } catch { }
-};
+const NOT_CONFIGURED = 'Website is not connected to the database.';
 
 const sortByLatest = (a: ChapterHighlightItem, b: ChapterHighlightItem) => {
   if (a.is_pinned && !b.is_pinned) return -1;
@@ -41,38 +11,6 @@ const sortByLatest = (a: ChapterHighlightItem, b: ChapterHighlightItem) => {
   const timeA = new Date(a.created_at || a.event_date || a.date || 0).getTime();
   const timeB = new Date(b.created_at || b.event_date || b.date || 0).getTime();
   return timeB - timeA;
-};
-
-const getStoredHighlights = (): ChapterHighlightItem[] => {
-  try {
-    const deleted = getDeletedHighlightIds();
-    const raw = localStorage.getItem(STORAGE_KEY);
-    const parsed: ChapterHighlightItem[] = raw ? JSON.parse(raw) : [];
-    const filtered = parsed.filter(p => !deleted.has(p.id) && !FORBIDDEN_HIGHLIGHT_IDS.has(p.id));
-    const ids = new Set(filtered.map(p => p.id));
-
-    // Only populate baseline items that haven't been deleted by admin
-    for (const m of mockGallery) {
-      if (!ids.has(m.id) && !deleted.has(m.id) && !FORBIDDEN_HIGHLIGHT_IDS.has(m.id)) {
-        filtered.push(m as any);
-      }
-    }
-    return filtered.sort(sortByLatest);
-  } catch {
-    const deleted = getDeletedHighlightIds();
-    return (mockGallery as any[]).filter(m => !deleted.has(m.id) && !FORBIDDEN_HIGHLIGHT_IDS.has(m.id)).sort(sortByLatest);
-  }
-};
-
-const saveStoredHighlights = (items: ChapterHighlightItem[]) => {
-  try {
-    const deleted = getDeletedHighlightIds();
-    const clean = items.filter(h => !deleted.has(h.id));
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(clean));
-    window.dispatchEvent(new CustomEvent('csi_content_updated', { detail: { type: 'highlight' } }));
-  } catch (err) {
-    console.warn('Failed to save highlights to localStorage:', err);
-  }
 };
 
 /** Map DB columns to frontend display properties */
@@ -97,280 +35,122 @@ const mapHighlight = (h: any): ChapterHighlightItem => {
 };
 
 export const highlightsService = {
-  /**
-   * Public: Fetch published chapter highlights (empty until admin uploads photos)
-   */
   async getPublishedHighlights(): Promise<{ data: ChapterHighlightItem[]; error?: string }> {
-    try {
-      const deleted = getDeletedHighlightIds();
-      if (isSupabaseConfigured) {
-        const { data, error } = await supabase
-          .from('highlights')
-          .select('*')
-          .eq('status', 'published')
-          .order('created_at', { ascending: false });
-
-        if (!error && data) {
-          const mapped = data.map(mapHighlight).filter(h => !deleted.has(h.id));
-          const local = getStoredHighlights().filter(h => h.is_published !== false && h.status !== 'draft');
-          const remoteIds = new Set(mapped.map(m => m.id));
-          const localOnly = local.filter(l => !remoteIds.has(l.id));
-          return { data: [...localOnly, ...mapped] };
-        }
-        console.warn('[CSI] Supabase highlights query failed:', 'check connection');
-        return { data: [] };
-      }
-
-      // Supabase NOT configured — use localStorage as fallback (dev mode only)
-      const local = getStoredHighlights().filter(h => h.is_published !== false && h.status !== 'draft');
-      return { data: local };
-    } catch (err: unknown) {
-      const local = getStoredHighlights().filter(h => h.is_published !== false && h.status !== 'draft');
-      return { data: local };
+    if (!isSupabaseConfigured) return { data: [], error: NOT_CONFIGURED };
+    const { data, error } = await supabase
+      .from('highlights')
+      .select('*')
+      .eq('status', 'published')
+      .order('created_at', { ascending: false });
+    if (error) {
+      console.warn('[CSI] highlights query failed:', error.message);
+      return { data: [], error: error.message };
     }
+    return { data: (data || []).map(mapHighlight).sort(sortByLatest) };
   },
 
-  /**
-   * Public: Fetch latest N published highlights (for homepage Instagram feed)
-   */
   async getLatestHighlights(limit: number = 6): Promise<{ data: ChapterHighlightItem[]; error?: string }> {
     const res = await this.getPublishedHighlights();
-    return { data: (res.data || []).slice(0, limit) };
+    return { data: (res.data || []).slice(0, limit), error: res.error };
   },
 
-  /**
-   * Admin: List all highlights
-   */
   async adminListHighlights(): Promise<{ data: ChapterHighlightItem[]; error?: string }> {
-    try {
-      const deleted = getDeletedHighlightIds();
-      if (isSupabaseConfigured) {
-        const { data, error } = await supabase
-          .from('highlights')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (!error && data) {
-          const mapped = data.map(mapHighlight).filter(h => !deleted.has(h.id));
-          const local = getStoredHighlights().filter(h => h.is_published !== false && h.status !== 'draft');
-          const remoteIds = new Set(mapped.map(m => m.id));
-          const localOnly = local.filter(l => !remoteIds.has(l.id));
-          return { data: [...localOnly, ...mapped] };
-        }
-        return { data: [] };
-      }
-
-      return { data: getStoredHighlights() };
-    } catch (err: unknown) {
-      return { data: getStoredHighlights() };
-    }
+    if (!isSupabaseConfigured) return { data: [], error: NOT_CONFIGURED };
+    const { data, error } = await supabase.from('highlights').select('*').order('created_at', { ascending: false });
+    if (error) return { data: [], error: error.message };
+    return { data: (data || []).map(mapHighlight).sort(sortByLatest) };
   },
 
-  /**
-   * Admin: Create single or multiple highlights
-   */
   async createHighlight(item: any): Promise<{ data?: ChapterHighlightItem; error?: string }> {
-    try {
-      await requireAdmin();
-    } catch (authErr: any) {
-      return { error: authErr.message || 'Unauthorized' };
-    }
-    const imagesList = Array.isArray(item.images) && item.images.length > 0
+    try { await requireAdmin(); } catch (e: any) { return { error: e.message }; }
+
+    const imagesList: string[] = Array.isArray(item.images) && item.images.length > 0
       ? item.images
       : [item.imageUrl || item.image_url].filter(Boolean);
+    const published = item.is_published !== false && item.status !== 'draft';
 
-    const newItem: ChapterHighlightItem = {
-      id: item.id || `hl-${Date.now()}`,
-      title: item.title || 'Chapter Highlight',
-      category: item.category || 'Events',
-      event_date: item.date || item.event_date || new Date().toISOString().split('T')[0],
-      date: item.date || item.event_date || new Date().toISOString().split('T')[0],
-      caption: item.caption || item.description || item.title || '',
-      description: item.caption || item.description || item.title || '',
-      image_url: imagesList[0] || item.imageUrl || item.image_url || '',
-      imageUrl: imagesList[0] || item.imageUrl || item.image_url || '',
-      images: imagesList,
-      status: item.is_published !== false && item.status !== 'draft' ? 'published' : 'draft',
-      is_published: item.is_published !== false && item.status !== 'draft',
-      created_at: new Date().toISOString()
-    };
-
-    // 1. Immediately persist to clean production store
-    const current = getStoredHighlights();
-    saveStoredHighlights([newItem, ...current]);
-
-    // 2. Sync to Supabase if configured
-    if (isSupabaseConfigured) {
-      try {
-        const { data, error } = await supabase
-          .from('highlights')
-          .insert([{
-            title: newItem.title,
-            category: newItem.category,
-            event_date: newItem.event_date || null,
-            caption: newItem.caption || null,
-            image_url: newItem.image_url,
-            status: newItem.status,
-          }])
-          .select()
-          .single();
-
-        if (!error && data) {
-          return { data: mapHighlight({ ...data, images: imagesList }) };
-        }
-      } catch (err) {
-        console.warn('Supabase highlight insert error:', err);
-      }
+    const { data, error } = await supabase
+      .from('highlights')
+      .insert([{
+        title: item.title || 'Chapter Highlight',
+        category: item.category || 'Events',
+        event_date: item.date || item.event_date || new Date().toISOString().split('T')[0],
+        caption: item.caption || item.description || item.title || null,
+        image_url: imagesList[0] || '',
+        status: published ? 'published' : 'draft',
+      }])
+      .select()
+      .single();
+    if (error) {
+      console.error('[CSI] highlight insert failed:', error);
+      return { error: error.message };
     }
-
-    return { data: newItem };
+    notifyContentUpdated('highlight');
+    return { data: mapHighlight({ ...data, images: imagesList }) };
   },
 
-  /**
-   * Admin: Update highlight
-   */
   async updateHighlight(id: string, updates: any): Promise<{ data?: ChapterHighlightItem; error?: string }> {
-    try {
-      await requireAdmin();
-    } catch (authErr: any) {
-      return { error: authErr.message || 'Unauthorized' };
-    }
-    const current = getStoredHighlights();
-    const updated = current.map(h => {
-      if (h.id === id) {
-        const next = { ...h, ...updates };
-        if (updates.images && Array.isArray(updates.images)) {
-          next.images = updates.images;
-          if (updates.images[0]) {
-            next.image_url = updates.images[0];
-            next.imageUrl = updates.images[0];
-          }
-        } else if (updates.imageUrl) {
-          next.image_url = updates.imageUrl;
-          next.imageUrl = updates.imageUrl;
-          next.images = [updates.imageUrl];
-        }
-        if (updates.date) next.event_date = updates.date;
-        if (updates.event_date) next.date = updates.event_date;
-        if (updates.description) next.caption = updates.description;
-        if (updates.caption) next.description = updates.caption;
-        if (updates.is_published !== undefined) {
-          next.status = updates.is_published ? 'published' : 'draft';
-        }
-        return next;
-      }
-      return h;
-    });
-    saveStoredHighlights(updated);
+    try { await requireAdmin(); } catch (e: any) { return { error: e.message }; }
 
-    if (isSupabaseConfigured) {
-      try {
-        const payload: any = {};
-        if (updates.title) payload.title = updates.title;
-        if (updates.category) payload.category = updates.category;
-        if (updates.imageUrl || updates.image_url) payload.image_url = updates.imageUrl || updates.image_url;
-        if (updates.caption || updates.description) payload.caption = updates.caption || updates.description;
-        if (updates.date || updates.event_date) payload.event_date = updates.date || updates.event_date;
-        if (updates.status) payload.status = updates.status;
-        else if (updates.is_published !== undefined) payload.status = updates.is_published ? 'published' : 'draft';
+    const payload: any = {};
+    if (updates.title) payload.title = updates.title;
+    if (updates.category) payload.category = updates.category;
+    const img = updates.imageUrl || updates.image_url || (Array.isArray(updates.images) ? updates.images[0] : undefined);
+    if (img) payload.image_url = img;
+    if (updates.caption || updates.description) payload.caption = updates.caption || updates.description;
+    if (updates.date || updates.event_date) payload.event_date = updates.date || updates.event_date;
+    if (updates.is_pinned !== undefined) payload.is_pinned = updates.is_pinned;
+    if (updates.status) payload.status = updates.status;
+    else if (updates.is_published !== undefined) payload.status = updates.is_published ? 'published' : 'draft';
 
-        await supabase.from('highlights').update(payload).eq('id', id);
-      } catch (err) {
-        console.warn('Supabase highlight update error:', err);
-      }
-    }
-
-    const item = updated.find(h => h.id === id);
-    return { data: item };
+    const { data, error } = await supabase.from('highlights').update(payload).eq('id', id).select().maybeSingle();
+    if (error) return { error: error.message };
+    if (!data) return { error: 'Update was blocked or the highlight no longer exists.' };
+    notifyContentUpdated('highlight');
+    return { data: mapHighlight({ ...data, images: updates.images }) };
   },
 
-  /**
-   * Admin: Update highlight status
-   */
   async updateHighlightStatus(id: string, newStatus: string): Promise<{ success: boolean; error?: string }> {
-    return this.updateHighlight(id, {
-      status: newStatus,
-      is_published: newStatus === 'published'
-    }).then(() => ({ success: true }));
+    const res = await this.updateHighlight(id, { status: newStatus, is_published: newStatus === 'published' });
+    return res.error ? { success: false, error: res.error } : { success: true };
   },
 
-  /**
-   * Admin: Toggle publish
-   */
   async toggleHighlightPublish(id: string, currentStatus: 'draft' | 'published'): Promise<{ success: boolean; error?: string }> {
-    const newStatus = currentStatus === 'published' ? 'draft' : 'published';
-    return this.updateHighlightStatus(id, newStatus);
+    return this.updateHighlightStatus(id, currentStatus === 'published' ? 'draft' : 'published');
   },
 
-  /**
-   * Admin: Toggle Pin to Top (Authority for Admins only)
-   */
   async togglePinHighlight(id: string): Promise<{ success: boolean; is_pinned: boolean; error?: string }> {
-    try {
-      await requireAdmin();
-    } catch (authErr: any) {
-      return { success: false, is_pinned: false, error: authErr.message || 'Unauthorized: Only admins can pin highlights' };
-    }
-    const current = getStoredHighlights();
-    let nextPinned = true;
-    const updated = current.map(h => {
-      if (h.id === id) {
-        nextPinned = !h.is_pinned;
-        return {
-          ...h,
-          is_pinned: nextPinned
-        };
-      }
-      return h;
-    });
-    saveStoredHighlights(updated);
-
-    if (isSupabaseConfigured) {
-      try {
-        await supabase.from('highlights').update({ is_pinned: nextPinned } as any).eq('id', id);
-      } catch (err) {
-        console.warn('Supabase highlight togglePin error:', err);
-      }
-    }
-
-    return { success: true, is_pinned: nextPinned };
+    try { await requireAdmin(); } catch (e: any) { return { success: false, is_pinned: false, error: e.message }; }
+    const { data: row, error: readErr } = await supabase.from('highlights').select('id,is_pinned').eq('id', id).maybeSingle();
+    if (readErr || !row) return { success: false, is_pinned: false, error: readErr?.message || 'Highlight not found.' };
+    const next = !(row as any).is_pinned;
+    const { error } = await supabase.from('highlights').update({ is_pinned: next } as any).eq('id', id);
+    if (error) return { success: false, is_pinned: !next, error: error.message };
+    notifyContentUpdated('highlight');
+    return { success: true, is_pinned: next };
   },
 
-  /**
-   * Helper: Get currently deleted highlight IDs
-   */
+  /** Kept for galleryService compatibility. Deletions now happen in the database, so nothing is hidden locally. */
   getDeletedHighlightIds(): Set<string> {
-    return getDeletedHighlightIds();
+    return new Set();
   },
 
-  /**
-   * Admin: Delete highlight permanently
-   */
   async deleteHighlight(id: string): Promise<{ success: boolean; error?: string }> {
-    try {
-      await requireAdmin();
-    } catch (authErr: any) {
-      return { success: false, error: authErr.message || 'Unauthorized' };
-    }
-    saveDeletedHighlightId(id);
-    const current = getStoredHighlights();
-    saveStoredHighlights(current.filter(h => h.id !== id));
+    try { await requireAdmin(); } catch (e: any) { return { success: false, error: e.message }; }
 
-    if (isSupabaseConfigured) {
-      try {
-        const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
-        if (isUUID) {
-          const { error } = await supabase.from('highlights').delete().eq('id', id);
-          if (error) console.warn('Supabase highlight delete error:', error);
-          await supabase.from('gallery_posts').delete().eq('id', id);
-        } else {
-          await supabase.from('gallery_posts').delete().eq('slug', id);
-        }
-      } catch (err) {
-        console.warn('Supabase highlight delete error:', err);
+    if (isUuid(id)) {
+      const { data, error } = await supabase.from('highlights').delete().eq('id', id).select('id');
+      if (error) return { success: false, error: error.message };
+      if (data && data.length > 0) {
+        notifyContentUpdated('highlight');
+        return { success: true };
       }
     }
-
+    // The id may belong to a gallery post instead of a highlight
+    const { data: gp, error: gpErr } = await matchIdOrSlug(supabase.from('gallery_posts').delete(), id).select('id');
+    if (gpErr) return { success: false, error: gpErr.message };
+    if (!gp || gp.length === 0) return { success: false, error: 'Nothing was deleted. It may already be gone, or the database blocked it.' };
+    notifyContentUpdated('highlight');
     return { success: true };
   }
 };

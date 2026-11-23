@@ -1,42 +1,26 @@
 import { supabase, isSupabaseConfigured } from './supabaseClient';
-import { adminAuthService } from '../services/adminAuthService';
 
 /**
- * Validates whether the current runtime environment / browser session has admin authorization.
- * Checks both local storage authenticated admin session and active Supabase user.
+ * True only when there is a REAL Supabase session AND the database says the
+ * user is an admin (public.is_admin() checks the admins table).
+ * Nothing stored in the browser can fake this.
  */
 export const checkAdminAuthorization = async (): Promise<boolean> => {
   try {
-    // 1. Check local session persistence
-    const saved = localStorage.getItem('csi_dev_admin_session');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        const email = parsed?.user?.email?.toLowerCase();
-        if (email && adminAuthService.isAuthorizedEmail(email)) {
-          return true;
-        }
-      } catch {}
-    }
-
-    // 2. Check Supabase auth if configured
-    if (isSupabaseConfigured) {
-      const { data: { session } } = await supabase.auth.getSession();
-      const email = session?.user?.email?.toLowerCase();
-      if (email && adminAuthService.isAuthorizedEmail(email)) {
-        return true;
-      }
-    }
+    if (!isSupabaseConfigured) return false;
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) return false;
+    const { data, error } = await supabase.rpc('is_admin');
+    return !error && data === true;
   } catch (err) {
     console.error('Authorization check failed:', err);
+    return false;
   }
-
-  return false;
 };
 
 export const requireAdmin = async (): Promise<void> => {
-  const isAuthorized = await checkAdminAuthorization();
-  if (!isAuthorized) {
-    throw new Error('Unauthorized: This action requires administrator privileges.');
+  const ok = await checkAdminAuthorization();
+  if (!ok) {
+    throw new Error('Not signed in as an administrator. Please log in again.');
   }
 };

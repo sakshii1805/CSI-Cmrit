@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { X, Key, Lock, Eye, EyeOff, Loader2, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import { useToast } from '../../common/Toast';
-import { adminAuthService } from '../../../services/adminAuthService';
 import { adminService } from '../../../services/adminService';
 import { validatePasswordStrict, evaluatePasswordSecurity } from '../../../lib/passwordSecurity';
 import { PasswordStrengthIndicator } from '../../common/PasswordStrengthIndicator';
@@ -65,19 +64,11 @@ export const ChangePasswordModal: React.FC<ChangePasswordModalProps> = ({
     try {
       setLoading(true);
 
-      // 1. Direct update in adminAuthService persistent registry
-      const authRes = adminAuthService.changePassword(targetEmail, cleanNewPass);
+      const authRes = await adminService.changePassword(cleanNewPass, targetEmail);
       if (!authRes.success) {
         setErrorMessage(authRes.error || 'Failed to update password.');
         showToast(authRes.error || 'Failed to update password.', 'error');
         return;
-      }
-
-      // 2. Also forward through adminService to keep any supabase integration in sync
-      try {
-        await adminService.changePassword(cleanNewPass, targetEmail);
-      } catch (err) {
-        console.warn('Backend sync noted:', err);
       }
 
       showToast('Password changed successfully! Please use this new password on your next sign-in.', 'success');

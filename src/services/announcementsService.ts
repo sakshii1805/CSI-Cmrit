@@ -1,84 +1,9 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 import { requireAdmin } from '../lib/authGuard';
+import { matchIdOrSlug, notifyContentUpdated, slugify, uniqueSlug } from '../lib/dbHelpers';
 import { AnnouncementItem, ContentStatus } from '../types';
-import { mockAnnouncements } from '../data/announcements';
 
-const STORAGE_KEY = 'csi_published_announcements';
-const DELETED_ANNOUNCEMENTS_KEY = 'csi_deleted_announcements';
-
-// Purge any old demo/mock storage cache once on module evaluation
-try {
-  localStorage.removeItem('csi_announcements_data');
-} catch { }
-
-const getDeletedAnnouncementIds = (): Set<string> => {
-  try {
-    const raw = localStorage.getItem(DELETED_ANNOUNCEMENTS_KEY);
-    return raw ? new Set(JSON.parse(raw)) : new Set();
-  } catch {
-    return new Set();
-  }
-};
-
-const saveDeletedAnnouncementId = (id: string) => {
-  try {
-    const set = getDeletedAnnouncementIds();
-    set.add(id);
-    localStorage.setItem(DELETED_ANNOUNCEMENTS_KEY, JSON.stringify(Array.from(set)));
-  } catch { }
-};
-
-const getStoredAnnouncements = (): AnnouncementItem[] => {
-  try {
-    const deleted = getDeletedAnnouncementIds();
-    const raw = localStorage.getItem(STORAGE_KEY);
-    let parsed: AnnouncementItem[] = raw ? JSON.parse(raw) : [];
-
-    // Purge any unauthorized dummy announcements and deleted items
-    const forbiddenIds = new Set(['ann-02', 'ann-03', 'ann-04', 'ann-05', 'mock-ann-1', 'mock-ann-2', 'mock-ann-3']);
-    parsed = parsed.filter(p => !forbiddenIds.has(p.id) && !deleted.has(p.id) && !p.title.includes('Membership Drive') && !p.title.includes('Call for Core Student Coordinators'));
-
-    // Ensure baseline announcements are present & updated only if not deleted
-    for (const item of mockAnnouncements) {
-      if (deleted.has(item.id) || forbiddenIds.has(item.id)) {
-        continue;
-      }
-      const existingIdx = parsed.findIndex(p => p.id === item.id);
-      if (existingIdx >= 0) {
-        parsed[existingIdx] = {
-          ...item,
-          ...parsed[existingIdx],
-          category: item.category,
-          title: item.title,
-          is_published: true,
-          status: 'published'
-        };
-      } else {
-        parsed.push(item);
-      }
-    }
-
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
-    } catch { }
-
-    return parsed;
-  } catch {
-    const deleted = getDeletedAnnouncementIds();
-    return mockAnnouncements.filter(m => !deleted.has(m.id));
-  }
-};
-
-const saveStoredAnnouncements = (items: AnnouncementItem[]) => {
-  try {
-    const deleted = getDeletedAnnouncementIds();
-    const clean = items.filter(a => !deleted.has(a.id));
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(clean));
-    window.dispatchEvent(new CustomEvent('csi_content_updated', { detail: { type: 'announcement' } }));
-  } catch (err) {
-    console.warn('Failed to save announcements to localStorage:', err);
-  }
-};
+const NOT_CONFIGURED = 'Website is not connected to the database.';
 
 const mapAnnouncement = (a: any): AnnouncementItem => ({
   ...a,
@@ -100,318 +25,139 @@ const sortAnnouncements = (a: AnnouncementItem, b: AnnouncementItem) => {
 };
 
 export const announcementsService = {
-  /**
-   * Public: Fetch all published announcements (empty until admin posts announcements)
-   */
+  /** Public: all published announcements (straight from the database) */
   async getPublishedAnnouncements(): Promise<{ data: AnnouncementItem[]; error?: string }> {
-    try {
-      const deleted = getDeletedAnnouncementIds();
-      if (isSupabaseConfigured) {
-        const { data, error } = await supabase
-          .from('announcements')
-          .select('*')
-          .eq('status', 'published')
-          .order('published_at', { ascending: false });
-
-        if (!error && data) {
-          const mapped = data.map(mapAnnouncement).filter(a => !deleted.has(a.id) && (!a.slug || !deleted.has(a.slug)));
-          const local = getStoredAnnouncements().filter(a => a.is_published !== false && a.status !== 'draft');
-          const remoteIds = new Set(mapped.map(m => m.id));
-          const remoteSlugs = new Set(mapped.map(m => m.slug).filter(Boolean));
-          const localOnly = local.filter(l => !remoteIds.has(l.id) && (!l.slug || !remoteSlugs.has(l.slug)));
-          const combined = [...localOnly, ...mapped].sort(sortAnnouncements);
-          return { data: combined };
-        }
-        // Supabase configured but query failed — return empty rather than stale local data
-        console.warn('[CSI] Supabase announcements query failed:', 'check connection');
-        return { data: [] };
-      }
-
-      // Supabase NOT configured — use localStorage as fallback (dev mode only)
-      const local = getStoredAnnouncements().filter(a => a.is_published !== false && a.status !== 'draft').sort(sortAnnouncements);
-      return { data: local.length > 0 ? local : (mockAnnouncements as AnnouncementItem[]).sort(sortAnnouncements) };
-    } catch (err: unknown) {
-      const local = getStoredAnnouncements().filter(a => a.is_published !== false && a.status !== 'draft').sort(sortAnnouncements);
-      return { data: local.length > 0 ? local : (mockAnnouncements as AnnouncementItem[]).sort(sortAnnouncements) };
+    if (!isSupabaseConfigured) return { data: [], error: NOT_CONFIGURED };
+    const { data, error } = await supabase
+      .from('announcements')
+      .select('*')
+      .eq('status', 'published')
+      .order('published_at', { ascending: false });
+    if (error) {
+      console.warn('[CSI] announcements query failed:', error.message);
+      return { data: [], error: error.message };
     }
+    return { data: (data || []).map(mapAnnouncement).sort(sortAnnouncements) };
   },
 
-  /**
-   * Public: Fetch latest N published announcements (for homepage)
-   */
   async getLatestAnnouncements(limit: number = 5): Promise<{ data: AnnouncementItem[]; error?: string }> {
     const res = await this.getPublishedAnnouncements();
-    return { data: (res.data || []).slice(0, limit) };
+    return { data: (res.data || []).slice(0, limit), error: res.error };
   },
 
-  /**
-   * Public: Fetch single published announcement by slug or id
-   */
   async getAnnouncementBySlug(slug: string): Promise<{ data: AnnouncementItem | null; error?: string }> {
-    try {
-      const deleted = getDeletedAnnouncementIds();
-      if (deleted.has(slug)) return { data: null, error: 'Announcement has been deleted' };
-
-      if (isSupabaseConfigured) {
-        const { data, error } = await supabase
-          .from('announcements')
-          .select('*')
-          .or(`slug.eq.${slug},id.eq.${slug}`)
-          .eq('status', 'published')
-          .single();
-
-        if (!error && data) {
-          const mapped = mapAnnouncement(data);
-          if (deleted.has(mapped.id) || (mapped.slug && deleted.has(mapped.slug))) {
-            return { data: null, error: 'Announcement has been deleted' };
-          }
-          return { data: mapped };
-        }
-      }
-
-      const all = getStoredAnnouncements();
-      const match = all.find(a => a.slug === slug || a.id === slug);
-      if (match) return { data: match };
-
-      return { data: null, error: 'Announcement not found' };
-    } catch (err: unknown) {
-      const all = getStoredAnnouncements();
-      const match = all.find(a => a.slug === slug || a.id === slug);
-      return { data: match || null };
-    }
+    if (!isSupabaseConfigured) return { data: null, error: NOT_CONFIGURED };
+    const { data, error } = await matchIdOrSlug(
+      supabase.from('announcements').select('*').eq('status', 'published'),
+      slug
+    ).maybeSingle();
+    if (error) return { data: null, error: error.message };
+    if (!data) return { data: null, error: 'Announcement not found' };
+    return { data: mapAnnouncement(data) };
   },
 
-  /**
-   * Admin: List all announcements (drafts and published)
-   */
+  /** Admin: list everything including drafts */
   async adminListAnnouncements(): Promise<{ data: AnnouncementItem[]; error?: string }> {
-    try {
-      const deleted = getDeletedAnnouncementIds();
-      if (isSupabaseConfigured) {
-        const { data, error } = await supabase
-          .from('announcements')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (!error && data) {
-          const mapped = data.map(mapAnnouncement).filter(a => !deleted.has(a.id) && (!a.slug || !deleted.has(a.slug)));
-          return { data: mapped };
-        }
-        return { data: [] };
-      }
-
-      return { data: getStoredAnnouncements() };
-    } catch (err: unknown) {
-      return { data: getStoredAnnouncements() };
-    }
+    if (!isSupabaseConfigured) return { data: [], error: NOT_CONFIGURED };
+    const { data, error } = await supabase
+      .from('announcements')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) return { data: [], error: error.message };
+    return { data: (data || []).map(mapAnnouncement) };
   },
 
-  /**
-   * Admin: Create new announcement
-   */
   async createAnnouncement(announcement: any): Promise<{ data?: AnnouncementItem; error?: string }> {
-    try {
-      await requireAdmin();
-    } catch (authErr: any) {
-      return { error: authErr.message || 'Unauthorized' };
-    }
-    const title = announcement.title || 'Untitled Announcement';
-    const slug = announcement.slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || ('ann-' + Date.now());
-    const isPublished = announcement.is_published !== false && announcement.status !== 'draft';
+    try { await requireAdmin(); } catch (e: any) { return { error: e.message }; }
 
-    const newAnn: AnnouncementItem = {
-      id: announcement.id || `ann-${Date.now()}`,
-      slug,
+    const title = announcement.title || 'Untitled Announcement';
+    const isPublished = announcement.is_published !== false && announcement.status !== 'draft';
+    const { data: userData } = await supabase.auth.getUser();
+
+    const payload: any = {
+      slug: announcement.slug || uniqueSlug(slugify(title, 'ann')),
       title,
       category: announcement.category || 'General',
       summary: announcement.summary || '',
       content: Array.isArray(announcement.content)
         ? announcement.content
         : (announcement.content ? [announcement.content] : []),
-      author: announcement.author || 'CSI CMRIT Core Team',
-      tags: Array.isArray(announcement.tags) ? announcement.tags : [announcement.category || 'General'],
       priority: announcement.isUrgent || announcement.priority === 'high' ? 'high' : 'medium',
-      isUrgent: !!(announcement.isUrgent || announcement.priority === 'high'),
-      is_published: isPublished,
-      status: (isPublished ? 'published' : 'draft') as ContentStatus,
-      date: announcement.date || new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+      status: isPublished ? 'published' : 'draft',
+      created_by: userData?.user?.id || null,
       published_at: isPublished ? (announcement.published_at || new Date().toISOString()) : null,
-      created_at: new Date().toISOString()
     };
+    if (announcement.image_url) payload.image_url = announcement.image_url;
 
-    // 1. Immediately persist locally
-    const current = getStoredAnnouncements();
-    saveStoredAnnouncements([newAnn, ...current]);
-
-    // 2. Sync with Supabase if configured
-    if (isSupabaseConfigured) {
-      try {
-        const { data: userData } = await supabase.auth.getUser();
-        const payload = {
-          slug: newAnn.slug,
-          title: newAnn.title,
-          category: newAnn.category,
-          summary: newAnn.summary,
-          content: newAnn.content,
-          status: newAnn.status,
-          created_by: userData?.user?.id || null,
-          published_at: newAnn.published_at,
-        };
-
-        const { data, error } = await supabase
-          .from('announcements')
-          .insert([payload])
-          .select()
-          .single();
-
-        if (!error && data) {
-          return { data: mapAnnouncement(data) };
-        }
-      } catch (err) {
-        console.warn('Supabase announcement insert error:', err);
-      }
+    const { data, error } = await supabase.from('announcements').insert([payload]).select().single();
+    if (error) {
+      console.error('[CSI] announcement insert failed:', error);
+      return { error: error.message };
     }
-
-    return { data: newAnn };
+    notifyContentUpdated('announcement');
+    return { data: mapAnnouncement(data) };
   },
 
-  /**
-   * Admin: Update announcement
-   */
   async updateAnnouncement(id: string, updates: any): Promise<{ data?: AnnouncementItem; error?: string }> {
-    try {
-      await requireAdmin();
-    } catch (authErr: any) {
-      return { error: authErr.message || 'Unauthorized' };
-    }
-    const current = getStoredAnnouncements();
-    const updated = current.map(a => {
-      if (a.id === id || a.slug === id) {
-        const next = { ...a, ...updates };
-        if (updates.is_published !== undefined) {
-          next.status = updates.is_published ? 'published' : 'draft';
-        }
-        if (updates.isUrgent !== undefined) {
-          next.priority = updates.isUrgent ? 'high' : 'medium';
-        }
-        return next;
-      }
-      return a;
-    });
-    saveStoredAnnouncements(updated);
+    try { await requireAdmin(); } catch (e: any) { return { error: e.message }; }
 
-    if (isSupabaseConfigured) {
-      try {
-        const payload: any = { ...updates };
-        if (updates.is_published !== undefined) {
-          payload.status = updates.is_published ? 'published' : 'draft';
-          if (updates.is_published && !payload.published_at) {
-            payload.published_at = new Date().toISOString();
-          }
-        }
-        await supabase.from('announcements').update(payload).or(`id.eq.${id},slug.eq.${id}`);
-      } catch (err) {
-        console.warn('Supabase announcement update error:', err);
-      }
+    const payload: any = {};
+    if (updates.title !== undefined) payload.title = updates.title;
+    if (updates.category !== undefined) payload.category = updates.category;
+    if (updates.summary !== undefined) payload.summary = updates.summary;
+    if (updates.content !== undefined) {
+      payload.content = Array.isArray(updates.content) ? updates.content : (updates.content ? [updates.content] : []);
+    }
+    if (updates.image_url !== undefined) payload.image_url = updates.image_url;
+    if (updates.isUrgent !== undefined) payload.priority = updates.isUrgent ? 'high' : 'medium';
+    else if (updates.priority !== undefined) payload.priority = updates.priority === 'high' ? 'high' : (updates.priority === 'low' ? 'low' : 'medium');
+    if (updates.is_pinned !== undefined) payload.is_pinned = updates.is_pinned;
+    if (updates.status !== undefined || updates.is_published !== undefined) {
+      const published = updates.status ? updates.status === 'published' : !!updates.is_published;
+      payload.status = published ? 'published' : 'draft';
+      if (published) payload.published_at = updates.published_at || new Date().toISOString();
     }
 
-    const item = updated.find(a => a.id === id || a.slug === id);
-    return { data: item };
+    const { data, error } = await matchIdOrSlug(supabase.from('announcements').update(payload), id).select().maybeSingle();
+    if (error) return { error: error.message };
+    if (!data) return { error: 'Update was blocked or the announcement no longer exists.' };
+    notifyContentUpdated('announcement');
+    return { data: mapAnnouncement(data) };
   },
 
-  /**
-   * Admin: Toggle publish
-   */
   async toggleAnnouncementPublish(id: string, currentStatus: ContentStatus): Promise<{ success: boolean; error?: string }> {
-    try {
-      await requireAdmin();
-    } catch (authErr: any) {
-      return { success: false, error: authErr.message || 'Unauthorized' };
-    }
-    const newStatus: ContentStatus = currentStatus === 'published' ? 'draft' : 'published';
-    const current = getStoredAnnouncements();
-    const updated = current.map(a => {
-      if (a.id === id || a.slug === id) {
-        return {
-          ...a,
-          status: newStatus,
-          is_published: newStatus === 'published',
-          published_at: newStatus === 'published' ? (a.published_at || new Date().toISOString()) : a.published_at
-        };
-      }
-      return a;
-    });
-    saveStoredAnnouncements(updated);
-
-    if (isSupabaseConfigured) {
-      try {
-        await supabase.from('announcements').update({
-          status: newStatus,
-          published_at: newStatus === 'published' ? new Date().toISOString() : null
-        }).or(`id.eq.${id},slug.eq.${id}`);
-      } catch (err) {
-        console.warn('Supabase toggleAnnouncementPublish error:', err);
-      }
-    }
-
+    try { await requireAdmin(); } catch (e: any) { return { success: false, error: e.message }; }
+    const publish = currentStatus !== 'published';
+    const { data, error } = await matchIdOrSlug(
+      supabase.from('announcements').update({
+        status: publish ? 'published' : 'draft',
+        published_at: publish ? new Date().toISOString() : null
+      }),
+      id
+    ).select('id');
+    if (error) return { success: false, error: error.message };
+    if (!data || data.length === 0) return { success: false, error: 'Update was blocked by the database.' };
+    notifyContentUpdated('announcement');
     return { success: true };
   },
 
-  /**
-   * Admin: Toggle Pin to Top (Authority for Admins only)
-   */
   async togglePinAnnouncement(id: string): Promise<{ success: boolean; is_pinned: boolean; error?: string }> {
-    try {
-      await requireAdmin();
-    } catch (authErr: any) {
-      return { success: false, is_pinned: false, error: authErr.message || 'Unauthorized: Only admins can pin announcements' };
-    }
-    const current = getStoredAnnouncements();
-    let nextPinned = true;
-    const updated = current.map(a => {
-      if (a.id === id || a.slug === id) {
-        nextPinned = !a.is_pinned;
-        return {
-          ...a,
-          is_pinned: nextPinned
-        };
-      }
-      return a;
-    });
-    saveStoredAnnouncements(updated);
-
-    if (isSupabaseConfigured) {
-      try {
-        await supabase.from('announcements').update({ is_pinned: nextPinned } as any).or(`id.eq.${id},slug.eq.${id}`);
-      } catch (err) {
-        console.warn('Supabase togglePinAnnouncement error:', err);
-      }
-    }
-
-    return { success: true, is_pinned: nextPinned };
+    try { await requireAdmin(); } catch (e: any) { return { success: false, is_pinned: false, error: e.message }; }
+    const { data: row, error: readErr } = await matchIdOrSlug(supabase.from('announcements').select('id,is_pinned'), id).maybeSingle();
+    if (readErr || !row) return { success: false, is_pinned: false, error: readErr?.message || 'Announcement not found.' };
+    const next = !(row as any).is_pinned;
+    const { error } = await supabase.from('announcements').update({ is_pinned: next } as any).eq('id', row.id);
+    if (error) return { success: false, is_pinned: !next, error: error.message };
+    notifyContentUpdated('announcement');
+    return { success: true, is_pinned: next };
   },
 
-  /**
-   * Admin: Delete announcement permanently
-   */
   async deleteAnnouncement(id: string): Promise<{ success: boolean; error?: string }> {
-    try {
-      await requireAdmin();
-    } catch (authErr: any) {
-      return { success: false, error: authErr.message || 'Unauthorized' };
-    }
-    saveDeletedAnnouncementId(id);
-    const current = getStoredAnnouncements();
-    saveStoredAnnouncements(current.filter(a => a.id !== id && a.slug !== id));
-
-    if (isSupabaseConfigured) {
-      try {
-        await supabase.from('announcements').delete().or(`id.eq.${id},slug.eq.${id}`);
-      } catch (err) {
-        console.warn('Supabase deleteAnnouncement error:', err);
-      }
-    }
-
+    try { await requireAdmin(); } catch (e: any) { return { success: false, error: e.message }; }
+    const { data, error } = await matchIdOrSlug(supabase.from('announcements').delete(), id).select('id');
+    if (error) return { success: false, error: error.message };
+    if (!data || data.length === 0) return { success: false, error: 'Nothing was deleted. The post may already be gone, or the database blocked it.' };
+    notifyContentUpdated('announcement');
     return { success: true };
   }
 };

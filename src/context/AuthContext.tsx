@@ -2,7 +2,6 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, Session, AuthError } from '@supabase/supabase-js';
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 import { AdminProfile } from '../types';
-import { adminAuthService } from '../services/adminAuthService';
 
 interface AuthContextType {
   user: User | null;
@@ -22,54 +21,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const DEFAULT_ADMIN_PROFILE: AdminProfile = {
-  id: 'admin-01',
-  full_name: 'Chapter Executive',
-  email: 'csi@cmritonline.ac.in',
-  role: 'super_admin',
-  avatar_url: '', // Default clean: No profile picture (initials monogram)
-  designation: 'CSI Chapter Lead',
-  department: 'Department of Computer Science & Engineering',
-  phone: '+91 80 2852 4466',
-  bio: 'Authorized administrator for CSI CMRIT chapter. Managing chapter events, workshops, hackathons, and technical community activities.',
-  created_at: '2024-01-15T00:00:00.000Z'
-};
-
-export const getSavedProfile = (email?: string): AdminProfile => {
-  const cleanEmail = email?.trim().toLowerCase();
-  if (cleanEmail) {
-    const account = adminAuthService.getAccountByEmail(cleanEmail);
-    if (account) {
-      return {
-        id: account.id,
-        full_name: account.full_name,
-        email: account.email,
-        role: account.role,
-        avatar_url: '',
-        designation: account.designation,
-        department: account.department,
-        phone: account.phone,
-        bio: account.bio,
-        created_at: account.created_at
-      };
-    }
-  }
-  try {
-    const saved = localStorage.getItem('csi_admin_profile_data');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (parsed.email && adminAuthService.isAuthorizedEmail(parsed.email)) {
-        const acc = adminAuthService.getAccountByEmail(parsed.email);
-        return {
-          ...DEFAULT_ADMIN_PROFILE,
-          ...acc,
-          ...parsed
-        };
-      }
-    }
-  } catch {}
-  return DEFAULT_ADMIN_PROFILE;
-};
+const NOT_ADMIN_MSG = 'This account is signed in but is not registered as an administrator.';
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -77,7 +29,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [adminProfile, setAdminProfile] = useState<AdminProfile | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Fetch admin profile from public.admins table if Supabase is active
+  // The admins table is the single source of truth for who is an admin.
   const fetchAdminProfile = async (userId: string): Promise<AdminProfile | null> => {
     try {
       if (!isSupabaseConfigured) return null;
@@ -85,12 +37,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         .from('admins')
         .select('*')
         .eq('id', userId)
-        .single();
-
-      if (error || !data) {
-        return null;
-      }
-
+        .maybeSingle();
+      if (error || !data) return null;
       return data as AdminProfile;
     } catch (err) {
       console.error('[Auth] Error fetching admin profile:', err);
@@ -98,69 +46,55 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const refreshProfile = async () => {
-    if (user && isSupabaseConfigured) {
-      const profile = await fetchAdminProfile(user.id);
-      if (profile) {
-        setAdminProfile(profile);
-        return;
-      }
+  const clearAuthState = () => {
+    setUser(null);
+    setSession(null);
+    setAdminProfile(null);
+  };
+
+  const applySession = async (newSession: Session | null) => {
+    if (!newSession?.user) {
+      clearAuthState();
+      return;
     }
-    setAdminProfile(getSavedProfile());
+    const profile = await fetchAdminProfile(newSession.user.id);
+    if (profile) {
+      setSession(newSession);
+      setUser(newSession.user);
+      setAdminProfile(profile);
+    } else {
+      // Logged in to Supabase but not an admin: treat as a normal visitor.
+      clearAuthState();
+    }
+  };
+
+  const refreshProfile = async () => {
+    if (user) {
+      const profile = await fetchAdminProfile(user.id);
+      if (profile) setAdminProfile(profile);
+    }
   };
 
   const updateProfile = async (updates: Partial<AdminProfile>): Promise<{ success: boolean; error?: string }> => {
     try {
-      const current = adminProfile || getSavedProfile();
-      const updated: AdminProfile = {
-        ...current,
-        ...updates,
-        updated_at: new Date().toISOString()
-      };
+      if (!user?.id || !adminProfile) return { success: false, error: 'Not signed in.' };
+      const updated: AdminProfile = { ...adminProfile, ...updates, updated_at: new Date().toISOString() };
 
-      setAdminProfile(updated);
-      try {
-        localStorage.setItem('csi_admin_profile_data', JSON.stringify(updated));
-        const sessionData = localStorage.getItem('csi_dev_admin_session');
-        if (sessionData) {
-          const parsed = JSON.parse(sessionData);
-          parsed.profile = updated;
-          if (updates.full_name) {
-            parsed.user.user_metadata = { ...(parsed.user.user_metadata || {}), full_name: updates.full_name };
-          }
-          localStorage.setItem('csi_dev_admin_session', JSON.stringify(parsed));
-        }
-      } catch {}
-
-      if (user?.email) {
-        adminAuthService.updateProfile(user.email, {
+      const { error } = await supabase
+        .from('admins')
+        .update({
           full_name: updated.full_name,
+          avatar_url: updated.avatar_url,
+          phone: updated.phone,
           designation: updated.designation,
           department: updated.department,
-          phone: updated.phone,
-          bio: updated.bio
-        });
-      }
+          bio: updated.bio,
+          updated_at: updated.updated_at
+        })
+        .eq('id', user.id);
 
-      if (isSupabaseConfigured && user?.id) {
-        try {
-          await supabase
-            .from('admins')
-            .update({
-              full_name: updated.full_name,
-              avatar_url: updated.avatar_url,
-              phone: updated.phone,
-              designation: updated.designation,
-              department: updated.department,
-              bio: updated.bio,
-              updated_at: updated.updated_at
-            })
-            .eq('id', user.id);
-        } catch (e) {
-          console.warn('[Auth] Supabase profile sync warning:', e);
-        }
-      }
-
+      if (error) return { success: false, error: error.message };
+      setAdminProfile(updated);
       return { success: true };
     } catch (err: any) {
       return { success: false, error: err?.message || 'Failed to update profile' };
@@ -168,166 +102,66 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    const initAuth = async () => {
-      try {
-        const saved = localStorage.getItem('csi_dev_admin_session');
-        if (saved) {
-          try {
-            const parsed = JSON.parse(saved);
-            const savedEmail = parsed.user?.email?.toLowerCase();
-            if (savedEmail && adminAuthService.isValidCmritEmail(savedEmail) && adminAuthService.isAuthorizedEmail(savedEmail)) {
-              const account = adminAuthService.getAccountByEmail(savedEmail);
-              const cleanProfile: AdminProfile = {
-                id: account?.id || parsed.user.id || 'admin-01',
-                email: savedEmail,
-                full_name: parsed.profile?.full_name || account?.full_name || 'Administrator',
-                role: account?.role || 'admin',
-                avatar_url: parsed.profile?.avatar_url || '',
-                designation: parsed.profile?.designation || account?.designation || 'Student Coordinator',
-                department: parsed.profile?.department || account?.department || 'Department of Computer Science & Engineering',
-                phone: parsed.profile?.phone || account?.phone || '+91 80 2852 4466',
-                bio: parsed.profile?.bio || account?.bio || 'Authorized administrator for CSI CMRIT chapter.',
-                created_at: account?.created_at || '2024-01-15T00:00:00.000Z'
-              };
-              setUser(parsed.user);
-              setAdminProfile(cleanProfile);
-              setSession({ user: parsed.user } as any);
-            } else {
-              localStorage.removeItem('csi_dev_admin_session');
-            }
-          } catch {
-            localStorage.removeItem('csi_dev_admin_session');
-          }
-        }
+    // Remove leftovers of the old fake/local login so they can never grant access.
+    try {
+      ['csi_dev_admin_session', 'csi_authorized_admin_accounts', 'csi_admin_profile_data',
+       'csi_published_announcements', 'csi_published_events', 'csi_published_highlights',
+       'csi_deleted_announcements', 'csi_deleted_events', 'csi_deleted_highlights']
+        .forEach(k => localStorage.removeItem(k));
+    } catch { /* ignore */ }
 
-        if (isSupabaseConfigured) {
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session?.user && session.user.email && adminAuthService.isAuthorizedEmail(session.user.email)) {
-            setSession(session);
-            setUser(session.user);
-            const profile = await fetchAdminProfile(session.user.id);
-            setAdminProfile(profile || getSavedProfile(session.user.email));
-          }
-        }
-      } catch (err) {
-        console.error('[Auth] Error during auth init:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    initAuth();
-
-    if (!isSupabaseConfigured) return;
-
-    // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
-      if (newSession?.user && newSession.user.email && adminAuthService.isAuthorizedEmail(newSession.user.email)) {
-        setSession(newSession);
-        setUser(newSession.user);
-        const profile = await fetchAdminProfile(newSession.user.id);
-        setAdminProfile(profile || getSavedProfile(newSession.user.email));
-      } else if (!newSession) {
-        // If not logged in via dev session either
-        const saved = localStorage.getItem('csi_dev_admin_session');
-        if (!saved) {
-          setUser(null);
-          setSession(null);
-          setAdminProfile(null);
-        }
-      }
+    if (!isSupabaseConfigured) {
       setIsLoading(false);
+      return;
+    }
+
+    let active = true;
+
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (active) await applySession(session);
+    }).catch(err => console.error('[Auth] Error during auth init:', err))
+      .finally(() => { if (active) setIsLoading(false); });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      // Defer to avoid deadlocks inside the auth callback.
+      setTimeout(() => { if (active) applySession(newSession); }, 0);
     });
 
     return () => {
+      active = false;
       subscription.unsubscribe();
     };
   }, []);
 
-  // Secure Sign In - verifies strictly against 5 authorized administrator accounts (@cmritonline.ac.in)
+  // Real Supabase sign-in. No local passwords, no fake sessions.
   const signIn = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
     try {
       setIsLoading(true);
-
-      const cleanEmail = email.trim().toLowerCase();
-      const cleanPassword = password.trim();
-
-      const verifyRes = adminAuthService.verifyCredentials(cleanEmail, cleanPassword);
-      if (!verifyRes.success || !verifyRes.account) {
-        return {
-          success: false,
-          error: verifyRes.error || 'Access denied: Invalid credentials.'
-        };
+      if (!isSupabaseConfigured) {
+        return { success: false, error: 'Website is not connected to the database. Please contact the site owner.' };
       }
 
-      const account = verifyRes.account;
-      const currentProfile: AdminProfile = {
-        id: account.id,
-        full_name: account.full_name,
-        email: account.email,
-        role: account.role,
-        avatar_url: '',
-        designation: account.designation,
-        department: account.department,
-        phone: account.phone,
-        bio: account.bio,
-        created_at: account.created_at
-      };
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password: password.trim(),
+      });
 
-      const authorizedUser: any = {
-        id: account.id,
-        email: account.email,
-        app_metadata: { role: account.role },
-        user_metadata: {
-          full_name: account.full_name,
-          avatar_url: ''
-        },
-        aud: 'authenticated',
-        created_at: account.created_at
-      };
-
-      const authorizedSession: any = {
-        access_token: 'auth-csi-cmrit-admin-token-' + account.id,
-        token_type: 'bearer',
-        expires_in: 86400,
-        refresh_token: 'auth-refresh-token',
-        user: authorizedUser
-      };
-
-      // If Supabase is configured, attempt auth or fallback gracefully
-      if (isSupabaseConfigured) {
-        try {
-          const { data, error } = await supabase.auth.signInWithPassword({
-            email: cleanEmail,
-            password: cleanPassword,
-          });
-
-          if (!error && data?.user) {
-            const profile = await fetchAdminProfile(data.user.id);
-            const finalProfile = profile ? { ...currentProfile, ...profile } : currentProfile;
-            setUser(data.user);
-            setSession(data.session);
-            setAdminProfile(finalProfile);
-            try {
-              localStorage.setItem('csi_dev_admin_session', JSON.stringify({ user: data.user, profile: finalProfile }));
-              localStorage.setItem('csi_admin_profile_data', JSON.stringify(finalProfile));
-            } catch {}
-            return { success: true };
-          }
-        } catch (supabaseErr) {
-          console.warn('[Auth] Supabase sign-in bypassed in favor of local authorized credential:', supabaseErr);
-        }
+      if (error || !data?.user) {
+        return { success: false, error: error?.message === 'Invalid login credentials'
+          ? 'Invalid email or password.'
+          : (error?.message || 'Sign in failed.') };
       }
 
-      // Persist authorized session
-      try {
-        localStorage.setItem('csi_dev_admin_session', JSON.stringify({ user: authorizedUser, profile: currentProfile }));
-        localStorage.setItem('csi_admin_profile_data', JSON.stringify(currentProfile));
-      } catch {}
+      const profile = await fetchAdminProfile(data.user.id);
+      if (!profile) {
+        await supabase.auth.signOut();
+        clearAuthState();
+        return { success: false, error: NOT_ADMIN_MSG };
+      }
 
-      setUser(authorizedUser);
-      setSession(authorizedSession);
-      setAdminProfile(currentProfile);
+      setSession(data.session);
+      setUser(data.user);
+      setAdminProfile(profile);
       return { success: true };
     } catch (err: unknown) {
       const authErr = err as AuthError;
@@ -337,19 +171,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Sign out
   const signOut = async () => {
     try {
-      localStorage.removeItem('csi_dev_admin_session');
-      if (isSupabaseConfigured) {
-        await supabase.auth.signOut();
-      }
+      if (isSupabaseConfigured) await supabase.auth.signOut();
     } catch (err) {
       console.error('[Auth] Sign out error:', err);
     } finally {
-      setUser(null);
-      setSession(null);
-      setAdminProfile(null);
+      clearAuthState();
     }
   };
 

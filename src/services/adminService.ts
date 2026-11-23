@@ -97,43 +97,27 @@ export const adminService = {
   },
 
   /**
-   * Change current admin password through persistent adminAuthService and Supabase Auth
+   * Change the signed-in admin's password through Supabase Auth.
+   * If currentPassword is given, it is verified first by re-authenticating.
    */
   async changePassword(newPassword: string, email?: string, currentPassword?: string): Promise<{ success: boolean; error?: string }> {
     try {
-      // 1. Update in adminAuthService registry
-      let targetEmail = email;
-      if (!targetEmail) {
-        try {
-          const saved = localStorage.getItem('csi_dev_admin_session');
-          if (saved) {
-            const parsed = JSON.parse(saved);
-            targetEmail = parsed?.user?.email;
-          }
-        } catch {}
-      }
-      if (targetEmail) {
-        const { adminAuthService } = await import('./adminAuthService');
-        const authRes = adminAuthService.changePassword(targetEmail, newPassword, currentPassword);
-        if (!authRes.success) {
-          return { success: false, error: authRes.error };
-        }
-      }
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return { success: false, error: 'You are not signed in.' };
 
-      // 2. If Supabase is configured, update Supabase auth
-      const { isSupabaseConfigured } = await import('../lib/supabaseClient');
-      if (isSupabaseConfigured) {
-        const { error } = await supabase.auth.updateUser({
-          password: newPassword,
+      if (currentPassword) {
+        const { error: verifyErr } = await supabase.auth.signInWithPassword({
+          email: email || session.user.email || '',
+          password: currentPassword
         });
-
-        if (error) return { success: false, error: error.message };
+        if (verifyErr) return { success: false, error: 'Current password is incorrect.' };
       }
 
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) return { success: false, error: error.message };
       return { success: true };
     } catch (err: unknown) {
-      const error = err as Error;
-      return { success: false, error: error.message };
+      return { success: false, error: (err as Error).message };
     }
   },
 

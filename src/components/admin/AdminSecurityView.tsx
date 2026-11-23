@@ -17,7 +17,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import { Button } from '../common/Button';
-import { adminAuthService } from '../../services/adminAuthService';
+import { adminService } from '../../services/adminService';
 import { validatePasswordStrict, evaluatePasswordSecurity } from '../../lib/passwordSecurity';
 import { PasswordStrengthIndicator } from '../common/PasswordStrengthIndicator';
 
@@ -95,7 +95,7 @@ export const AdminSecurityView: React.FC<AdminSecurityViewProps> = ({
 
     setIsChangingPassword(true);
     try {
-      const res = adminAuthService.changePassword(adminEmail, newPassword, currentPassword);
+      const res = await adminService.changePassword(newPassword, adminEmail, currentPassword);
       if (!res.success) {
         showToast(res.error || 'Password update failed.', 'error');
         return;

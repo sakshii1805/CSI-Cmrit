@@ -1,91 +1,9 @@
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 import { requireAdmin } from '../lib/authGuard';
+import { matchIdOrSlug, notifyContentUpdated, slugify, uniqueSlug } from '../lib/dbHelpers';
 import { EventItem } from '../types';
-import { mockEvents } from '../data/events';
 
-const STORAGE_KEY = 'csi_published_events';
-const DELETED_EVENTS_KEY = 'csi_deleted_events';
-
-// Purge any old demo/mock storage cache once on module evaluation
-try {
-  localStorage.removeItem('csi_events_data');
-} catch { }
-
-const getDeletedEventIds = (): Set<string> => {
-  try {
-    const raw = localStorage.getItem(DELETED_EVENTS_KEY);
-    return raw ? new Set(JSON.parse(raw)) : new Set();
-  } catch {
-    return new Set();
-  }
-};
-
-const saveDeletedEventId = (id: string) => {
-  try {
-    const set = getDeletedEventIds();
-    set.add(id);
-    localStorage.setItem(DELETED_EVENTS_KEY, JSON.stringify(Array.from(set)));
-  } catch { }
-};
-
-const getStoredEvents = (): EventItem[] => {
-  try {
-    const deleted = getDeletedEventIds();
-    if (deleted.has('avishkaar-2026')) {
-      deleted.delete('avishkaar-2026');
-      try {
-        localStorage.setItem(DELETED_EVENTS_KEY, JSON.stringify(Array.from(deleted)));
-      } catch { }
-    }
-
-    const raw = localStorage.getItem(STORAGE_KEY);
-    let parsed: EventItem[] = raw ? JSON.parse(raw) : [];
-
-    // Purge any dummy mock event IDs from previous tests and deleted items
-    const forbiddenIds = new Set(['evt-01', 'evt-02', 'evt-03', 'mock-evt-1', 'mock-evt-2']);
-    parsed = parsed.filter(e => !forbiddenIds.has(e.id) && !deleted.has(e.id));
-
-    // Ensure baseline Hackathon event (avishkaar-2026) is present only if not deleted by admin
-    if (!deleted.has('avishkaar-2026')) {
-      const avishkaarIndex = parsed.findIndex(e => e.id === 'avishkaar-2026' || e.slug === 'avishkaar-2026');
-      if (avishkaarIndex >= 0) {
-        parsed[avishkaarIndex] = {
-          ...mockEvents[0],
-          ...parsed[avishkaarIndex],
-          galleryImages: (parsed[avishkaarIndex].galleryImages && parsed[avishkaarIndex].galleryImages.length > 0)
-            ? parsed[avishkaarIndex].galleryImages
-            : mockEvents[0].galleryImages,
-          title: mockEvents[0].title,
-          shortDescription: mockEvents[0].shortDescription || parsed[avishkaarIndex].shortDescription,
-          image: mockEvents[0].image,
-          is_published: true,
-          status: 'published'
-        };
-      } else if (mockEvents.length > 0) {
-        parsed.unshift(mockEvents[0]);
-      }
-    }
-
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
-    } catch { }
-
-    return parsed;
-  } catch {
-    return mockEvents;
-  }
-};
-
-const saveStoredEvents = (items: EventItem[]) => {
-  try {
-    const deleted = getDeletedEventIds();
-    const clean = items.filter(e => !deleted.has(e.id));
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(clean));
-    window.dispatchEvent(new CustomEvent('csi_content_updated', { detail: { type: 'event' } }));
-  } catch (err) {
-    console.warn('Failed to save events to localStorage:', err);
-  }
-};
+const NOT_CONFIGURED = 'Website is not connected to the database.';
 
 /** Normalize DB row to frontend EventItem */
 const mapEvent = (e: any): EventItem => {
@@ -122,348 +40,138 @@ const sortEvents = (a: EventItem, b: EventItem) => {
 };
 
 export const eventsService = {
-  /**
-   * Public: Fetch all published events (empty until admin creates events)
-   */
   async getPublishedEvents(): Promise<{ data: EventItem[]; error?: string }> {
-    try {
-      const deleted = getDeletedEventIds();
-      if (isSupabaseConfigured) {
-        const { data, error } = await supabase
-          .from('events')
-          .select('*')
-          .eq('status', 'published')
-          .order('event_date', { ascending: false });
-
-        if (!error && data) {
-          const mapped = data.map(mapEvent).filter(e => !deleted.has(e.id) && (!e.slug || !deleted.has(e.slug)));
-          // If Supabase table is empty or has items, merge baseline default events if they aren't deleted
-          const local = getStoredEvents().filter(e => e.is_published !== false && e.status !== 'draft');
-          const remoteIds = new Set(mapped.map(m => m.id));
-          const remoteSlugs = new Set(mapped.map(m => m.slug).filter(Boolean));
-          const localOnly = local.filter(l => !remoteIds.has(l.id) && (!l.slug || !remoteSlugs.has(l.slug)));
-          const combined = [...localOnly, ...mapped].sort(sortEvents);
-          return { data: combined };
-        }
-        // Supabase configured but query failed — return empty rather than stale local data
-        console.warn('[CSI] Supabase events query failed:', 'check connection');
-        return { data: [] };
-      }
-
-      // Supabase NOT configured — use localStorage as fallback (dev mode only)
-      const local = getStoredEvents().filter(e => e.is_published !== false && e.status !== 'draft').sort(sortEvents);
-      return { data: local };
-    } catch (err: unknown) {
-      const local = getStoredEvents().filter(e => e.is_published !== false && e.status !== 'draft').sort(sortEvents);
-      return { data: local };
+    if (!isSupabaseConfigured) return { data: [], error: NOT_CONFIGURED };
+    const { data, error } = await supabase
+      .from('events')
+      .select('*')
+      .eq('status', 'published')
+      .order('event_date', { ascending: false });
+    if (error) {
+      console.warn('[CSI] events query failed:', error.message);
+      return { data: [], error: error.message };
     }
+    return { data: (data || []).map(mapEvent).sort(sortEvents) };
   },
 
-  /**
-   * Public: Fetch latest N published events (for homepage)
-   */
   async getLatestEvents(limit: number = 4): Promise<{ data: EventItem[]; error?: string }> {
     const res = await this.getPublishedEvents();
-    return { data: (res.data || []).slice(0, limit) };
+    return { data: (res.data || []).slice(0, limit), error: res.error };
   },
 
-  /**
-   * Public: Fetch upcoming events
-   */
   async getUpcomingEvents(): Promise<{ data: EventItem[]; error?: string }> {
     const today = new Date().toISOString().split('T')[0];
     const res = await this.getPublishedEvents();
-    const upcoming = (res.data || []).filter(e => (e.event_date || e.date || '') >= today);
-    return { data: upcoming };
+    return { data: (res.data || []).filter(e => (e.event_date || e.date || '') >= today) };
   },
 
-  /**
-   * Public: Fetch past events
-   */
   async getPastEvents(): Promise<{ data: EventItem[]; error?: string }> {
     const today = new Date().toISOString().split('T')[0];
     const res = await this.getPublishedEvents();
-    const past = (res.data || []).filter(e => (e.event_date || e.date || '') < today);
-    return { data: past };
+    return { data: (res.data || []).filter(e => (e.event_date || e.date || '') < today) };
   },
 
-  /**
-   * Public: Fetch single published event by slug or id
-   */
   async getEventBySlug(slug: string): Promise<{ data: EventItem | null; error?: string }> {
-    try {
-      const deleted = getDeletedEventIds();
-      if (deleted.has(slug)) return { data: null, error: 'Event has been deleted' };
-
-      if (isSupabaseConfigured) {
-        const { data, error } = await supabase
-          .from('events')
-          .select('*')
-          .or(`slug.eq.${slug},id.eq.${slug}`)
-          .eq('status', 'published')
-          .single();
-
-        if (!error && data) {
-          const mapped = mapEvent(data);
-          if (deleted.has(mapped.id) || (mapped.slug && deleted.has(mapped.slug))) {
-            return { data: null, error: 'Event has been deleted' };
-          }
-          return { data: mapped };
-        }
-      }
-
-      const all = getStoredEvents();
-      const match = all.find(e => e.slug === slug || e.id === slug);
-      if (match) return { data: match };
-
-      return { data: null, error: 'Event not found' };
-    } catch (err: unknown) {
-      const all = getStoredEvents();
-      const match = all.find(e => e.slug === slug || e.id === slug);
-      return { data: match || null };
-    }
+    if (!isSupabaseConfigured) return { data: null, error: NOT_CONFIGURED };
+    const { data, error } = await matchIdOrSlug(
+      supabase.from('events').select('*').eq('status', 'published'),
+      slug
+    ).maybeSingle();
+    if (error) return { data: null, error: error.message };
+    if (!data) return { data: null, error: 'Event not found' };
+    return { data: mapEvent(data) };
   },
 
-  /**
-   * Admin: List all events (all statuses)
-   */
   async adminListEvents(): Promise<{ data: EventItem[]; error?: string }> {
-    try {
-      const deleted = getDeletedEventIds();
-      if (isSupabaseConfigured) {
-        const { data, error } = await supabase
-          .from('events')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (!error && data) {
-          const mapped = data.map(mapEvent).filter(e => !deleted.has(e.id) && (!e.slug || !deleted.has(e.slug)));
-          return { data: mapped };
-        }
-        return { data: [] };
-      }
-
-      return { data: getStoredEvents() };
-    } catch (err: unknown) {
-      return { data: getStoredEvents() };
-    }
+    if (!isSupabaseConfigured) return { data: [], error: NOT_CONFIGURED };
+    const { data, error } = await supabase.from('events').select('*').order('created_at', { ascending: false });
+    if (error) return { data: [], error: error.message };
+    return { data: (data || []).map(mapEvent) };
   },
 
-  /**
-   * Admin: Create new event
-   */
   async createEvent(event: any): Promise<{ data?: EventItem; error?: string }> {
-    try {
-      await requireAdmin();
-    } catch (authErr: any) {
-      return { error: authErr.message || 'Unauthorized' };
-    }
-    const title = event.title || 'Untitled Event';
-    const slug = event.slug || title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || ('event-' + Date.now());
-    const isPublished = event.is_published !== false && event.status !== 'draft';
+    try { await requireAdmin(); } catch (e: any) { return { error: e.message }; }
 
-    const newEvent: EventItem = {
-      id: event.id || `event-${Date.now()}`,
-      slug,
+    const title = event.title || 'Untitled Event';
+    const isPublished = event.is_published !== false && event.status !== 'draft';
+    const image = event.image || event.image_url || '';
+    const { data: userData } = await supabase.auth.getUser();
+
+    const payload: any = {
+      slug: event.slug || uniqueSlug(slugify(title, 'event')),
       title,
       category: event.category || 'Workshop',
       event_date: event.date || event.event_date || new Date().toISOString().split('T')[0],
-      date: event.date || event.event_date || new Date().toISOString().split('T')[0],
       event_time: event.time || event.event_time || '10:00 AM - 1:00 PM',
-      time: event.time || event.event_time || '10:00 AM - 1:00 PM',
       venue: event.location || event.venue || 'CMRIT Campus, Bengaluru',
-      location: event.location || event.venue || 'CMRIT Campus, Bengaluru',
       description: event.description || '',
-      shortDescription: event.shortDescription || (event.description ? event.description.slice(0, 150) : ''),
-      image: event.image || event.image_url || '',
-      image_url: event.image || event.image_url || '',
-      galleryImages: Array.isArray(event.galleryImages) && event.galleryImages.length > 0
-        ? event.galleryImages
-        : (event.image || event.image_url ? [event.image || event.image_url] : []),
+      image_url: image || null,
       organizer: event.organizer || 'CSI CMRIT',
-      highlights: Array.isArray(event.highlights) ? event.highlights : [],
-      registrationOpen: event.registrationOpen !== false,
-      is_published: isPublished,
       status: isPublished ? 'published' : 'draft',
-      is_featured: !!event.is_featured,
-      created_at: new Date().toISOString()
+      created_by: userData?.user?.id || null,
     };
 
-    // 1. Immediately persist to clean production store
-    const current = getStoredEvents();
-    saveStoredEvents([newEvent, ...current]);
-
-    // 2. Sync to Supabase if configured
-    if (isSupabaseConfigured) {
-      try {
-        const { data: userData } = await supabase.auth.getUser();
-        const payload = {
-          slug: newEvent.slug,
-          title: newEvent.title,
-          category: newEvent.category,
-          event_date: newEvent.event_date,
-          event_time: newEvent.event_time,
-          venue: newEvent.venue,
-          description: newEvent.description,
-          image_url: newEvent.image_url,
-          organizer: newEvent.organizer,
-          status: newEvent.status,
-          created_by: userData?.user?.id || null,
-        };
-
-        const { data, error } = await supabase
-          .from('events')
-          .insert([payload])
-          .select()
-          .single();
-
-        if (!error && data) {
-          return { data: mapEvent(data) };
-        }
-      } catch (err) {
-        console.warn('Supabase event insert error:', err);
-      }
+    const { data, error } = await supabase.from('events').insert([payload]).select().single();
+    if (error) {
+      console.error('[CSI] event insert failed:', error);
+      return { error: error.message };
     }
-
-    return { data: newEvent };
+    notifyContentUpdated('event');
+    return { data: mapEvent({ ...data, galleryImages: event.galleryImages }) };
   },
 
-  /**
-   * Admin: Update an event
-   */
   async updateEvent(id: string, updates: any): Promise<{ data?: EventItem; error?: string }> {
-    try {
-      await requireAdmin();
-    } catch (authErr: any) {
-      return { error: authErr.message || 'Unauthorized' };
-    }
-    const current = getStoredEvents();
-    const updated = current.map(e => {
-      if (e.id === id || e.slug === id) {
-        const next = { ...e, ...updates };
-        if (updates.date) { next.event_date = updates.date; next.date = updates.date; }
-        if (updates.time) { next.event_time = updates.time; next.time = updates.time; }
-        if (updates.location) { next.venue = updates.location; next.location = updates.location; }
-        if (updates.image) { next.image_url = updates.image; next.image = updates.image; }
-        if (updates.galleryImages) { next.galleryImages = updates.galleryImages; }
-        if (updates.is_published !== undefined) {
-          next.status = updates.is_published ? 'published' : 'draft';
-        }
-        return next;
-      }
-      return e;
-    });
-    saveStoredEvents(updated);
+    try { await requireAdmin(); } catch (e: any) { return { error: e.message }; }
 
-    if (isSupabaseConfigured) {
-      try {
-        const payload: any = { ...updates };
-        if (updates.date) payload.event_date = updates.date;
-        if (updates.time) payload.event_time = updates.time;
-        if (updates.location) payload.venue = updates.location;
-        if (updates.image) payload.image_url = updates.image;
-        if (updates.is_published !== undefined) {
-          payload.status = updates.is_published ? 'published' : 'draft';
-        }
-        await supabase.from('events').update(payload).or(`id.eq.${id},slug.eq.${id}`);
-      } catch (err) {
-        console.warn('Supabase event update error:', err);
-      }
+    const payload: any = {};
+    if (updates.title !== undefined) payload.title = updates.title;
+    if (updates.category !== undefined) payload.category = updates.category;
+    if (updates.description !== undefined) payload.description = updates.description;
+    if (updates.organizer !== undefined) payload.organizer = updates.organizer;
+    if (updates.date || updates.event_date) payload.event_date = updates.date || updates.event_date;
+    if (updates.time || updates.event_time) payload.event_time = updates.time || updates.event_time;
+    if (updates.location || updates.venue) payload.venue = updates.location || updates.venue;
+    if (updates.image || updates.image_url) payload.image_url = updates.image || updates.image_url;
+    if (updates.is_pinned !== undefined) payload.is_pinned = updates.is_pinned;
+    if (updates.status !== undefined || updates.is_published !== undefined) {
+      const published = updates.status ? updates.status === 'published' : !!updates.is_published;
+      payload.status = published ? 'published' : 'draft';
     }
 
-    const item = updated.find(e => e.id === id || e.slug === id);
-    return { data: item };
+    const { data, error } = await matchIdOrSlug(supabase.from('events').update(payload), id).select().maybeSingle();
+    if (error) return { error: error.message };
+    if (!data) return { error: 'Update was blocked or the event no longer exists.' };
+    notifyContentUpdated('event');
+    return { data: mapEvent(data) };
   },
 
-  /**
-   * Admin: Toggle publish
-   */
   async toggleEventPublish(id: string, currentStatus: 'draft' | 'published'): Promise<{ success: boolean; error?: string }> {
-    try {
-      await requireAdmin();
-    } catch (authErr: any) {
-      return { success: false, error: authErr.message || 'Unauthorized' };
-    }
-    const newStatus = currentStatus === 'published' ? 'draft' : 'published';
-    const current = getStoredEvents();
-    const updated: EventItem[] = current.map(e => {
-      if (e.id === id || e.slug === id) {
-        return {
-          ...e,
-          status: newStatus as any,
-          is_published: newStatus === 'published'
-        };
-      }
-      return e;
-    });
-    saveStoredEvents(updated);
-
-    if (isSupabaseConfigured) {
-      try {
-        await supabase.from('events').update({ status: newStatus }).or(`id.eq.${id},slug.eq.${id}`);
-      } catch (err) {
-        console.warn('Supabase toggleEventPublish error:', err);
-      }
-    }
-
+    try { await requireAdmin(); } catch (e: any) { return { success: false, error: e.message }; }
+    const next = currentStatus === 'published' ? 'draft' : 'published';
+    const { data, error } = await matchIdOrSlug(supabase.from('events').update({ status: next }), id).select('id');
+    if (error) return { success: false, error: error.message };
+    if (!data || data.length === 0) return { success: false, error: 'Update was blocked by the database.' };
+    notifyContentUpdated('event');
     return { success: true };
   },
 
-  /**
-   * Admin: Toggle Pin to Top (Authority for Admins only)
-   */
   async togglePinEvent(id: string): Promise<{ success: boolean; is_pinned: boolean; error?: string }> {
-    try {
-      await requireAdmin();
-    } catch (authErr: any) {
-      return { success: false, is_pinned: false, error: authErr.message || 'Unauthorized: Only admins can pin events' };
-    }
-    const current = getStoredEvents();
-    let nextPinned = true;
-    const updated: EventItem[] = current.map(e => {
-      if (e.id === id || e.slug === id) {
-        nextPinned = !e.is_pinned;
-        return {
-          ...e,
-          is_pinned: nextPinned
-        };
-      }
-      return e;
-    });
-    saveStoredEvents(updated);
-
-    if (isSupabaseConfigured) {
-      try {
-        await supabase.from('events').update({ is_pinned: nextPinned } as any).or(`id.eq.${id},slug.eq.${id}`);
-      } catch (err) {
-        console.warn('Supabase togglePinEvent error:', err);
-      }
-    }
-
-    return { success: true, is_pinned: nextPinned };
+    try { await requireAdmin(); } catch (e: any) { return { success: false, is_pinned: false, error: e.message }; }
+    const { data: row, error: readErr } = await matchIdOrSlug(supabase.from('events').select('id,is_pinned'), id).maybeSingle();
+    if (readErr || !row) return { success: false, is_pinned: false, error: readErr?.message || 'Event not found.' };
+    const next = !(row as any).is_pinned;
+    const { error } = await supabase.from('events').update({ is_pinned: next } as any).eq('id', row.id);
+    if (error) return { success: false, is_pinned: !next, error: error.message };
+    notifyContentUpdated('event');
+    return { success: true, is_pinned: next };
   },
 
-  /**
-   * Admin: Delete event permanently
-   */
   async deleteEvent(id: string): Promise<{ success: boolean; error?: string }> {
-    try {
-      await requireAdmin();
-    } catch (authErr: any) {
-      return { success: false, error: authErr.message || 'Unauthorized' };
-    }
-    saveDeletedEventId(id);
-    const current = getStoredEvents();
-    saveStoredEvents(current.filter(e => e.id !== id && e.slug !== id));
-
-    if (isSupabaseConfigured) {
-      try {
-        await supabase.from('events').delete().or(`id.eq.${id},slug.eq.${id}`);
-      } catch (err) {
-        console.warn('Supabase deleteEvent error:', err);
-      }
-    }
-
+    try { await requireAdmin(); } catch (e: any) { return { success: false, error: e.message }; }
+    const { data, error } = await matchIdOrSlug(supabase.from('events').delete(), id).select('id');
+    if (error) return { success: false, error: error.message };
+    if (!data || data.length === 0) return { success: false, error: 'Nothing was deleted. The event may already be gone, or the database blocked it.' };
+    notifyContentUpdated('event');
     return { success: true };
   }
 };
