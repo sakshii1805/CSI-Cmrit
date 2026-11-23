@@ -2,11 +2,28 @@ import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 import { requireAdmin } from '../lib/authGuard';
 import { matchIdOrSlug, notifyContentUpdated, slugify, uniqueSlug } from '../lib/dbHelpers';
 import { EventItem } from '../types';
+import { mockEvents } from '../data/events';
+
+// The Avishkaar post lives in the database; these rich display-only extras
+// (poster gallery, speaker, rules) are merged in because the table has no columns for them.
+const AVISHKAAR_EXTRAS = mockEvents.find(m => m.slug === 'avishkaar-2026');
 
 const NOT_CONFIGURED = 'Website is not connected to the database.';
 
 /** Normalize DB row to frontend EventItem */
 const mapEvent = (e: any): EventItem => {
+  if (e.slug === 'avishkaar-2026' && AVISHKAAR_EXTRAS) {
+    e = {
+      ...e,
+      galleryImages: e.galleryImages?.length ? e.galleryImages : AVISHKAAR_EXTRAS.galleryImages,
+      expectations: e.expectations || AVISHKAAR_EXTRAS.expectations,
+      speaker: e.speaker || AVISHKAAR_EXTRAS.speaker,
+      mode: e.mode || AVISHKAAR_EXTRAS.mode,
+      shortDescription: e.shortDescription || AVISHKAAR_EXTRAS.shortDescription,
+      highlights: e.highlights?.length ? e.highlights : AVISHKAAR_EXTRAS.highlights,
+      image: e.image || e.image_url || AVISHKAAR_EXTRAS.image,
+    };
+  }
   const galleryImages = Array.isArray(e.galleryImages) && e.galleryImages.length > 0
     ? e.galleryImages
     : (e.image || e.image_url ? [e.image || e.image_url] : []);

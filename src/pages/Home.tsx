@@ -74,7 +74,17 @@ export const Home: React.FC = () => {
       loadHomeContent();
     };
     window.addEventListener('csi_content_updated', handleUpdate);
-    return () => window.removeEventListener('csi_content_updated', handleUpdate);
+
+    // Keep "latest" fresh for visitors: refresh when they return to the tab and every 60 seconds.
+    const handleVisible = () => { if (document.visibilityState === 'visible') loadHomeContent(); };
+    document.addEventListener('visibilitychange', handleVisible);
+    const timer = window.setInterval(loadHomeContent, 60000);
+
+    return () => {
+      window.removeEventListener('csi_content_updated', handleUpdate);
+      document.removeEventListener('visibilitychange', handleVisible);
+      window.clearInterval(timer);
+    };
   }, []);
 
   const handleDeleteEventConfirm = async () => {

@@ -2,6 +2,9 @@ import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 import { requireAdmin } from '../lib/authGuard';
 import { matchIdOrSlug, notifyContentUpdated, isUuid } from '../lib/dbHelpers';
 import { ChapterHighlightItem } from '../types';
+import { mockGallery } from '../data/gallery';
+
+const AVISHKAAR_POSTER = '/images/avishkaar_poster.jpg';
 
 const NOT_CONFIGURED = 'Website is not connected to the database.';
 
@@ -15,6 +18,10 @@ const sortByLatest = (a: ChapterHighlightItem, b: ChapterHighlightItem) => {
 
 /** Map DB columns to frontend display properties */
 const mapHighlight = (h: any): ChapterHighlightItem => {
+  if (h.image_url === AVISHKAAR_POSTER && !(Array.isArray(h.images) && h.images.length > 1)) {
+    const extra: any = (mockGallery as any[]).find(m => m.image_url === AVISHKAAR_POSTER);
+    if (extra?.images) h = { ...h, images: extra.images };
+  }
   const imagesList = Array.isArray(h.images) && h.images.length > 0
     ? h.images
     : [h.image_url || h.imageUrl].filter(Boolean);
