@@ -58,7 +58,7 @@ const sortEvents = (a: EventItem, b: EventItem) => {
 
 export const eventsService = {
   async getPublishedEvents(): Promise<{ data: EventItem[]; error?: string }> {
-    if (!isSupabaseConfigured) return { data: [], error: NOT_CONFIGURED };
+    if (!isSupabaseConfigured) return { data: [...mockEvents], error: NOT_CONFIGURED };
     const { data, error } = await supabase
       .from('events')
       .select('*')
@@ -66,9 +66,15 @@ export const eventsService = {
       .order('event_date', { ascending: false });
     if (error) {
       console.warn('[CSI] events query failed:', error.message);
-      return { data: [], error: error.message };
+      return { data: [...mockEvents], error: error.message };
     }
-    return { data: (data || []).map(mapEvent).sort(sortEvents) };
+    const mapped = (data || []).map(mapEvent);
+    // If the database has no events, or doesn't have Avishkaar yet, keep the Avishkaar hackathon post visible
+    const hasAvishkaar = mapped.some(e => e.slug === 'avishkaar-2026' || e.id === 'avishkaar-2026');
+    if (!hasAvishkaar && AVISHKAAR_EXTRAS) {
+      mapped.unshift(AVISHKAAR_EXTRAS);
+    }
+    return { data: mapped.sort(sortEvents) };
   },
 
   async getLatestEvents(limit: number = 4): Promise<{ data: EventItem[]; error?: string }> {
@@ -89,21 +95,34 @@ export const eventsService = {
   },
 
   async getEventBySlug(slug: string): Promise<{ data: EventItem | null; error?: string }> {
-    if (!isSupabaseConfigured) return { data: null, error: NOT_CONFIGURED };
+    if (!isSupabaseConfigured) {
+      const match = mockEvents.find(e => e.slug === slug || e.id === slug);
+      return { data: match || null };
+    }
     const { data, error } = await matchIdOrSlug(
       supabase.from('events').select('*').eq('status', 'published'),
       slug
     ).maybeSingle();
     if (error) return { data: null, error: error.message };
-    if (!data) return { data: null, error: 'Event not found' };
+    if (!data) {
+      if (slug === 'avishkaar-2026' && AVISHKAAR_EXTRAS) {
+        return { data: AVISHKAAR_EXTRAS };
+      }
+      return { data: null, error: 'Event not found' };
+    }
     return { data: mapEvent(data) };
   },
 
   async adminListEvents(): Promise<{ data: EventItem[]; error?: string }> {
-    if (!isSupabaseConfigured) return { data: [], error: NOT_CONFIGURED };
+    if (!isSupabaseConfigured) return { data: [...mockEvents], error: NOT_CONFIGURED };
     const { data, error } = await supabase.from('events').select('*').order('created_at', { ascending: false });
-    if (error) return { data: [], error: error.message };
-    return { data: (data || []).map(mapEvent) };
+    if (error) return { data: [...mockEvents], error: error.message };
+    const mapped = (data || []).map(mapEvent);
+    const hasAvishkaar = mapped.some(e => e.slug === 'avishkaar-2026' || e.id === 'avishkaar-2026');
+    if (!hasAvishkaar && AVISHKAAR_EXTRAS) {
+      mapped.unshift(AVISHKAAR_EXTRAS);
+    }
+    return { data: mapped };
   },
 
   async createEvent(event: any): Promise<{ data?: EventItem; error?: string }> {
